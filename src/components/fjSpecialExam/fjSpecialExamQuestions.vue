@@ -5,8 +5,12 @@
         <fj-breadNav :bread-data="breadData"></fj-breadNav>
       </div>
       <div class="fj-block content">
-        <div class="fj-block-head">
-          <h3>{{ruleForm.title}}</h3>
+        <div
+          class="fj-block-head"
+          @mouseover="isTitleDisabled=false"
+          @mouseout="isTitleDisabled=true"
+        >
+          <el-input :disabled="isTitleDisabled" type="text" v-model="ruleForm.title">{{e}}</el-input>
         </div>
         <div class="fj-block-body">
           <div class="body-header">
@@ -24,16 +28,19 @@
                 <el-option :value="0" label="民警"></el-option>
               </el-select>
             </div>
-            <el-input
-              type="textarea"
-              :autosize="{ minRows: 2, maxRows: 4}"
-              v-model="ruleForm.textarea"
-            ></el-input>
-            <div class="add-list-btn" @click="submitForm(0)">+ 添加考题</div>
+            <div @mouseover="istextareaDisabled=false" @mouseout="istextareaDisabled=true">
+              <el-input
+                :disabled="istextareaDisabled"
+                type="textarea"
+                :autosize="{ minRows: 2, maxRows: 4}"
+                v-model="ruleForm.textarea"
+              ></el-input>
+            </div>
+            <div class="add-list-btn" @click="addTopicS()">+ 添加考题</div>
           </div>
           <div class="body-body">
             <ul>
-              <li class="add-topic">
+              <li class="add-topic" v-if="isAddTopic">
                 <div class="topic">
                   题目:
                   <el-input type="text" v-model="addTopicList.title"></el-input>
@@ -59,13 +66,18 @@
                     <el-input type="text" v-model="addTopicList.D"></el-input>
                     <el-radio v-model="addTopicList.daan" label="4"></el-radio>
                     <div class="add-topic-btn">
-                      <el-button>取消</el-button>
+                      <el-button @click="isAddTopic=false">取消</el-button>
                       <el-button type="primary" @click="addTopic()">确认</el-button>
                     </div>
                   </li>
                 </ul>
               </li>
-              <li class="check-topic" v-for="(item, index) in ruleForm.content">
+              <li
+                class="check-topic"
+                v-for="(item, index) in ruleForm.content"
+                @mouseover="item.editIcon=true,item.edt==true&&(item.edit=false)"
+                @mouseout="item.editIcon=false,item.edit=true"
+              >
                 <div class="topic">
                   {{index+1}}.
                   <el-input type="text" :disabled="item.edit" v-model="item.title"></el-input>
@@ -87,6 +99,12 @@
                     <el-radio v-model="item.daan" :disabled="item.edit&&!(item.daan==4)" label="4"></el-radio>D:
                     <el-input type="text" :disabled="item.edit" v-model="item.D"></el-input>
                   </li>
+                  <div class="right-revise" v-if="item.editIcon">
+                    <img src="static/images/fj-exam-edt.png" alt="修改" @click="edtTopic(index)">
+                    <img src="static/images/fj-exam-up.png" alt="上移" @click="upTopic(index)">
+                    <img src="static/images/fj-exam-down.png" alt="下移" @click="downTopic(index)">
+                    <img src="static/images/fj-exam-del.png" alt="删除" @click="delTopic(index)">
+                  </div>
                 </ul>
               </li>
             </ul>
@@ -119,8 +137,10 @@ export default {
             B: "hahaB",
             C: "hahaC",
             D: "hahaD",
-            daan: 1,
-            edit: true
+            daan: "1",
+            edit: true, //用来判断是否可以编辑
+            edt: false, //用来判断是否点击修改图标
+            editIcon: false //用来判断是否展示侧边栏图标
           },
           {
             title: "题目2",
@@ -128,19 +148,26 @@ export default {
             B: "hahaB2",
             C: "hahaC2",
             D: "hahaD2",
-            daan: 2,
-            edit: true
+            daan: "2",
+            edit: true, //用来判断是否可以编辑
+            edt: false, //用来判断是否点击修改图标
+            editIcon: false //用来判断是否展示侧边栏图标
           }
         ]
       },
+      isAddTopic: false,
+      isTitleDisabled: true,
+      istextareaDisabled: true,
       addTopicList: {
         title: "题目",
         A: "hahaA",
         B: "hahaB",
         C: "hahaC",
         D: "hahaD",
-        daan: 1,
-        edit: true
+        daan: "1",
+        edit: true, //用来判断是否可以编辑
+        edt: false, //用来判断是否点击修改图标
+        editIcon: false //用来判断是否展示侧边栏图标
       },
       radio: "",
       randomCityList: [], //抽查地点
@@ -179,6 +206,7 @@ export default {
         }
       });
     },
+    //新增考题
     addTopic() {
       let list = {};
       list.title = this.addTopicList.title;
@@ -188,7 +216,44 @@ export default {
       list.D = this.addTopicList.D;
       list.daan = this.addTopicList.daan;
       list.edit = this.addTopicList.edit;
+      list.editIcon = this.addTopicList.editIcon;
       this.ruleForm.content.unshift(list);
+    },
+    //修改考题
+    edtTopic(index) {
+      this.ruleForm.content[index].edit = false;
+      this.ruleForm.content[index].edt = true;
+    },
+    //上移考题
+    upTopic(index) {
+      let arr = this.ruleForm.content;
+      if (arr.length > 1 && index !== 0) {
+        let arr1 = arr[index];
+        let arr2 = arr[index - 1];
+        this.ruleForm.content.splice(index, 1, arr2);
+        this.ruleForm.content.splice(index - 1, 1, arr1);
+      }
+    },
+    //下移考题
+    downTopic(index) {
+      let arr = this.ruleForm.content;
+      if (arr.length > 1 && index !== arr.length - 1) {
+        let arr1 = arr[index];
+        let arr2 = arr[index + 1];
+        this.ruleForm.content.splice(index, 1, arr2);
+        this.ruleForm.content.splice(index + 1, 1, arr1);
+      }
+    },
+    //删除考题
+    delTopic(index) {
+      this.ruleForm.content.splice(index, 1);
+    },
+    //重置新增试题
+    addTopicS() {
+      this.isAddTopic = true;
+      for (let x in this.addTopicList) {
+        this.addTopicList[x] = "";
+      }
     },
     // 提交或者编辑数据
     postRuleForm: function() {
@@ -245,19 +310,49 @@ export default {
 <style scope lang="less">
 .exam-questions {
   .fj-block.content {
-    padding: 0px 180px;
+    padding: 10px 180px;
   }
   .fj-block-head {
     border-bottom: 0px;
-    h3 {
+    input {
+      width: 800px;
+      height: 50px;
+      background: rgba(255, 255, 255, 1);
+      border: 1px solid rgba(0, 0, 0, 0.14901960784313725);
+      opacity: 1;
       text-align: center;
-      line-height: 50px;
+      font-size: 16px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 1);
+      opacity: 1;
+    }
+    .is-disabled {
+      .el-input__inner {
+        background-color: #fff;
+        border: none;
+        cursor: pointer;
+        color: rgba(0, 0, 0, 1);
+      }
+      .el-textarea__inner {
+        background-color: #fff;
+        border: none;
+        cursor: pointer;
+        color: rgba(0, 0, 0, 1);
+      }
     }
   }
   .fj-block-body {
     margin-top: 10px;
     .body-header {
       text-align: center;
+      .is-disabled {
+        .el-textarea__inner {
+          background-color: #fff;
+          border: none;
+          cursor: pointer;
+          color: rgba(0, 0, 0, 1);
+        }
+      }
       .search-item {
         display: inline-block;
       }
@@ -304,6 +399,23 @@ export default {
           }
         }
         .check-topic {
+          position: relative;
+          .right-revise {
+            width: 60px;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: #f0f0f0;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            img {
+              width: 24px;
+              height: 24px;
+              margin-top: 20px;
+              margin-left: 17px;
+              cursor: pointer;
+            }
+          }
           .el-radio {
             margin-right: 4px;
           }
@@ -323,7 +435,7 @@ export default {
             }
           }
           li {
-            margin: 20px 0;
+            margin: 10px 0;
             .el-input {
               width: 480px;
             }
