@@ -540,23 +540,23 @@ export default {
           children: [
             {
               title: "招聘管理",
-              route: "/knowleage-center"
+              route: "/personnel-recruitment"
             },
             {
               title: "合同管理",
-              route: "/training"
+              route: "/personnel-contract"
             },
             {
               title: "档案管理",
-              route: "/training"
+              route: "/personnel-archives"
             },
             {
               title: "工资管理",
-              route: "/training"
+              route: "/personnel-wage"
             },
             {
               title: "规则管理",
-              route: "/training"
+              route: "/personnel-eule-setting"
             }
           ]
         },

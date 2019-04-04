@@ -192,7 +192,27 @@ export default new Router({
             path: '/special-exam-fraction',
             name: 'special-exam-fraction',
             component: resolve => require(['@/components/fjSpecialExam/fjSpecialExamFraction'], resolve)
-        },
+        }, { //人事管理 ->招聘管理
+            path: '/personnel-recruitment',
+            name: 'personnel-recruitment',
+            component: resolve => require(['@/components/fjPersonnel/fjRecruitment'], resolve)
+        }, { //人事管理 ->合同管理
+            path: '/personnel-contract',
+            name: 'personnel-contract',
+            component: resolve => require(['@/components/fjPersonnel/fjContract'], resolve)
+        }, { //人事管理 ->档案管理
+            path: '/personnel-archives',
+            name: 'personnel-archives',
+            component: resolve => require(['@/components/fjPersonnel/fjArchives'], resolve)
+        }, { //人事管理 ->工资管理
+            path: '/personnel-wage',
+            name: 'personnel-wage',
+            component: resolve => require(['@/components/fjPersonnel/fjWage'], resolve)
+        }, { //人事管理 ->规则设置
+            path: '/personnel-eule-setting',
+            name: 'personnel-eule-setting',
+            component: resolve => require(['@/components/fjPersonnel/fjRule-setting'], resolve)
+        }
 
     ]
 })

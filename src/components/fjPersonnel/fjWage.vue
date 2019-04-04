@@ -1,41 +1,34 @@
 <template>
-  <div class="fj-content_view work-mis workLog">
+  <div class="fj-content_view work-mis fj-leave">
     <div class="fj-block title">
       <fj-breadNav :bread-data="breadData"></fj-breadNav>
     </div>
     <div class="fj-block content">
-      <div class="fj-block-head kaohe" style="border-bottom:0px;">
-        <el-tabs v-model="activeName" @tab-click="handleClick">
-          <el-tab-pane label="考试题库" name="0"></el-tab-pane>
-          <el-tab-pane label="考试试卷" name="1"></el-tab-pane>
-          <el-tab-pane label="考试发布" name="2"></el-tab-pane>
-          <el-tab-pane label="考试得分" name="3"></el-tab-pane>
-        </el-tabs>
+      <div class="fj-block-head kaohe">
+        <p class="title fj-fl">工资</p>
       </div>
       <div class="fj-block-body">
         <div class="fj-search-inline">
           <el-row>
             <el-form inline label-width="85px" label-position="left">
-              <el-col :lg="6" :xl="5">
-                <el-form-item label="状态：">
+              <el-col :lg="8" :xl="7" class="time-item">
+                <el-form-item label="公安局：">
                   <el-select
-                    @change="changeDeptId"
-                    clearable
-                    filterable
-                    v-model="searchForm.deptId"
+                    @change="changeSupDeptId"
+                    clearable filterable
+                    v-model="searchForm.supDeptId"
                     size="small"
                   >
                     <el-option
-                      v-for="item in missionStates"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
+                      v-for="item in supDeptIds"
+                      :key="item.deptId"
+                      :label="item.deptName"
+                      :value="item.deptId"
                     ></el-option>
                   </el-select>
                 </el-form-item>
-              </el-col>
-              <el-col :lg="8" :xl="7" class="time-item">
-                <el-form-item label="起始时间：" class="datepicker">
+
+                <el-form-item label="申请时间：" class="datepicker">
                   <el-date-picker
                     v-model="searchForm.searchTime"
                     type="daterange"
@@ -47,12 +40,45 @@
                   ></el-date-picker>
                 </el-form-item>
               </el-col>
-              <el-col :xs="8" :sm="12" :md="16" :lg="6" :xl="6">
-                <el-form-item label="关键字：">
+              <el-col :lg="6" :xl="5">
+                <el-form-item label="派出所：">
+                  <el-select
+                    @change="changeDeptId"
+                    clearable
+                    filterable
+                    v-model="searchForm.deptId"
+                    size="small"
+                  >
+                    <el-option
+                      v-for="item in deptIds"
+                      :key="item.deptId"
+                      :label="item.deptName"
+                      :value="item.deptId"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="批准结果：">
+                  <el-select
+                    @change="changeStatus"
+                    clearable
+                    v-model="searchForm.status"
+                    size="small"
+                  >
+                    <el-option
+                      v-for="item in statuses"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :lg="6" :xl="6">
+                <el-form-item label="输入查询：">
                   <el-input
                     v-model="searchForm.nameOrAccount"
                     clearable
-                    placeholder="请输入考试内容关键字"
+                    placeholder="请输入名称或警号"
                     size="small"
                     class="search-input"
                   >
@@ -63,170 +89,39 @@
             </el-form>
           </el-row>
         </div>
-        <!-- 考试题库 -->
-        <el-table v-if="activeName==0" :data="attendAppealData" style="width: 100%">
-          <el-table-column type="index" label="序号"></el-table-column>
-          <el-table-column prop="userName" label="标题"></el-table-column>
-          <el-table-column prop="userName" label="类型" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userName" label="主要内容" :key="Math.random()"></el-table-column>
-          <el-table-column prop="signTime" label="建立时间" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="建库人员" :key="Math.random()"></el-table-column>
-          <el-table-column label="题目数量" :key="Math.random()">
+        <el-table :data="attendLeaveData">
+          <el-table-column prop="userId" label="姓名" width="80px"></el-table-column>
+          <el-table-column prop="userAccount" label="警号"></el-table-column>
+          <el-table-column prop="leave_reason" label="请假理由" show-overflow-tooltip class-name="textLeft" width="400px"></el-table-column>
+          <el-table-column label="申请时间" show-overflow-tooltip :formatter="timeFormatter" prop="apply_time">
+            <!-- <template slot-scope="scope">
+              <p>{{scope.row.apply_time | getFormatTime}}</p>
+            </template> -->
+          </el-table-column>
+          <el-table-column label="请假起始时间" show-overflow-tooltip :formatter="timeFormatter" prop="start_time">
+           
+          </el-table-column>
+         
+          <el-table-column label="请假结束时间" show-overflow-tooltip :formatter="timeFormatter" prop="end_time">
+            
+          </el-table-column>
+           
+          <el-table-column label="审核状态" prop="leave_state" width="120px" >
             <template slot-scope="scope">
-              <p>{{scope.row.signType | getSignType}}</p>
+              <span class="circle-status" :class="scope.row.leave_state == 0 ? 'grey' : scope.row.leave_state == 1 ? 'green' : 'red'">
+                  {{parseInt( scope.row.leave_state) === 0 ? '待审核' : parseInt( scope.row.leave_state) === 1 ?'已通过'
+                  : '被驳回'}}
+              </span>
             </template>
           </el-table-column>
-          <el-table-column
-            label="适合人群"
-            :formatter="timeFormatter"
-            prop="exception_time"
-            :key="Math.random()"
-          ></el-table-column>
-          <el-table-column label="状态" width="100px" :key="Math.random()">
-            <template slot-scope="scope">
-              <!-- <p>{{scope.row}}</p> -->
-              <el-switch v-model="scope.row.signType" active-color="#13ce66" inactive-color="#ccc"></el-switch>
-              <span>{{scope.row.signType==true?'开启':'关闭'}}</span>
-            </template>
+          <el-table-column label="处理说明" show-overflow-tooltip width="200px" prop="leader_content" class-name="textLeft">
+            
           </el-table-column>
-          <el-table-column label="操作" :key="Math.random()">
+          <el-table-column label="操作">
             <template slot-scope="scope">
-              <span class="ope-txt" v-if="scope.row.result != 0">--</span>
-              <span
-                class="ope-txt"
-                v-if="scope.row.result == 0"
-                @click="checkUpdate(scope.row.exceptionid, 1)"
-              >详情</span>
-              <span
-                class="ope-txt"
-                v-if="scope.row.result == 0"
-                @click="openCheckDialog(scope.row.exceptionid, 2)"
-              >管理</span>
-              <span
-                class="ope-txt"
-                v-if="scope.row.result == 0"
-                @click="openCheckDialog(scope.row.exceptionid, 2)"
-              >删除</span>
-            </template>
-          </el-table-column>
-        </el-table>
-        <!-- 考试试卷 -->
-        <el-table v-if="activeName==1" :data="attendAppealData" style="width: 100%">
-          <el-table-column type="index" label="序号"></el-table-column>
-          <el-table-column prop="userName" label="标题"></el-table-column>
-          <el-table-column prop="signTime" label="建立时间" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userName" label="内容" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userName" label="考试时间(分钟)" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="适合人员" :key="Math.random()"></el-table-column>
-          <el-table-column label="题目数量" :key="Math.random()">
-            <template slot-scope="scope">
-              <p>{{scope.row.signType | getSignType}}</p>
-            </template>
-          </el-table-column>
-          <el-table-column
-            label="总分"
-            :formatter="timeFormatter"
-            prop="exception_time"
-            :key="Math.random()"
-          ></el-table-column>
-          <el-table-column label="状态" width="100px" :key="Math.random()">
-            <template slot-scope="scope">
-              <!-- <p>{{scope.row}}</p> -->
-              <el-switch v-model="scope.row.signType" active-color="#13ce66" inactive-color="#ccc"></el-switch>
-              <span>{{scope.row.signType==true?'开启':'关闭'}}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" :key="Math.random()">
-            <template slot-scope="scope">
-              <span class="ope-txt" v-if="scope.row.result != 0">--</span>
-              <span
-                class="ope-txt"
-                v-if="scope.row.result == 0"
-                @click="checkUpdate(scope.row.exceptionid, 1)"
-              >详情</span>
-              <span
-                class="ope-txt"
-                v-if="scope.row.result == 0"
-                @click="openCheckDialog(scope.row.exceptionid, 2)"
-              >管理</span>
-              <span
-                class="ope-txt"
-                v-if="scope.row.result == 0"
-                @click="openCheckDialog(scope.row.exceptionid, 2)"
-              >删除</span>
-            </template>
-          </el-table-column>
-        </el-table>
-        <!-- 考试发布 -->
-        <el-table v-if="activeName==2" :data="attendAppealData" style="width: 100%">
-          <el-table-column type="index" label="序号"></el-table-column>
-          <el-table-column prop="userName" label="标题"></el-table-column>
-          <el-table-column prop="signTime" label="考试时间" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userName" label="考试人员" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="发布时间" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="试卷标题" :key="Math.random()"></el-table-column>
-          <el-table-column
-            label="主要内容"
-            :formatter="timeFormatter"
-            prop="exception_time"
-            :key="Math.random()"
-          ></el-table-column>
-          <el-table-column label="状态" width="100px" :key="Math.random()">
-            <template slot-scope="scope">
-              <!-- <p>{{scope.row}}</p> -->
-              <el-switch v-model="scope.row.signType" active-color="#13ce66" inactive-color="#ccc"></el-switch>
-              <span>{{scope.row.signType==true?'开启':'关闭'}}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" :key="Math.random()">
-            <template slot-scope="scope">
-              <span class="ope-txt" v-if="scope.row.result != 0">--</span>
-              <span
-                class="ope-txt"
-                v-if="scope.row.result == 0"
-                @click="checkUpdate(scope.row.exceptionid, 1)"
-              >详情</span>
-              <span
-                class="ope-txt"
-                v-if="scope.row.result == 0"
-                @click="openCheckDialog(scope.row.exceptionid, 2)"
-              >管理</span>
-              <span
-                class="ope-txt"
-                v-if="scope.row.result == 0"
-                @click="openCheckDialog(scope.row.exceptionid, 2)"
-              >删除</span>
-            </template>
-          </el-table-column>
-        </el-table>
-        <!-- 考试得分 -->
-        <el-table v-if="activeName==3" :data="attendAppealData" style="width: 100%">
-          <el-table-column type="index" label="序号"></el-table-column>
-          <el-table-column prop="userName" label="标题"></el-table-column>
-          <el-table-column prop="signTime" label="考试时间" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userName" label="主要内容" :key="Math.random()"></el-table-column>
-          <el-table-column prop="signTime" label="警号" :key="Math.random()"></el-table-column>
-          <el-table-column prop="signTime" label="姓名" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="分数" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="用时" :key="Math.random()"></el-table-column>
-          <el-table-column label="操作" :key="Math.random()">
-            <template slot-scope="scope">
-              <span class="ope-txt" v-if="scope.row.result != 0">--</span>
-              <span
-                class="ope-txt"
-                v-if="scope.row.result == 0"
-                @click="checkUpdate(scope.row.exceptionid, 1)"
-              >详情</span>
-              <span
-                class="ope-txt"
-                v-if="scope.row.result == 0"
-                @click="openCheckDialog(scope.row.exceptionid, 2)"
-              >管理</span>
-              <span
-                class="ope-txt"
-                v-if="scope.row.result == 0"
-                @click="openCheckDialog(scope.row.exceptionid, 2)"
-              >删除</span>
+              <span class="ope-txt" v-if="scope.row.leave_state != 0">--</span>
+              <span class="ope-txt" v-if="scope.row.leave_state == 0" @click="checkUpdate(scope.row.leaveId,1)">同意</span>
+              <span class="ope-txt" v-if="scope.row.leave_state == 0" @click="openCheckDialog(scope.row.leaveId, 2)">不同意</span>
             </template>
           </el-table-column>
         </el-table>
@@ -235,204 +130,337 @@
             :current-page="currentPage"
             :page-sizes="[10,20,30]"
             :page-size="pageSize"
-            layout="total, sizes, prev, pager, next, jumper"
+            layout="total, prev, pager, next, jumper"
             :total="total"
             @current-change="currentPageChange"
             @prev-click="prevPageChange"
             @next-click="nextPageChange"
             @size-change="sizePageChange"
-            v-if="total > 0"
-          ></el-pagination>
+          >
+          </el-pagination>
         </div>
       </div>
     </div>
+    <!-- 审核弹出框 -->
+    <el-dialog 
+      :title="checkDialogTitle"
+      :visible.sync="checkDialogVisible"
+      :modal-append-to-body="checkDialogVisibleModal"
+      style="position: absolute" width="450px"
+      @close="closeDialog"
+      :close-on-click-modal="false"
+      top="25vh"
+      class="check-dialog">
+      <el-form :model="checkDialogForm" ref="checkDialogForm" inline :rules="checkRule">
+        <el-form-item label="不通过理由" label-width="100px" prop="reason" >
+          <el-input type="textarea"  :rows="3" placeholder="请输入不通过理由" v-model="checkDialogForm.reason" :disabled="reasonDisabled"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="checkDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="updateLeaveStatus(false)">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
-import fjBreadNav from "@/components/fjBreadNav";
-export default {
-  name: "specialExamination",
-  data() {
-    return {
-      breadData: [
-        { name: "当前位置:", path: "" },
-        { name: "人事管理", path: "" },
-        { name: "工资管理", path: "" }
-      ],
-      activeName: "0",
-      // 状态下拉框
-      missionStates: [
-        {
-          value: "1001",
-          label: "岗前培训"
-        },
-        {
-          value: "1002",
-          label: "夜校培训"
-        }
-      ],
-      // 列表查询参数
-      searchForm: {
-        searchTime: "", // 查询时间
-        nameOrAccount: "", // 警号或负责人名称
-        deptId: "", // 派出所
-        supDeptId: "", // 公安局
-        status: "" // 状态
-      },
-      // 列表数据
-      attendAppealData: [],
-      // 分页数据
-      currentPage: 1,
-      pageSize: 10,
-      total: 0
-    };
-  },
-  mounted() {
-    fjPublic.closeLoad();
-    // 初始化任务列表
-    this.searchSign();
-    return;
-  },
-  beforeRouteEnter(to, from, next) {
-    next(function(vm) {
-      fjPublic.closeLoad();
-    });
-  },
-  methods: {
-    currentPageChange(pageNum) {
-      // 点击某个分页按钮
-      this.currentPage = pageNum;
-      this.searchSign();
-    },
-    prevPageChange(pageNum) {
-      // 点击分页的上一页
-      this.currentPage = pageNum;
-      this.searchSign();
-    },
-    nextPageChange(pageNum) {
-      // 点击分页的下一页
-      this.currentPage = pageNum;
-      this.searchSign();
-    },
-    sizePageChange(pageSize) {
-      // 改变每页条数时
-      this.currentPage = 1;
-      this.pageSize = pageSize;
-      this.searchSign();
-    },
-    //获取被选中的标签 tab 实例
-    handleClick(tab) {
-      console.log(tab);
-      this.activeName = tab.index;
-    },
-    // 修改单位下拉框查询
-    changeDeptId: function(deptId) {
-      this.searchForm["deptId"] = deptId;
-      this.searchSign();
-    },
-    // 标题或负责人名称查询
-    searchAttendLeave: function() {
-      this.searchSign();
-    },
-    // 修改查询时间
-    changeSearchTime: function(searchTime) {
-      if (searchTime) {
-        this.searchForm["startTime"] = fjPublic.dateFormatYYMMDD(searchTime[0]);
-        this.searchForm["endTime"] = fjPublic.dateFormatYYMMDD(searchTime[1]);
-      } else {
-        this.searchForm["startTime"] = "";
-        this.searchForm["endTime"] = "";
-      }
-      this.searchSign();
-    },
-    // 获取采集列表
-    searchSign: function() {
-      var defer = $.Deferred();
-      var vm = this;
-      // 参数
-      this.searchForm["page"] = this.currentPage;
-      this.searchForm["rows"] = this.pageSize;
-      // 传入当前用户信息
-      this.searchForm["nowUser"] = $.cookie(fjPublic.loginCookieKey);
-      $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/searchSign",
-        type: "POST",
-        data: vm.searchForm,
-        dataType: "json",
-        success: function(data) {
-          vm.attendAppealData = null;
-          vm.attendAppealData = data.list;
-          vm.total = data.total;
-          _.each(vm.attendAppealData, function(item, i) {
-            vm.$set(item, "rank", i + 1);
-          });
-          defer.resolve();
-        },
-        error: function(err) {
-          defer.reject();
-        }
-      });
-      return defer;
-    },
-    handleChange(file, list) {
-      var vm = this;
-      vm.fileList = list;
-    },
-    onRemove(file, list) {
-      var vm = this;
-      this.fileList.forEach((v, i) => {
-        if (v == file.response) {
-          vm.fileList.splice(i, 1);
-        }
-      });
-    },
+  import fjBreadNav from '@/components/fjBreadNav';
 
-    clearF() {
-      this.form = new FormData();
-      this.dialogVisible = false;
-      this.trainUsersAccount = null;
-      this.dialogForm = {
-        reportType: "",
-        trainConext: "",
-        trainAdreess: "",
-        trainUsersAccount: "",
-        trainTime: "",
-        trainUsersId: ""
+  export default {
+    name: 'fjAttendHistory',
+    data: function () {
+      return {
+        breadData: [
+          {name: '当前位置:', path: ''},
+          {name: '考勤管理', path: ''},
+          {name: '请假休假', path: ''}
+        ],
+        nowUser: $.cookie(fjPublic.loginCookieKey),
+        // 分局
+        supDeptIds: null,
+        // 派出所
+        deptIds: null,
+        // 状态
+        statuses: [{
+          value: '0',
+          label: '待审核'
+        },{
+          value: '1',
+          label: '已通过'
+        },{
+          value: '2',
+          label: '被驳回'
+        }],
+        // 列表查询参数
+        searchForm: {
+          searchTime: '',         // 查询时间
+          nameOrAccount: '',         // 警号或负责人名称
+          deptId: '',     // 派出所
+          supDeptId: '',     // 公安局
+          status: ''      // 状态
+        },
+        // 列表数据
+        attendLeaveData: [
+          // {
+          //   apply_time: "",
+          //   end_time: "",
+          //   leader_content: "",
+          //   leader_name: "",
+          //   leader_time: "",
+          //   leaveId: "",
+          //   leave_reason: "",
+          //   leave_state: "",
+          //   start_time: "",
+          //   userId: "",
+          //   userAccount: ""
+          // }
+        ],
+        // 分页数据
+        currentPage: 1,
+        pageSize: 10,
+        total: 0,
+        // 审核弹出框数据
+        checkDialogVisible: false,
+        checkDialogVisibleModal:false,
+        checkDialogTitle: '',
+        checkDialogForm: {
+          id: "",
+          status: "",
+          reason: ""
+        },
+        reasonDisabled: true,
+        formLabelWidth: '120px',
+        // 不批准弹出框校验
+        checkRule: {
+          reason: {
+            required: true,
+            message: '请输入不通过理由',
+            trigger: 'blur'
+          }
+        }
       };
-      this.$refs.uploadfile.clearFiles();
     },
-    // 时间格式化
-    timeFormatter(row, type) {
-      let dateStr = row[type.property];
-      if (!dateStr) {
-        return "";
+    mounted: function () {
+      // 初始化派出所下拉列表
+      this.initDeptIds();
+      // 初始化派出所下拉列表
+      this.initSupDeptIds();
+      // 初始化请假休假列表
+      this.searchUserLeave();
+      
+      return;
+    },
+    filters: {
+      // 状态处理
+      getLeaveStatus: function (value) {
+        return value == '0' ? '待批' : value == 1 ? '已批准' : value == 2 ? '未批准' : '';
+      },
+      getFormatTime: function (value) {
+        // return value ? fjPublic.dateStrFormat(value) : '';
+        return value ? value.substring(0, value.length - 2) : '';
       }
-      return (
-        dateStr.substr(5, 2) +
-        "/" +
-        dateStr.substr(8, 2) +
-        " " +
-        dateStr.substr(11, 2) +
-        ":" +
-        dateStr.substr(14, 2)
-      );
+    },
+    methods: {
+      currentPageChange: function (pageNum) {  // 点击某个分页按钮
+        this.currentPage = pageNum;
+        this.searchUserLeave();
+      },
+      prevPageChange: function (pageNum) {  // 点击分页的上一页
+        this.currentPage = pageNum;
+        this.searchUserLeave();
+      },
+      nextPageChange: function (pageNum) {  // 点击分页的下一页
+        this.currentPage = pageNum;
+        this.searchUserLeave();
+      },
+      sizePageChange: function (pageSize) {  // 改变每页条数时
+        this.currentPage = 1;
+        this.pageSize = pageSize;
+        this.searchUserLeave();
+      },
+      // 初始化分局
+      initSupDeptIds: function () {
+        var defer = $.Deferred();
+        var vm = this;
+        $.ajax({
+          url: fjPublic.ajaxUrlDNN + '/searchDepListBySearch',
+          type: 'POST',
+          data: {},
+          dataType: 'json',
+          success: function (data) {
+            vm.supDeptIds = data.list;
+            defer.resolve();
+          },
+          error: function (err) {
+            defer.reject();
+          }
+        });
+        return defer;
+      },
+      // 初始化派出所
+      initDeptIds: function () {
+        var defer = $.Deferred();
+        var vm = this;
+        $.ajax({
+          url: fjPublic.ajaxUrlDNN + '/searchDeptsByFenju',
+          type: 'POST',
+          data: {
+            parentDeptId: ''
+          },
+          dataType: 'json',
+          success: function (data) {
+            vm.deptIds = data.list;
+            defer.resolve();
+          },
+          error: function (err) {
+            defer.reject();
+          }
+        });
+        return defer;
+      },
+      // 修改单位下拉框查询
+      changeSupDeptId: function (supDeptId) {
+        this.searchForm['supDeptId'] = supDeptId;
+        this.searchUserLeave();
+      },
+      // 修改单位下拉框查询
+      changeDeptId: function (deptId) {
+        this.searchForm['deptId'] = deptId;
+        this.searchUserLeave();
+      },
+      // 修改状态下拉框查询
+      changeStatus: function(status) {
+        this.searchForm['status'] = status;
+        this.searchUserLeave();
+      },
+      // 标题或负责人名称查询
+      searchAttendLeave: function () {
+        this.searchUserLeave();
+      },
+      // 修改查询时间
+      changeSearchTime: function (searchTime) {
+        if (searchTime) {
+          this.searchForm['startTime'] = fjPublic.dateFormatYYMMDD(searchTime[0]);
+          this.searchForm['endTime'] = fjPublic.dateFormatYYMMDD(searchTime[1]);
+        } else {
+          this.searchForm['startTime'] = '';
+          this.searchForm['endTime'] = '';
+        }
+        this.searchUserLeave();
+      },
+      // 获取采集列表
+      searchUserLeave: function () {
+        var defer = $.Deferred();
+        var vm = this;
+        // 参数
+        this.searchForm['page'] = this.currentPage;
+        this.searchForm['rows'] = this.pageSize;
+        // 传入当前用户信息
+        this.searchForm['nowUser'] = this.nowUser;
+        $.ajax({
+          url: fjPublic.ajaxUrlDNN + '/searchUserLeave',
+          type: 'POST',
+          data: vm.searchForm,
+          dataType: 'json',
+          success: function (data) {
+            vm.attendLeaveData = null;
+            vm.attendLeaveData = data.list;
+            vm.total = data.total;
+            _.each(vm.attendLeaveData, function (item, i) {
+              vm.$set(item, 'rank', i + 1);
+            });
+            defer.resolve();
+          },
+          error: function (err) {
+            defer.reject();
+          }
+        });
+        return defer;
+      },
+      // 打开审核弹出框
+      openCheckDialog: function (id, status) {
+        this.checkDialogForm["id"] = id;
+        this.checkDialogForm["status"] = status;
+        this.checkDialogTitle = (status == 1 ? "批准？" : "不批准？");
+        this.reasonDisabled = (status == 1 ? true : false);
+        this.checkDialogVisible = true;
+      },
+      // 确认批准直接询问并发请求
+      checkUpdate(id, status) {
+        this.$confirm('确认批准该条请假(休假)?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.checkDialogForm["id"] = id;
+          this.checkDialogForm["status"] = status;
+          this.updateLeaveStatus(true)
+        })
+      },
+      // 保存请假批准
+      updateLeaveStatus: function(isConfirm) {
+        var defer = $.Deferred();
+        var vm = this;
+        let ajax = () => {
+          $.ajax({
+            url: fjPublic.ajaxUrlDNN + '/dealLeave',
+            type: 'POST',
+            data: vm.checkDialogForm,
+            dataType: 'json',
+            success: function(data){
+              if(data.errorCode == 0) {
+                vm.checkDialogVisible = false;
+                vm.searchUserLeave();
+              }
+              vm.$message({
+                type: 'success',
+                message: data.errorMsg
+              });
+              defer.resolve();
+            },
+            error: function(err){
+              defer.reject();
+            }
+          });
+        }
+        // 传入当前用户信息
+        vm.checkDialogForm['nowUser'] = $.cookie(fjPublic.loginCookieKey);
+        // 直接批准
+       
+        if (isConfirm) {
+           ajax()
+        } else {
+          this.$refs.checkDialogForm.validate((validate) => {
+            if (validate) {
+              ajax()
+            }
+          })
+        }
+      },
+      // 时间格式化
+      timeFormatter (row, type) {
+        let dateStr = row[type.property]
+        if (!dateStr) {
+            return ''
+        }
+        return dateStr.substr(5, 2) + '/' + dateStr.substr(8, 2) 
+        + ' ' + dateStr.substr(11, 2) + ':' + dateStr.substr(14, 2)
+      },
+      // 弹窗关闭事件
+      closeDialog() {
+        this.$refs.checkDialogForm.resetFields()
+      }
+    },
+    components: {
+      fjBreadNav
     }
-  },
-  filters: {
-    getSignType: function(value) {
-      return value == "1" ? "上班未签到" : value == 2 ? "下班未签退" : "";
-    }
-  },
-  components: {
-    fjBreadNav
   }
-};
 </script>
 <style scope lang="less">
-.workLog {
+.fj-leave {
   .fj-search-inline {
     // 上下间距
-    @media screen and (max-width: 1366px) {
+    @media screen and (max-width: 1366px){
       .el-form-item__label {
         line-height: 20px;
       }
@@ -446,7 +474,7 @@ export default {
         }
       }
       .el-form-item {
-        margin: 0;
+        margin:0;
         &:first-child {
           margin: 15px 0;
         }
@@ -469,40 +497,8 @@ export default {
       }
     }
   }
-  .el-tables {
-    .circle-status {
-      position: relative;
-      &.red {
-        &::before {
-          background: #f5222d;
-        }
-      }
-      &.green {
-        &::before {
-          background: #52c41a;
-        }
-      }
-      &.grey {
-        &::before {
-          background: #ababab;
-        }
-      }
-      &::before {
-        display: block;
-        position: absolute;
-        content: "";
-        width: 6px;
-        height: 6px;
-        background: rgba(171, 171, 171, 1);
-        border-radius: 50%;
-        opacity: 1;
-        top: 5px;
-        left: -9px;
-      }
-    }
-    /deep/ .textLeft {
-      text-align: left;
-    }
+  .textLeft {
+    text-align: left;
   }
   .check-dialog {
     /deep/ .el-form-item {
@@ -511,16 +507,37 @@ export default {
       }
     }
   }
-  .detail-dialog {
-    /deep/ .el-form-item {
-      .el-textarea {
-        textarea {
-          width: 240px;
+  /deep/ .el-table {
+    .circle-status{
+      position: relative;
+      &.red {
+        &::before {
+          background: #F5222D;
         }
+      }
+      &.green {
+        &::before {
+          background: #52C41A;
+        }
+      }
+      &.grey {
+        &::before {
+          background: #ABABAB;
+        }
+      }
+      &::before{
+        display: block;
+        position: absolute;
+        content: '';
+        width:6px;
+        height:6px;
+        background:rgba(171,171,171,1);
+        border-radius:50%;
+        opacity:1;
+        top: 5px;
+        left: -9px
       }
     }
   }
 }
 </style>
-
-

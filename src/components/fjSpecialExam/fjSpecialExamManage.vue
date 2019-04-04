@@ -6,9 +6,9 @@
       </div>
       <div class="fj-block content">
         <div class="fj-block-head kaohe">
-          <p class="title">
-            <span>{{title}}</span>
-            <el-button type="primary" @click="submitForm('ruleForm')">生成试卷</el-button>
+          <p class="title" @mouseover="isTitleDisabled=false" @mouseout="isTitleDisabled=true">
+            <el-input :disabled="isTitleDisabled" type="text" v-model="ruleForm.title"></el-input>
+            <el-button type="primary" @click="createPaper()" v-if="userInfo.state != 1">生成试卷</el-button>
           </p>
         </div>
         <div class="fj-block-body">
@@ -18,11 +18,12 @@
               <el-row>
                 <el-col :span="24">
                   <el-form-item prop="houseNumber" label="题目类型">
-                    <el-checkbox-group v-model="checkList">
+                    <el-checkbox-group v-model="checkList" v-if="userInfo.state != 1">
                       <el-checkbox label="单选"></el-checkbox>
                       <el-checkbox label="多选"></el-checkbox>
                       <el-checkbox label="其他"></el-checkbox>
                     </el-checkbox-group>
+                    <p v-if="userInfo.state == 1">单选，单选</p>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -30,22 +31,24 @@
                 <el-col :span="12">
                   <el-form-item prop="city" label="选题规则">
                     <el-select
-                      v-model="ruleForm.city"
+                      v-model="ruleForm.selectRules"
                       v-bind:disabled="userInfo.state == 1"
                       placeholder="请选择（必选）"
                     >
-                      <el-option></el-option>
+                      <el-option :value="1" label="单选题"></el-option>
+                      <el-option :value="0" label="单选题"></el-option>
                     </el-select>
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
                   <el-form-item class="noBR" prop="street" label="考试类型">
                     <el-select
-                      v-model="ruleForm.street"
+                      v-model="ruleForm.examType"
                       v-bind:disabled="userInfo.state == 1"
                       placeholder="请选择（必选）"
                     >
-                      <el-option></el-option>
+                      <el-option :value="1" label="单选题"></el-option>
+                      <el-option :value="0" label="单选题"></el-option>
                     </el-select>
                   </el-form-item>
                 </el-col>
@@ -54,18 +57,20 @@
                 <el-col :span="12">
                   <el-form-item prop="community" label="题目数量">
                     <el-select
-                      v-model="ruleForm.community"
+                      v-model="ruleForm.amount"
                       v-bind:disabled="userInfo.state == 1"
                       placeholder="请选择（必选）"
                     >
-                      <el-option></el-option>
+                      <el-option :value="10" label="10"></el-option>
+                      <el-option :value="20" label="20"></el-option>
+                      <el-option :value="25" label="25"></el-option>
                     </el-select>
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
                   <el-form-item class="noBR" prop="road" label="试卷分数">
                     <el-input
-                      v-model="ruleForm.road"
+                      v-model="ruleForm.score"
                       v-bind:disabled="userInfo.state == 1"
                       placeholder="100分"
                     ></el-input>
@@ -90,7 +95,9 @@
                       v-bind:disabled="userInfo.state == 1"
                       placeholder="请选择（必选）"
                     >
-                      <el-option></el-option>
+                      <el-option :value="30" label="30"></el-option>
+                      <el-option :value="60" label="60"></el-option>
+                      <el-option :value="90" label="90"></el-option>
                     </el-select>
                   </el-form-item>
                 </el-col>
@@ -103,14 +110,17 @@
                       v-bind:disabled="userInfo.state == 1"
                       placeholder="请选择（必选）"
                     >
-                      <el-option></el-option>
+                      <el-option :value="4" label="4"></el-option>
+                      <el-option :value="5" label="5"></el-option>
+                      <el-option :value="10" label="10"></el-option>
                     </el-select>
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
                   <el-form-item class="noBR" label="题序随机">
-                    <el-radio v-model="radio" label="1">是</el-radio>
-                    <el-radio v-model="radio" label="2">否</el-radio>
+                    <el-radio v-model="radio" label="1" v-if="userInfo.state != 1">是</el-radio>
+                    <el-radio v-model="radio" label="2" v-if="userInfo.state != 1">否</el-radio>
+                    <p v-if="userInfo.state == 1">是</p>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -119,7 +129,7 @@
                   <el-form-item class="noBR noBB" label="适用人员">
                     <el-input
                       v-bind:disabled="userInfo.state == 1"
-                      v-model="ruleForm.remark"
+                      v-model="ruleForm.people"
                       @focus="checkDialogVisible=true"
                     ></el-input>
                   </el-form-item>
@@ -128,21 +138,25 @@
             </el-form>
           </div>
         </div>
-        <div class="fj-block-foot">
+        <div class="fj-block-foot" v-if="isCreatePaperShow">
           <div class="fj-block-head kaohe">
             <p class="title">
               <span>试卷内容</span>
-              <el-button @click="submitForm('ruleForm')">重新生成试卷</el-button>
-              <el-button type="primary" @click="submitForm('ruleForm')">保存试卷</el-button>
+              <el-button @click="createPaper()" v-if="userInfo.state != 1">重新生成试卷</el-button>
+              <el-button
+                type="primary"
+                @click="submitForm('ruleForm')"
+                v-if="userInfo.state != 1"
+              >保存试卷</el-button>
             </p>
           </div>
           <div class="foot-body">
             <el-container>
-              <el-aside width="300px">
+              <el-aside width="300px" v-if="userInfo.state != 1">
                 <div class="head">题库/行政法规</div>
                 <div class="search">
                   <el-input
-                    v-model="ruleForm.remark"
+                    v-model="ruleForm.people"
                     clearable
                     placeholder="请输入"
                     size="small"
@@ -151,21 +165,21 @@
                     <el-button slot="append" @click="searchAttendHistory">搜索</el-button>
                   </el-input>
                 </div>
-                <el-checkbox-group v-model="checkedCities">
+                <el-checkbox-group v-model="checkedCities" :max="ruleForm.amount">
                   <el-checkbox v-for="city in cities" :label="city" :key="city">{{city}}</el-checkbox>
                 </el-checkbox-group>
               </el-aside>
-              <el-main>
-                <div class="head">
+              <el-main :class="userInfo.state == 1?aside-left:''">
+                <div class="head" v-if="userInfo.state != 1">
                   <span>
                     <img src="static/images/exam-manage-info.png" alt>
                   </span>
                   <span>
                     已选择
                     <span class="text-blue">{{headInfo.choose}}</span>
-                    项，单选题{{headInfo.radio}}题，多选题{{headInfo.selection}}题，本套试卷共{{headInfo.all}}题（共计100分）。
+                    项，单选题{{headInfo.radio}}题，多选题{{headInfo.selection}}题，本套试卷共{{headInfo.all}}题（共计{{ruleForm.score}}分）。
                   </span>
-                  <span class="text-blue">清空</span>
+                  <span class="text-blue" @click="createPaper()">清空</span>
                 </div>
                 <div class="body">
                   <div
@@ -195,7 +209,7 @@
                         <el-radio v-model="item.daan" :disabled="!(item.daan==4)" label="4"></el-radio>D:
                         <el-input type="text" :disabled="true" v-model="item.D"></el-input>
                       </li>
-                      <div class="right-revise" v-if="item.editIcon">
+                      <div class="right-revise" v-if="item.editIcon&&userInfo.state != 1">
                         <img src="static/images/fj-exam-del.png" alt="删除" @click="delTopic(index)">
                       </div>
                     </ul>
@@ -305,10 +319,18 @@ export default {
       ],
       userInfo: {},
       checkDialogVisible: false,
+      isCreatePaperShow: false,
+      isTitleDisabled: true,
       ruleForm: {
         title: "这里是题库的标题",
-        selectedRole: 1,
-        textarea: "请简单描述试题库内容",
+        score: 100,
+        time: 30,
+        examType: 30,
+        type: 30,
+        people: 30,
+        instime: 30,
+        amount: 10,
+        id: 30,
         content: [
           {
             title: "题目1",
@@ -361,13 +383,14 @@ export default {
   mounted() {
     // this.getTeamList();
     // this.getDownDepts();
-    // this.setCreated();
+    this.setCreated();
   },
   methods: {
+    // 验证规则
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
-          this.postRuleForm();
+          this.createPaper();
         } else {
           this.$message({
             message: "请填写完所有必填信息",
@@ -377,18 +400,25 @@ export default {
         }
       });
     },
+    //生成试卷
+    createPaper() {
+      this.isCreatePaperShow = true;
+      this.ruleForm.content = [];
+      this.checkedCities = [];
+    },
     treeAudit(i) {
       // console.log(this.$refs.tree.getCheckedNodes());
       let list = this.$refs.tree.getCheckedNodes();
-      this.ruleForm.remark = "";
+      this.ruleForm.people = "";
       for (let index = 0; index < list.length; index++) {
         const element = list[index];
         if (index < list.length - 1) {
-          this.ruleForm.remark += element.label + ",";
+          this.ruleForm.people += element.label + ",";
         } else {
-          this.ruleForm.remark += element.label;
+          this.ruleForm.people += element.label;
         }
       }
+      this.checkDialogVisible = false;
       // console.log(this.$refs.tree.getCheckedKeys());
     },
     //删除考题
@@ -436,9 +466,9 @@ export default {
       this.userInfo = this.$route.query;
       // this.breadData[3].name =
       //   this.activeList[this.userInfo.index].name + "信息采集表";
-      this.ruleForm = {};
-      this.userInfo.state != 0 &&
-        (this.ruleForm = $.parseJSON(fjPublic.getLocalData("ybssItem")));
+      // this.ruleForm = {};
+      // this.userInfo.state != 0 &&
+      //   (this.ruleForm = $.parseJSON(fjPublic.getLocalData("ybssItem")));
       // this.$refs["ruleForm"].resetFields();
     },
     routerGo() {
@@ -487,6 +517,18 @@ export default {
     float: right;
     margin: 10px;
   }
+  .el-input {
+    width: 500px;
+    margin-top: 4px;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .el-input.is-disabled .el-input__inner {
+    background-color: #fff;
+    border-color: #fff;
+    color: rgba(0, 0, 0, 0.85);
+    cursor: auto;
+  }
 }
 .foot-body {
   padding: 10px 0;
@@ -528,6 +570,9 @@ export default {
       .el-checkbox + .el-checkbox {
         margin-left: 0px;
       }
+    }
+    .aside-left {
+      margin-left: 200px;
     }
     .el-main {
       .head {
@@ -602,6 +647,15 @@ export default {
 }
 .Exam-Manage-form-area {
   margin-top: 10px;
+  .el-checkbox-group {
+    margin-left: 18px;
+  }
+  .el-radio {
+    margin-left: 18px;
+  }
+  p {
+    margin-left: 18px;
+  }
   .el-input.is-disabled .el-input__inner {
     cursor: auto;
     background-color: #fff;
