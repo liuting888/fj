@@ -9,14 +9,14 @@
       </div>
       <div class="fj-block-body">
         <!-- <a href="./test2.pdf">Download PDF</a> -->
-        <iframe
+        <!-- <iframe
           src="http://storage.xuetangx.com/public_assets/xuetangx/PDF/PlayerAPI_v1.0.6.pdf"
           width="100%"
           height="200px"
         >
           This browser does not support PDFs. Please download the PDF to view it:
           <a href="/test2.pdf" rel="external nofollow">Download PDF</a>
-        </iframe>
+        </iframe>-->
 
         <!-- src="https://view.officeapps.live.com/op/view.aspx?src=http://storage.xuetangx.com/public_assets/xuetangx/PDF/1.xls" -->
         <!-- <iframe
@@ -29,7 +29,7 @@
           <el-row>
             <el-form inline label-width="85px" label-position="left">
               <el-col :lg="8" :xl="7" class="time-item">
-                <el-form-item label="公安局：">
+                <el-form-item label="区县分局：">
                   <el-select
                     @change="changeSupDeptId"
                     clearable
@@ -46,7 +46,7 @@
                   </el-select>
                 </el-form-item>
 
-                <el-form-item label="申请时间：" class="datepicker">
+                <el-form-item label="起始日期：" class="datepicker">
                   <el-date-picker
                     v-model="searchForm.searchTime"
                     type="daterange"
@@ -75,7 +75,20 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="批准结果：">
+                <el-form-item label="输入查询：">
+                  <el-input
+                    v-model="searchForm.nameOrAccount"
+                    clearable
+                    placeholder="请输入姓名或电话"
+                    size="small"
+                    class="search-input"
+                  >
+                    <el-button slot="append" @click="searchAttendLeave">搜索</el-button>
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :lg="6" :xl="6">
+                <el-form-item label="审核结果：">
                   <el-select
                     @change="changeStatus"
                     clearable
@@ -90,35 +103,32 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-              </el-col>
-              <el-col :lg="6" :xl="6">
-                <el-form-item label="输入查询：">
-                  <el-input
-                    v-model="searchForm.nameOrAccount"
-                    clearable
-                    placeholder="请输入名称或警号"
-                    size="small"
-                    class="search-input"
-                  >
-                    <el-button slot="append" @click="searchAttendLeave">搜索</el-button>
-                  </el-input>
+                <el-form-item label=" ">
+                  <el-button
+                    type="primary"
+                    @click="review"
+                  >{{multipleSelection.length>1?'批量审核':'审核'}}</el-button>
+                  <el-button>导出</el-button>
                 </el-form-item>
               </el-col>
             </el-form>
           </el-row>
         </div>
-        <el-table :data="attendLeaveData">
+        <el-table :data="attendLeaveData" @selection-change="handleSelectionChange">
+          <el-table-column type="selection" width="55"></el-table-column>
+          <el-table-column prop="userId" label="地区" width="100px" show-overflow-tooltip></el-table-column>
           <el-table-column prop="userId" label="姓名" width="80px"></el-table-column>
-          <el-table-column prop="userAccount" label="警号"></el-table-column>
-          <el-table-column
+          <el-table-column prop="userId" label="电话"></el-table-column>
+          <el-table-column prop="userAccount" label="报名职位"></el-table-column>
+          <!-- <el-table-column
             prop="leave_reason"
             label="请假理由"
             show-overflow-tooltip
             class-name="textLeft"
             width="400px"
-          ></el-table-column>
+          ></el-table-column>-->
           <el-table-column
-            label="申请时间"
+            label="报名日期"
             show-overflow-tooltip
             :formatter="timeFormatter"
             prop="apply_time"
@@ -127,21 +137,7 @@
               <p>{{scope.row.apply_time | getFormatTime}}</p>
             </template>-->
           </el-table-column>
-          <el-table-column
-            label="请假起始时间"
-            show-overflow-tooltip
-            :formatter="timeFormatter"
-            prop="start_time"
-          ></el-table-column>
-
-          <el-table-column
-            label="请假结束时间"
-            show-overflow-tooltip
-            :formatter="timeFormatter"
-            prop="end_time"
-          ></el-table-column>
-
-          <el-table-column label="审核状态" prop="leave_state" width="120px">
+          <el-table-column label="资格审查" prop="leave_state" width="120px">
             <template slot-scope="scope">
               <span
                 class="circle-status"
@@ -152,26 +148,52 @@
               </span>
             </template>
           </el-table-column>
-          <el-table-column
-            label="处理说明"
-            show-overflow-tooltip
-            width="200px"
-            prop="leader_content"
-            class-name="textLeft"
-          ></el-table-column>
+          <el-table-column prop="userAccount" label="笔试">
+            <template slot-scope="scope">
+              <span v-if="scope.row.leave_state == 0">--</span>
+              <span v-if="scope.row.leave_state == 1">✓</span>
+              <span v-if="scope.row.leave_state == 2">✗</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="userAccount" label="面试">
+            <template slot-scope="scope">
+              <span v-if="scope.row.leave_state == 0">--</span>
+              <span v-if="scope.row.leave_state == 1">✓</span>
+              <span v-if="scope.row.leave_state == 2">✗</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="userAccount" label="公示">
+            <template slot-scope="scope">
+              <span v-if="scope.row.leave_state == 0">--</span>
+              <span v-if="scope.row.leave_state == 1">✓</span>
+              <span v-if="scope.row.leave_state == 2">✗</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="userAccount" label="录用">
+            <template slot-scope="scope">
+              <span v-if="scope.row.leave_state == 0">--</span>
+              <span v-if="scope.row.leave_state == 1">✓</span>
+              <span v-if="scope.row.leave_state == 2">✗</span>
+            </template>
+          </el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
               <span class="ope-txt" v-if="scope.row.leave_state != 0">--</span>
               <span
                 class="ope-txt"
                 v-if="scope.row.leave_state == 0"
-                @click="checkUpdate(scope.row.leaveId,1)"
-              >同意</span>
+                @click="goDetails(scope.row.leaveId,1)"
+              >详情</span>
               <span
                 class="ope-txt"
                 v-if="scope.row.leave_state == 0"
-                @click="openCheckDialog(scope.row.leaveId, 2)"
-              >不同意</span>
+                @click="goDetails(scope.row.leaveId, 2)"
+              >编辑</span>
+              <span
+                class="ope-txt"
+                v-if="scope.row.leave_state == 0"
+                @click="goDetails(scope.row.leaveId, 3)"
+              >删除</span>
             </template>
           </el-table-column>
         </el-table>
@@ -202,17 +224,20 @@
       top="25vh"
       class="check-dialog"
     >
-      <el-form :model="checkDialogForm" ref="checkDialogForm" inline :rules="checkRule">
-        <el-form-item label="不通过理由" label-width="100px" prop="reason">
-          <el-input
-            type="textarea"
-            :rows="3"
-            placeholder="请输入不通过理由"
-            v-model="checkDialogForm.reason"
-            :disabled="reasonDisabled"
-          ></el-input>
-        </el-form-item>
-      </el-form>
+      <div>请选择需要审核的内容</div>
+      <div>
+        <el-checkbox-group v-model="checkList">
+          <el-checkbox label="笔试"></el-checkbox>
+          <el-checkbox label="面试"></el-checkbox>
+          <el-checkbox label="公示"></el-checkbox>
+          <el-checkbox label="录用"></el-checkbox>
+        </el-checkbox-group>
+      </div>
+      <div>请选择审核状态</div>
+      <div>
+        <el-radio v-model="radio" label="1">通过</el-radio>
+        <el-radio v-model="radio" label="2">不通过</el-radio>
+      </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="checkDialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="updateLeaveStatus(false)">确 定</el-button>
@@ -224,15 +249,17 @@
 import fjBreadNav from "@/components/fjBreadNav";
 
 export default {
-  name: "fjAttendHistory",
+  name: "fjRecruitment",
   data: function() {
     return {
-      abc: "./考试专题接口文档2019-4-1.docx",
       breadData: [
         { name: "当前位置:", path: "" },
-        { name: "考勤管理", path: "" },
-        { name: "请假休假", path: "" }
+        { name: "人事管理", path: "" },
+        { name: "招聘管理", path: "" }
       ],
+      multipleSelection: [],
+      radio: "1",
+      checkList: ["选中且禁用", "复选框 A"],
       nowUser: $.cookie(fjPublic.loginCookieKey),
       // 分局
       supDeptIds: null,
@@ -350,6 +377,17 @@ export default {
       this.pageSize = pageSize;
       this.searchUserLeave();
     },
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
+    },
+    //审核
+    review() {
+      this.$message({
+        message: "请保证人员审核进度一致",
+        type: "warning"
+      });
+      this.checkDialogVisible = true;
+    },
     // 初始化分局
     initSupDeptIds: function() {
       var defer = $.Deferred();
@@ -449,26 +487,40 @@ export default {
       });
       return defer;
     },
-    // 打开审核弹出框
-    openCheckDialog: function(id, status) {
-      this.checkDialogForm["id"] = id;
-      this.checkDialogForm["status"] = status;
-      this.checkDialogTitle = status == 1 ? "批准？" : "不批准？";
-      this.reasonDisabled = status == 1 ? true : false;
-      this.checkDialogVisible = true;
-    },
-    // 确认批准直接询问并发请求
-    checkUpdate(id, status) {
-      this.$confirm("确认批准该条请假(休假)?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      }).then(() => {
-        this.checkDialogForm["id"] = id;
-        this.checkDialogForm["status"] = status;
-        this.updateLeaveStatus(true);
+    /**
+     * 查看，编辑，新建
+     * @param {*} state 状态0=新增，1=查看，2=编辑
+     */
+    goDetails(state, items) {
+      // let item = items;
+      // !item && (item = { id: "" });
+      this.$router.push({
+        path: "/personnel-recruitment-detail",
+        query: { state: items, id: state }
       });
+      //设置缓存，到编辑回显
+      // state != 0 && fjPublic.setLocalData("ybssItem", JSON.stringify(item));
     },
+    // 打开审核弹出框
+    // openCheckDialog: function(id, status) {
+    //   this.checkDialogForm["id"] = id;
+    //   this.checkDialogForm["status"] = status;
+    //   this.checkDialogTitle = status == 1 ? "批准？" : "不批准？";
+    //   this.reasonDisabled = status == 1 ? true : false;
+    //   this.checkDialogVisible = true;
+    // },
+    // 确认批准直接询问并发请求
+    // checkUpdate(id, status) {
+    //   this.$confirm("确认批准该条请假(休假)?", "提示", {
+    //     confirmButtonText: "确定",
+    //     cancelButtonText: "取消",
+    //     type: "warning"
+    //   }).then(() => {
+    //     this.checkDialogForm["id"] = id;
+    //     this.checkDialogForm["status"] = status;
+    //     this.updateLeaveStatus(true);
+    //   });
+    // },
     // 保存请假批准
     updateLeaveStatus: function(isConfirm) {
       var defer = $.Deferred();
@@ -481,7 +533,7 @@ export default {
           dataType: "json",
           success: function(data) {
             if (data.errorCode == 0) {
-              vm.checkDialogVisible = false;
+              // vm.checkDialogVisible = false;
               vm.searchUserLeave();
             }
             vm.$message({
@@ -615,6 +667,14 @@ export default {
         opacity: 1;
         top: 5px;
         left: -9px;
+      }
+    }
+  }
+  .el-dialog__body{
+    div{
+      margin: 20px;
+      .el-radio{
+        margin-left: 20px;
       }
     }
   }

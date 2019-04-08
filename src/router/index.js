@@ -196,14 +196,26 @@ export default new Router({
             path: '/personnel-recruitment',
             name: 'personnel-recruitment',
             component: resolve => require(['@/components/fjPersonnel/fjRecruitment'], resolve)
+        }, { //人事管理 ->招聘管理->详情
+            path: '/personnel-recruitment-detail',
+            name: 'personnel-recruitment-detail',
+            component: resolve => require(['@/components/fjPersonnel/fjRecruitment-detail'], resolve)
         }, { //人事管理 ->合同管理
             path: '/personnel-contract',
             name: 'personnel-contract',
             component: resolve => require(['@/components/fjPersonnel/fjContract'], resolve)
+        }, { //人事管理 ->合同管理->详情
+            path: '/personnel-contract-detail',
+            name: 'personnel-contract-detail',
+            component: resolve => require(['@/components/fjPersonnel/fjContract-detail'], resolve)
         }, { //人事管理 ->档案管理
             path: '/personnel-archives',
             name: 'personnel-archives',
             component: resolve => require(['@/components/fjPersonnel/fjArchives'], resolve)
+        }, { //人事管理 ->档案管理->详情
+            path: '/personnel-archives-detail',
+            name: 'personnel-archives-detail',
+            component: resolve => require(['@/components/fjPersonnel/fjArchives-detail'], resolve)
         }, { //人事管理 ->工资管理
             path: '/personnel-wage',
             name: 'personnel-wage',
