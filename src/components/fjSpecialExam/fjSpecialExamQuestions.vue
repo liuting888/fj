@@ -190,7 +190,8 @@ export default {
   mounted() {
     // this.getTeamList();
     // this.getDownDepts();
-    // this.setCreated();
+    this.setCreated();
+    this.getDetailList();
   },
   methods: {
     submitForm(formName) {
@@ -255,6 +256,31 @@ export default {
         this.addTopicList[x] = "";
       }
     },
+    // 获取编辑信息
+    getDetailList: function() {
+      console.log(this.userInfo.id);
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/getExamWarehouseInfo",
+        type: "POST",
+        data: {
+          id:this.userInfo.id
+        },
+        dataType: "json",
+        success: function(data) {
+          console.log(data)
+          console.log(222)
+          // vm.tableDataList = null;
+          // vm.tableDataList = data.list;
+          // vm.total = data.total;
+          // _.each(vm.attendAppealData, function(item, i) {
+          //   vm.$set(item, "rank", i + 1);
+          // });
+        },
+        error: function(err) {}
+      });
+    },
     // 提交或者编辑数据
     postRuleForm: function() {
       let vm = this;
@@ -284,11 +310,14 @@ export default {
     },
     setCreated() {
       this.userInfo = this.$route.query;
-      // this.breadData[3].name =
-      //   this.activeList[this.userInfo.index].name + "信息采集表";
-      this.ruleForm = {};
-      this.userInfo.state != 0 &&
-        (this.ruleForm = $.parseJSON(fjPublic.getLocalData("ybssItem")));
+      // this.ruleForm = {
+      //   title: "这里是题库的标题",
+      //   selectedRole: 1,
+      //   textarea: "请简单描述试题库内容",
+      //   content: []
+      // };
+      // this.userInfo.state != 0 &&
+      //   (this.ruleForm = $.parseJSON(fjPublic.getLocalData("ybssItem")));
       // this.$refs["ruleForm"].resetFields();
     },
     routerGo() {

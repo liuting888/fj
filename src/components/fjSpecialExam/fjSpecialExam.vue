@@ -144,15 +144,12 @@
           </el-table-column>
           <el-table-column label="操作" :key="Math.random()">
             <template slot-scope="scope">
-              <span class="ope-txt" v-if="scope.row.result != 0">--</span>
               <span
                 class="ope-txt"
-                v-if="scope.row.result == 0"
-                @click="openCheckDialog(scope.row.exceptionid, 2)"
+                @click="goQuestions(2,scope.row.id)"
               >管理</span>
               <span
                 class="ope-txt"
-                v-if="scope.row.result == 0"
                 @click="openCheckDialog(scope.row.exceptionid, 2)"
               >删除</span>
             </template>
@@ -212,31 +209,19 @@
           @selection-change="handleSelectionChange"
         >
           <el-table-column type="selection" width="30" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userName" label="试卷标题" :key="Math.random()"></el-table-column>
+          <el-table-column prop="title" label="试卷标题" :key="Math.random()"></el-table-column>
           <el-table-column prop="userName" label="姓名" :key="Math.random()"></el-table-column>
-          <el-table-column prop="signTime" label="分数" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userName" label="考试日期" :key="Math.random()"></el-table-column>
-          <el-table-column prop="signTime" label="警号" :key="Math.random()"></el-table-column>
-          <el-table-column prop="signTime" label="单位" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="用时" :key="Math.random()"></el-table-column>
+          <el-table-column prop="score" label="分数" :key="Math.random()"></el-table-column>
+          <el-table-column prop="time" label="考试日期" :key="Math.random()"></el-table-column>
+          <el-table-column prop="userAccount" label="警号" :key="Math.random()"></el-table-column>
+          <el-table-column prop="deptName" label="单位" :key="Math.random()"></el-table-column>
+          <el-table-column prop="useTime" label="用时" :key="Math.random()"></el-table-column>
           <el-table-column label="操作" :key="Math.random()">
             <template slot-scope="scope">
-              <span class="ope-txt" v-if="scope.row.result != 0">--</span>
               <span
                 class="ope-txt"
-                v-if="scope.row.result == 0"
-                @click="checkUpdate(scope.row.exceptionid, 1)"
-              >详情</span>
-              <span
-                class="ope-txt"
-                v-if="scope.row.result == 0"
-                @click="openCheckDialog(scope.row.exceptionid, 2)"
-              >管理</span>
-              <span
-                class="ope-txt"
-                v-if="scope.row.result == 0"
-                @click="openCheckDialog(scope.row.exceptionid, 2)"
-              >删除</span>
+                @click="goFraction(scope.row.id)"
+              >查看</span>
             </template>
           </el-table-column>
         </el-table>
@@ -376,16 +361,13 @@ export default {
           : "/getExamResultList";
       console.log(url);
       // 参数
-      vm.searchForm["page"] = vm.currentPage;
-      vm.searchForm["rows"] = vm.pageSize;
-      // 传入当前用户信息
-      vm.searchForm["nowUser"] = $.cookie(fjPublic.loginCookieKey);
+      vm.searchForm["pageNumber"] = vm.currentPage;
+      vm.searchForm["pageSize"] = vm.pageSize;
       $.ajax({
         // url: fjPublic.ajaxUrlDNN + "/searchSign",
         url: fjPublic.ajaxUrlDNN + url,
         type: "POST",
         data: vm.searchForm,
-        data: {},
         dataType: "json",
         success: function(data) {
           vm.tableDataList = null;
@@ -399,21 +381,17 @@ export default {
       });
     },
     /**
-     * 查看，编辑，新建
+     * 考试题库查看，编辑，新建
      * @param {*} state 状态0=新增，1=查看，2=编辑
      */
-    goQuestions(state, items) {
-      let item = items;
-      !item && (item = { id: "" });
+    goQuestions(state, id) {
       this.$router.push({
         path: "/special-exam-questions",
-        query: { index: this.activeIndex, state: state, id: item.id }
+        query: { state: state, id: id }
       });
-      //设置缓存，到编辑回显
-      state != 0 && fjPublic.setLocalData("ybssItem", JSON.stringify(item));
     },
     /**
-     * 查看，编辑，新建
+     * 考试试卷查看，编辑，新建
      * @param {*} state 状态0=新增，1=查看，2=编辑
      */ goManage(state, items) {
       let item = items;
@@ -426,7 +404,7 @@ export default {
       state != 0 && fjPublic.setLocalData("ybssItem", JSON.stringify(item));
     },
     /**
-     * 查看，编辑，新建
+     * 考试分数查看，编辑，新建
      * @param {*} state 状态0=新增，1=查看，2=编辑
      */ goFraction(state, items) {
       let item = items;
