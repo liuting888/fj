@@ -220,10 +220,18 @@ export default new Router({
             path: '/personnel-wage',
             name: 'personnel-wage',
             component: resolve => require(['@/components/fjPersonnel/fjWage'], resolve)
+        }, { //人事管理 ->工资管理->详情
+            path: '/personnel-wage-detail',
+            name: 'personnel-wage-detail',
+            component: resolve => require(['@/components/fjPersonnel/fjWage-detail'], resolve)
         }, { //人事管理 ->规则设置
-            path: '/personnel-eule-setting',
-            name: 'personnel-eule-setting',
+            path: '/personnel-rule-setting',
+            name: 'personnel-rule-setting',
             component: resolve => require(['@/components/fjPersonnel/fjRule-setting'], resolve)
+        }, { //人事管理 ->规则设置->详情
+            path: '/personnel-rule-setting-detail',
+            name: 'personnel-rule-setting-detail',
+            component: resolve => require(['@/components/fjPersonnel/fjRule-setting-detail'], resolve)
         }
 
     ]

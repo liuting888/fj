@@ -1,5 +1,5 @@
 <template>
-  <div class="fj-content_view work-mis fj-leave">
+  <div class="fj-content_view work-mis archives">
     <div class="fj-block title">
       <fj-breadNav :bread-data="breadData"></fj-breadNav>
     </div>
@@ -488,7 +488,7 @@ export default {
 };
 </script>
 <style scope lang="less">
-.fj-leave {
+.archives {
   .fj-search-inline {
     // 上下间距
     @media screen and (max-width: 1366px) {

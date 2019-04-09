@@ -123,27 +123,23 @@
         </div>
         <!-- 考试题库 -->
         <el-table v-if="activeIndex==0" :data="tableDataList" style="width: 100%">
-          <el-table-column prop="userName" label="题目类型" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userName" label="题目" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userName" label="考试类型" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="创建人" :key="Math.random()"></el-table-column>
-          <el-table-column prop="signTime" label="创建时间" :key="Math.random()"></el-table-column>
-          <!-- <el-table-column
-            label="适合人群"
-            :formatter="timeFormatter"
-            prop="exception_time"
-            :key="Math.random()"
-          ></el-table-column>-->
-          <el-table-column label="题目数量" :key="Math.random()">
-            <template slot-scope="scope">
-              <p>{{scope.row.signType | getSignType}}</p>
-            </template>
-          </el-table-column>
+          <el-table-column prop="type" label="题目类型" :key="Math.random()"></el-table-column>
+          <el-table-column prop="title" label="标题" :key="Math.random()"></el-table-column>
+          <el-table-column prop="content" label="考试类型" :key="Math.random()"></el-table-column>
+          <el-table-column prop="createUsername" label="创建人" :key="Math.random()"></el-table-column>
+          <el-table-column prop="instime" label="创建时间" :key="Math.random()"></el-table-column>
+          <el-table-column prop="examNumber" label="题目数量" :key="Math.random()"></el-table-column>
           <el-table-column label="状态" width="100px" :key="Math.random()">
             <template slot-scope="scope">
-              <!-- <p>{{scope.row}}</p> -->
-              <el-switch v-model="scope.row.signType" active-color="#13ce66" inactive-color="#ccc"></el-switch>
-              <span>{{scope.row.signType==true?'开启':'关闭'}}</span>
+              <el-switch
+                v-model="scope.row.state"
+                active-color="#13ce66"
+                inactive-color="#ccc"
+                active-value="0"
+                inactive-value="1"
+                @change="changeSwitch(scope.row.id,scope.row.state)"
+              ></el-switch>
+              <span>{{scope.row.state==0?'开启':'关闭'}}</span>
             </template>
           </el-table-column>
           <el-table-column label="操作" :key="Math.random()">
@@ -164,39 +160,45 @@
         </el-table>
         <!-- 试卷管理 -->
         <el-table v-if="activeIndex==1" :data="tableDataList" style="width: 100%">
-          <el-table-column prop="userName" label="试卷标题" :key="Math.random()"></el-table-column>
-          <el-table-column prop="signTime" label="试卷类型" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userName" label="总分" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userName" label="创建人" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="发布时间" :key="Math.random()"></el-table-column>
+          <el-table-column prop="title" label="试卷标题" :key="Math.random()"></el-table-column>
+          <el-table-column prop="sigtypenTime" label="试卷类型" :key="Math.random()"></el-table-column>
+          <el-table-column prop="score" label="总分" :key="Math.random()"></el-table-column>
+          <el-table-column prop="a" label="创建人" :key="Math.random()"></el-table-column>
+          <el-table-column prop="instime" label="发布时间" :key="Math.random()"></el-table-column>
           <el-table-column label="状态" width="100px" :key="Math.random()">
             <template slot-scope="scope">
-              <!-- <p>{{scope.row}}</p> -->
-              <el-switch v-model="scope.row.signType" active-color="#13ce66" inactive-color="#ccc"></el-switch>
-              <span>{{scope.row.signType==true?'开启':'关闭'}}</span>
+              <span
+                class="circle-status"
+                :class="scope.row.state == 0 ? 'grey' : scope.row.state == 1 ? 'green' : 'red'"
+              >
+                {{parseInt( scope.row.state) === 0 ? '待发布' : parseInt( scope.row.state) === 1 ?'已发布'
+                : '被结束'}}
+              </span>
             </template>
           </el-table-column>
-          <el-table-column label="题目数量" :key="Math.random()">
-            <template slot-scope="scope">
-              <p>{{scope.row.signType | getSignType}}</p>
-            </template>
-          </el-table-column>
+          <el-table-column label="题目数量" prop="amount" :key="Math.random()"></el-table-column>
           <el-table-column label="操作" :key="Math.random()">
             <template slot-scope="scope">
-              <span class="ope-txt" v-if="scope.row.result != 0">--</span>
+              <span class="ope-txt" v-if="scope.row.state != 0">--</span>
+              <span class="ope-txt" v-if="scope.row.state == -1">复用</span>
               <span
                 class="ope-txt"
-                v-if="scope.row.result == 0"
+                v-if="scope.row.state != 0"
+                @click="goManage(1,scope.row.exceptionid)"
+              >查看</span>
+              <span
+                class="ope-txt"
+                v-if="scope.row.state == 0"
                 @click="checkUpdate(scope.row.exceptionid, 1)"
               >发布</span>
               <span
                 class="ope-txt"
-                v-if="scope.row.result == 0"
-                @click="openCheckDialog(scope.row.exceptionid, 2)"
+                v-if="scope.row.state == 0"
+                @click="goManage( 2,scope.row.exceptionid)"
               >编辑</span>
               <span
                 class="ope-txt"
-                v-if="scope.row.result == 0"
+                v-if="scope.row.state == 0"
                 @click="openCheckDialog(scope.row.exceptionid, 2)"
               >删除</span>
             </template>
@@ -338,6 +340,10 @@ export default {
       this.activeIndex = tab.index;
       this.searchSign();
     },
+    //获取被选中的标签 tab 实例
+    changeSwitch(id, state) {
+      console.log(id, state);
+    },
     // 修改单位下拉框查询
     changeDeptId: function(deptId) {
       this.searchForm["deptId"] = deptId;
@@ -375,10 +381,11 @@ export default {
       // 传入当前用户信息
       vm.searchForm["nowUser"] = $.cookie(fjPublic.loginCookieKey);
       $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/searchSign",
-        // url: fjPublic.ajaxUrlDNN + "/getExamWarehouseList",
+        // url: fjPublic.ajaxUrlDNN + "/searchSign",
+        url: fjPublic.ajaxUrlDNN + url,
         type: "POST",
         data: vm.searchForm,
+        data: {},
         dataType: "json",
         success: function(data) {
           vm.tableDataList = null;
@@ -404,12 +411,11 @@ export default {
       });
       //设置缓存，到编辑回显
       state != 0 && fjPublic.setLocalData("ybssItem", JSON.stringify(item));
-    }
+    },
     /**
      * 查看，编辑，新建
      * @param {*} state 状态0=新增，1=查看，2=编辑
-     */,
-    goManage(state, items) {
+     */ goManage(state, items) {
       let item = items;
       !item && (item = { id: "" });
       this.$router.push({
@@ -418,12 +424,11 @@ export default {
       });
       //设置缓存，到编辑回显
       state != 0 && fjPublic.setLocalData("ybssItem", JSON.stringify(item));
-    }
+    },
     /**
      * 查看，编辑，新建
      * @param {*} state 状态0=新增，1=查看，2=编辑
-     */,
-    goFraction(state, items) {
+     */ goFraction(state, items) {
       let item = items;
       !item && (item = { id: "" });
       this.$router.push({
@@ -462,9 +467,38 @@ export default {
 </script>
 <style scope lang="less">
 .specialExamination {
-  // .ope-txt{
-  //   border-left: 1px solid #E9E9E9;
-  // }
+  /deep/ .el-table {
+    .circle-status {
+      position: relative;
+      &.red {
+        &::before {
+          background: #f5222d;
+        }
+      }
+      &.green {
+        &::before {
+          background: #52c41a;
+        }
+      }
+      &.grey {
+        &::before {
+          background: #ababab;
+        }
+      }
+      &::before {
+        display: block;
+        position: absolute;
+        content: "";
+        width: 6px;
+        height: 6px;
+        background: rgba(171, 171, 171, 1);
+        border-radius: 50%;
+        opacity: 1;
+        top: 5px;
+        left: -9px;
+      }
+    }
+  }
   .tj-btn {
     float: right;
     margin-top: -38px;

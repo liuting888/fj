@@ -556,7 +556,7 @@ export default {
             },
             {
               title: "规则管理",
-              route: "/personnel-eule-setting"
+              route: "/personnel-rule-setting"
             }
           ]
         },
