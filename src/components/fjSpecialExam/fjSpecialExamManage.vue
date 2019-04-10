@@ -7,8 +7,8 @@
       <div class="fj-block content">
         <div class="fj-block-head kaohe">
           <p class="title" @mouseover="isTitleDisabled=false" @mouseout="isTitleDisabled=true">
-            <el-input :disabled="isTitleDisabled" type="text" v-model="ruleForm.title"></el-input>
-            <el-button type="primary" @click="createPaper()" v-if="userInfo.state != 1">生成试卷</el-button>
+            <el-input :disabled="isTitleDisabled" type="text" v-model="ruleForm.data.title"></el-input>
+            <el-button type="primary" @click="createPaper()" v-if="userInfo.state == 0">生成试卷</el-button>
           </p>
         </div>
         <div class="fj-block-body">
@@ -18,7 +18,7 @@
               <el-row>
                 <el-col :span="24">
                   <el-form-item prop="houseNumber" label="题目类型">
-                    <el-checkbox-group v-model="checkList" v-if="userInfo.state != 1">
+                    <el-checkbox-group v-model="ruleForm.data.type" v-if="userInfo.state != 1">
                       <el-checkbox label="单选"></el-checkbox>
                       <el-checkbox label="多选"></el-checkbox>
                       <el-checkbox label="其他"></el-checkbox>
@@ -31,7 +31,7 @@
                 <el-col :span="12">
                   <el-form-item prop="city" label="选题规则">
                     <el-select
-                      v-model="ruleForm.selectRules"
+                      v-model="ruleForm.data.selectRules"
                       v-bind:disabled="userInfo.state == 1"
                       placeholder="请选择（必选）"
                     >
@@ -43,7 +43,7 @@
                 <el-col :span="12">
                   <el-form-item class="noBR" prop="street" label="考试类型">
                     <el-select
-                      v-model="ruleForm.examType"
+                      v-model="ruleForm.data.examType"
                       v-bind:disabled="userInfo.state == 1"
                       placeholder="请选择（必选）"
                     >
@@ -57,7 +57,7 @@
                 <el-col :span="12">
                   <el-form-item prop="community" label="题目数量">
                     <el-select
-                      v-model="ruleForm.amount"
+                      v-model="ruleForm.data.amount"
                       v-bind:disabled="userInfo.state == 1"
                       placeholder="请选择（必选）"
                     >
@@ -70,7 +70,7 @@
                 <el-col :span="12">
                   <el-form-item class="noBR" prop="road" label="试卷分数">
                     <el-input
-                      v-model="ruleForm.score"
+                      v-model="ruleForm.data.score"
                       v-bind:disabled="userInfo.state == 1"
                       placeholder="100分"
                     ></el-input>
@@ -82,7 +82,7 @@
                   <el-form-item prop="houseNumber" label="考试日期">
                     <el-date-picker
                       v-bind:disabled="userInfo.state == 1"
-                      v-model="ruleForm.time"
+                      v-model="ruleForm.data.instime"
                       type="date"
                       placeholder="请选择"
                     ></el-date-picker>
@@ -91,7 +91,7 @@
                 <el-col :span="12">
                   <el-form-item class="noBR" prop="plots" label="考试时长">
                     <el-select
-                      v-model="ruleForm.community"
+                      v-model="ruleForm.data.time"
                       v-bind:disabled="userInfo.state == 1"
                       placeholder="请选择（必选）"
                     >
@@ -106,7 +106,7 @@
                 <el-col :span="12">
                   <el-form-item prop="entityName" label="题目分数">
                     <el-select
-                      v-model="ruleForm.community"
+                      v-model="ruleForm.data.community"
                       v-bind:disabled="userInfo.state == 1"
                       placeholder="请选择（必选）"
                     >
@@ -129,7 +129,7 @@
                   <el-form-item class="noBR noBB" label="适用人员">
                     <el-input
                       v-bind:disabled="userInfo.state == 1"
-                      v-model="ruleForm.people"
+                      v-model="ruleForm.data.people"
                       @focus="checkDialogVisible=true"
                     ></el-input>
                   </el-form-item>
@@ -156,7 +156,7 @@
                 <div class="head">题库/行政法规</div>
                 <div class="search">
                   <el-input
-                    v-model="ruleForm.people"
+                    v-model="ruleForm.data.people"
                     clearable
                     placeholder="请输入"
                     size="small"
@@ -165,7 +165,7 @@
                     <el-button slot="append" @click="searchAttendHistory">搜索</el-button>
                   </el-input>
                 </div>
-                <el-checkbox-group v-model="checkedCities" :max="ruleForm.amount">
+                <el-checkbox-group v-model="checkedCities" :max="ruleForm.data.amount">
                   <el-checkbox v-for="city in cities" :label="city" :key="city">{{city}}</el-checkbox>
                 </el-checkbox-group>
               </el-aside>
@@ -177,14 +177,14 @@
                   <span>
                     已选择
                     <span class="text-blue">{{headInfo.choose}}</span>
-                    项，单选题{{headInfo.radio}}题，多选题{{headInfo.selection}}题，本套试卷共{{headInfo.all}}题（共计{{ruleForm.score}}分）。
+                    项，单选题{{headInfo.radio}}题，多选题{{headInfo.selection}}题，本套试卷共{{headInfo.all}}题（共计{{ruleForm.data.score}}分）。
                   </span>
                   <span class="text-blue" @click="createPaper()">清空</span>
                 </div>
                 <div class="body">
                   <div
                     class="check-topic"
-                    v-for="(item, index) in ruleForm.content"
+                    v-for="(item, index) in ruleForm.list"
                     @mouseover="item.editIcon=true"
                     @mouseout="item.editIcon=false"
                   >
@@ -322,16 +322,19 @@ export default {
       isCreatePaperShow: false,
       isTitleDisabled: true,
       ruleForm: {
-        title: "这里是题库的标题",
-        score: 100,
-        time: 30,
-        examType: 30,
-        type: 30,
-        people: 30,
-        instime: 30,
-        amount: 10,
-        id: 30,
-        content: [
+        data: {
+          title: "这里是题库的标题",
+          score: 100,
+          time: 30,
+          examType: 30,
+          type: 30,
+          people: 30,
+          instime: 30,
+          amount: 10,
+          id: "",
+          type: []
+        },
+        list: [
           {
             title: "题目1",
             A: "hahaA",
@@ -381,9 +384,8 @@ export default {
   //   this.setCreated();
   // },
   mounted() {
-    // this.getTeamList();
-    // this.getDownDepts();
     this.setCreated();
+    this.getDetailList();
   },
   methods: {
     // 验证规则
@@ -403,19 +405,19 @@ export default {
     //生成试卷
     createPaper() {
       this.isCreatePaperShow = true;
-      this.ruleForm.content = [];
+      this.ruleForm.list = [];
       this.checkedCities = [];
     },
     treeAudit(i) {
       // console.log(this.$refs.tree.getCheckedNodes());
       let list = this.$refs.tree.getCheckedNodes();
-      this.ruleForm.people = "";
+      this.ruleForm.data.people = "";
       for (let index = 0; index < list.length; index++) {
         const element = list[index];
         if (index < list.length - 1) {
-          this.ruleForm.people += element.label + ",";
+          this.ruleForm.data.people += element.label + ",";
         } else {
-          this.ruleForm.people += element.label;
+          this.ruleForm.data.people += element.label;
         }
       }
       this.checkDialogVisible = false;
@@ -423,8 +425,8 @@ export default {
     },
     //删除考题
     delTopic(index) {
-      let title = this.ruleForm.content[index].title;
-      this.ruleForm.content.splice(index, 1);
+      let title = this.ruleForm.list[index].title;
+      this.ruleForm.list.splice(index, 1);
       this.checkedCities.forEach((item, i) => {
         if (item == title) {
           this.checkedCities.splice(i, 1);
@@ -435,15 +437,53 @@ export default {
     handleNodeClick(data) {
       console.log(data);
     },
+    // 获取题库详情
+    getDetailList: function() {
+      console.log(this.userInfo.id);
+      this.ruleForm.data.id = this.userInfo.id;
+      if (!this.userInfo.id) {
+        return false;
+      }
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/getExamPaperInfo",
+        type: "POST",
+        data: {
+          id: this.userInfo.id
+        },
+        dataType: "json",
+        success: function(data) {
+          console.log(data);
+          vm.ruleForm.data = data.data;
+          // for (let i = 0; i < data.list.length; i++) {
+          //   let tm = {
+          //     id: data.list[i].id,
+          //     question: data.list[i].question,
+          //     A: data.list[i].options.split("&GXCF&")[0],
+          //     B: data.list[i].options.split("&GXCF&")[1],
+          //     C: data.list[i].options.split("&GXCF&")[2],
+          //     D: data.list[i].options.split("&GXCF&")[3],
+          //     rightOptions: data.list[i].rightOptions.split("|"),
+          //     edit: true, //用来判断是否可以编辑
+          //     edt: false, //用来判断是否点击修改图标
+          //     editIcon: false //用来判断是否展示侧边栏图标
+          //   };
+          //   vm.ruleForm.list.unshift(tm);
+          // }
+        },
+        error: function(err) {}
+      });
+    },
     // 提交或者编辑数据
     postRuleForm: function() {
       let vm = this;
       let url = vm.userInfo.state == 0 ? "/addInfo" : "/updInfo";
       if (vm.userInfo.id) {
-        vm.ruleForm.id = vm.userInfo.id;
+        vm.ruleForm.data.id = vm.userInfo.id;
       }
-      // vm.ruleForm.tableName = vm.activeList[vm.userInfo.index].tableName;
-      vm.ruleForm.userId = $.parseJSON(
+      // vm.ruleForm.data.tableName = vm.activeList[vm.userInfo.index].tableName;
+      vm.ruleForm.data.userId = $.parseJSON(
         fjPublic.getLocalData("userInfo")
       ).userId;
       $.ajax({
@@ -464,12 +504,7 @@ export default {
     },
     setCreated() {
       this.userInfo = this.$route.query;
-      // this.breadData[3].name =
-      //   this.activeList[this.userInfo.index].name + "信息采集表";
-      // this.ruleForm = {};
-      // this.userInfo.state != 0 &&
-      //   (this.ruleForm = $.parseJSON(fjPublic.getLocalData("ybssItem")));
-      // this.$refs["ruleForm"].resetFields();
+      this.userInfo.state != 0 && (this.isCreatePaperShow = true);
     },
     routerGo() {
       window.history.go(-1);
@@ -492,12 +527,12 @@ export default {
           list.D = "66";
           list.daan = "2";
           list.editIcon = false;
-          this.ruleForm.content.unshift(list);
+          this.ruleForm.list.unshift(list);
         } else {
-          this.ruleForm.content.forEach((item, i) => {
+          this.ruleForm.list.forEach((item, i) => {
             for (const key in item) {
               if (item[key] == oldval[oldval.length - 1]) {
-                this.ruleForm.content.splice(i, 1);
+                this.ruleForm.list.splice(i, 1);
               }
             }
           });

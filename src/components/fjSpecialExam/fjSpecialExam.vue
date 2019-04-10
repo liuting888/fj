@@ -90,7 +90,7 @@
               <el-col :lg="8" :xl="7" class="time-item">
                 <el-form-item label="起始时间：" class="datepicker">
                   <el-date-picker
-                    v-model="searchForm.searchTime"
+                    v-model="searchTime"
                     type="daterange"
                     range-separator="至"
                     start-placeholder="开始日期"
@@ -127,7 +127,12 @@
           <el-table-column prop="title" label="标题" :key="Math.random()"></el-table-column>
           <el-table-column prop="content" label="考试类型" :key="Math.random()"></el-table-column>
           <el-table-column prop="createUsername" label="创建人" :key="Math.random()"></el-table-column>
-          <el-table-column prop="instime" label="创建时间" :key="Math.random()"></el-table-column>
+          <el-table-column
+            prop="instime"
+            label="创建时间"
+            :formatter="timeFormatter"
+            :key="Math.random()"
+          ></el-table-column>
           <el-table-column prop="examNumber" label="题目数量" :key="Math.random()"></el-table-column>
           <el-table-column label="状态" width="100px" :key="Math.random()">
             <template slot-scope="scope">
@@ -137,21 +142,15 @@
                 inactive-color="#ccc"
                 active-value="0"
                 inactive-value="1"
-                @change="changeSwitch(scope.row.id,scope.row.state)"
+                @change="updExam(scope.row.id,scope.row.state)"
               ></el-switch>
               <span>{{scope.row.state==0?'开启':'关闭'}}</span>
             </template>
           </el-table-column>
           <el-table-column label="操作" :key="Math.random()">
             <template slot-scope="scope">
-              <span
-                class="ope-txt"
-                @click="goQuestions(2,scope.row.id)"
-              >管理</span>
-              <span
-                class="ope-txt"
-                @click="openCheckDialog(scope.row.exceptionid, 2)"
-              >删除</span>
+              <span class="ope-txt" @click="goQuestions(2,scope.row.id)">管理</span>
+              <span class="ope-txt" @click="updExam(scope.row.id, -1)">删除</span>
             </template>
           </el-table-column>
         </el-table>
@@ -178,11 +177,7 @@
             <template slot-scope="scope">
               <span class="ope-txt" v-if="scope.row.state != 0">--</span>
               <span class="ope-txt" v-if="scope.row.state == -1">复用</span>
-              <span
-                class="ope-txt"
-                v-if="scope.row.state != 0"
-                @click="goManage(1,scope.row.exceptionid)"
-              >查看</span>
+              <span class="ope-txt" v-if="scope.row.state != 0" @click="goManage(1,scope.row.id)">查看</span>
               <span
                 class="ope-txt"
                 v-if="scope.row.state == 0"
@@ -191,7 +186,7 @@
               <span
                 class="ope-txt"
                 v-if="scope.row.state == 0"
-                @click="goManage( 2,scope.row.exceptionid)"
+                @click="goManage( 2,scope.row.id)"
               >编辑</span>
               <span
                 class="ope-txt"
@@ -218,10 +213,7 @@
           <el-table-column prop="useTime" label="用时" :key="Math.random()"></el-table-column>
           <el-table-column label="操作" :key="Math.random()">
             <template slot-scope="scope">
-              <span
-                class="ope-txt"
-                @click="goFraction(scope.row.id)"
-              >查看</span>
+              <span class="ope-txt" @click="goFraction(scope.row.id)">查看</span>
             </template>
           </el-table-column>
         </el-table>
@@ -267,8 +259,8 @@ export default {
         }
       ],
       // 列表查询参数
+      searchTime: "", // 查询时间
       searchForm: {
-        searchTime: "", // 查询时间
         nameOrAccount: "", // 警号或负责人名称
         deptId: "", // 派出所
         supDeptId: "", // 公安局
@@ -349,6 +341,26 @@ export default {
       }
       this.searchSign();
     },
+    // 更新题库
+    updExam: function(id, state) {
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/updExamWarehouse",
+        type: "POST",
+        data: {
+          id: id,
+          state: state
+        },
+        dataType: "json",
+        success: function(data) {
+          console.log(data);
+        },
+        error: function(err) {
+          vm.searchSign();
+        }
+      });
+    },
     // 获取采集列表
     searchSign: function() {
       var defer = $.Deferred();
@@ -373,9 +385,6 @@ export default {
           vm.tableDataList = null;
           vm.tableDataList = data.list;
           vm.total = data.total;
-          // _.each(vm.attendAppealData, function(item, i) {
-          //   vm.$set(item, "rank", i + 1);
-          // });
         },
         error: function(err) {}
       });
@@ -393,15 +402,11 @@ export default {
     /**
      * 考试试卷查看，编辑，新建
      * @param {*} state 状态0=新增，1=查看，2=编辑
-     */ goManage(state, items) {
-      let item = items;
-      !item && (item = { id: "" });
+     */ goManage(state, id) {
       this.$router.push({
         path: "/special-exam-manage",
-        query: { index: this.activeIndex, state: state, id: item.id }
+        query: { state: state, id: id }
       });
-      //设置缓存，到编辑回显
-      state != 0 && fjPublic.setLocalData("ybssItem", JSON.stringify(item));
     },
     /**
      * 考试分数查看，编辑，新建
@@ -415,23 +420,22 @@ export default {
       });
       //设置缓存，到编辑回显
       state != 0 && fjPublic.setLocalData("ybssItem", JSON.stringify(item));
-    }
+    },
     // 时间格式化
-    // timeFormatter(row, type) {
-    //   let dateStr = row[type.property];
-    //   if (!dateStr) {
-    //     return "";
-    //   }
-    //   return (
-    //     dateStr.substr(5, 2) +
-    //     "/" +
-    //     dateStr.substr(8, 2) +
-    //     " " +
-    //     dateStr.substr(11, 2) +
-    //     ":" +
-    //     dateStr.substr(14, 2)
-    //   );
-    // }
+    timeFormatter(row, type) {
+      let dateStr = row[type.property];
+      if (!dateStr) {
+        return "";
+      }
+      return (
+        dateStr.substr(5, 2) + "/" + dateStr.substr(8, 2)
+        // +
+        // " " +
+        // dateStr.substr(11, 2) +
+        // ":" +
+        // dateStr.substr(14, 2)
+      );
+    }
   },
   filters: {
     getSignType: function(value) {

@@ -182,16 +182,19 @@ export default new Router({
         { //教培管理 ->考试考题
             path: '/special-exam-questions',
             name: 'special-exam-questions',
-            component: resolve => require(['@/components/fjSpecialExam/fjSpecialExamQuestions'], resolve)
+            component: resolve => require(['@/components/fjSpecialExam/fjSpecialExamQuestions'], resolve),
+            meta: { noKeepAlive: true }
         },
         { //教培管理 ->试卷管理
             path: '/special-exam-manage',
             name: 'special-exam-manage',
-            component: resolve => require(['@/components/fjSpecialExam/fjSpecialExamManage'], resolve)
+            component: resolve => require(['@/components/fjSpecialExam/fjSpecialExamManage'], resolve),
+            meta: { noKeepAlive: true }
         }, { //教培管理 ->考试得分
             path: '/special-exam-fraction',
             name: 'special-exam-fraction',
-            component: resolve => require(['@/components/fjSpecialExam/fjSpecialExamFraction'], resolve)
+            component: resolve => require(['@/components/fjSpecialExam/fjSpecialExamFraction'], resolve),
+            meta: { noKeepAlive: true }
         }, { //人事管理 ->招聘管理
             path: '/personnel-recruitment',
             name: 'personnel-recruitment',
