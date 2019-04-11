@@ -15,34 +15,34 @@
               <el-row>
                 <el-col :span="8">
                   <el-form-item label="考试人员">
-                    <p>{{ruleForm.userName}}</p>
+                    <p>{{ruleForm.data.userName}}</p>
                   </el-form-item>
                 </el-col>
                 <el-col :span="8">
                   <el-form-item label="考试时长">
-                    <p>{{ruleForm.useTime}}</p>
+                    <p>{{ruleForm.data.useTime}}</p>
                   </el-form-item>
                 </el-col>
                 <el-col :span="8">
                   <el-form-item label="正确">
-                    <p>{{ruleForm.userName}}</p>
+                    <p>{{ruleForm.data.userName}}</p>
                   </el-form-item>
                 </el-col>
               </el-row>
               <el-row>
                 <el-col :span="8">
                   <el-form-item label="考试得分">
-                    <p>{{ruleForm.score}}</p>
+                    <p>{{ruleForm.data.score}}</p>
                   </el-form-item>
                 </el-col>
                 <el-col :span="8">
                   <el-form-item label="考试日期">
-                    <p>{{ruleForm.time}}</p>
+                    <p>{{ruleForm.data.time}}</p>
                   </el-form-item>
                 </el-col>
                 <el-col :span="8">
                   <el-form-item label="错误">
-                    <p>{{ruleForm.wrongNumber}}</p>
+                    <p>{{ruleForm.data.wrongNumber}}</p>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -59,33 +59,33 @@
             <el-container>
               <el-main class="aside-left">
                 <div class="body">
-                  <div class="check-topic" v-for="(item, index) in ruleForm.list">
+                  <div class="check-topic" v-for="(item, index) in ruleForm.list" :key="index">
                     <div class="topic">
                       {{index+1}}.
-                      <span>{{item.title}}</span>
+                      <span>{{item.question}}</span>
                     </div>
                     <ul>
                       <li>
                         <i
-                          :class="item.error==1?'el-icon-error':item.success==1?'el-icon-success':'el-icon-info'"
+                          :class="(item.rightOptions.indexOf('0')!=-1)?'el-icon-success':(item.myChoice.indexOf('0')!=-1)?'el-icon-error':'el-icon-info'"
                         ></i>A:
                         <span>{{item.A}}</span>
                       </li>
                       <li>
                         <i
-                          :class="item.error==2?'el-icon-error':item.success==2?'el-icon-success':'el-icon-info'"
+                          :class="(item.rightOptions.indexOf('1')!=-1)?'el-icon-success':(item.myChoice.indexOf('1')!=-1)?'el-icon-error':'el-icon-info'"
                         ></i>B:
                         <span>{{item.B}}</span>
                       </li>
                       <li>
                         <i
-                          :class="item.error==3?'el-icon-error':item.success==3?'el-icon-success':'el-icon-info'"
+                          :class="(item.rightOptions.indexOf('2')!=-1)?'el-icon-success':(item.myChoice.indexOf('2')!=-1)?'el-icon-error':'el-icon-info'"
                         ></i>C:
                         <span>{{item.C}}</span>
                       </li>
                       <li>
                         <i
-                          :class="item.error==4?'el-icon-error':item.success==4?'el-icon-success':'el-icon-info'"
+                          :class="(item.rightOptions.indexOf('3')!=-1)?'el-icon-success':(item.myChoice.indexOf('3')!=-1)?'el-icon-error':'el-icon-info'"
                         ></i>D:
                         <span>{{item.D}}</span>
                       </li>
@@ -114,62 +114,93 @@ export default {
       userInfo: {},
       isTitleDisabled: true,
       ruleForm: {
-        title: "这里是题库的标题",
-        id: "主键id",
-        instime: "新建时间",
-        paperId: "试卷id",
-        rightNumber: "正确数量",
-        score: "得分",
-        time: "考试时间",
-        updtime: "更新时间",
-        useTime: "考试用时",
-        userId: "用户id",
-        userName: "用户信命",
-        wrongNumber: "错误数量",
+        data: {
+          title: "这里是题库的标题",
+          id: "主键id",
+          instime: "新建时间",
+          paperId: "试卷id",
+          rightNumber: "正确数量",
+          score: "得分",
+          time: "考试时间",
+          updtime: "更新时间",
+          useTime: "考试用时",
+          userId: "用户id",
+          userName: "用户信命",
+          wrongNumber: "错误数量"
+        },
         list: [
           {
-            title: "题目1",
+            question: "题目1",
             A: "hahaA",
             B: "hahaB",
             C: "hahaC",
             D: "hahaD",
-            error: "3",
-            success: "1"
+            myChoice: "3,2",
+            rightOptions: "1"
           },
           {
-            title: "题目2",
+            question: "题目2",
             A: "hahaA2",
             B: "hahaB2",
             C: "hahaC2",
             D: "hahaD2",
-            error: "2",
-            success: "3"
+            myChoice: "2",
+            rightOptions: "3,0"
           }
         ]
       },
       rules: {}
     };
   },
-  // created() {
-  //   this.setCreated();
-  // },
   mounted() {
-    // this.getTeamList();
-    // this.getDownDepts();
     this.setCreated();
+    this.getDetailList();
   },
   methods: {
+    // 获取题库详情
+    getDetailList: function() {
+      this.ruleForm.data.id = this.userInfo.id;
+      if (!this.userInfo.id) {
+        return false;
+      }
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/getExamResultInfo",
+        type: "POST",
+        data: {
+          id: this.userInfo.id
+        },
+        dataType: "json",
+        success: function(data) {
+          vm.ruleForm.data = data.data;
+          for (let i = 0; i < data.list.length; i++) {
+            let tm = {
+              id: data.list[i].id,
+              question: data.list[i].question,
+              A: data.list[i].options.split("&GXCF&")[0],
+              B: data.list[i].options.split("&GXCF&")[1],
+              C: data.list[i].options.split("&GXCF&")[2],
+              D: data.list[i].options.split("&GXCF&")[3],
+              rightOptions: data.list[i].rightOptions,
+              myChoice: data.list[i].myChoice
+            };
+            vm.ruleForm.list.unshift(tm);
+          }
+        },
+        error: function(err) {}
+      });
+    },
     // 提交或者编辑数据
     postRuleForm: function() {
       let vm = this;
       let url = vm.userInfo.state == 0 ? "/addInfo" : "/updInfo";
       if (vm.userInfo.id) {
-        vm.ruleForm.id = vm.userInfo.id;
+        vm.ruleForm.data.id = vm.userInfo.id;
       }
-      // vm.ruleForm.tableName = vm.activeList[vm.userInfo.index].tableName;
-      vm.ruleForm.userId = $.parseJSON(
-        fjPublic.getLocalData("userInfo")
-      ).userId;
+      // vm.ruleForm.userId = $.parseJSON(
+      //   fjPublic.getLocalData("userInfo")
+      // ).userId;
       $.ajax({
         url: fjPublic.ajaxUrlDNN + url,
         type: "POST",
@@ -188,8 +219,6 @@ export default {
     },
     setCreated() {
       this.userInfo = this.$route.query;
-      // this.breadData[3].name =
-      //   this.activeList[this.userInfo.index].name + "信息采集表";
       // this.ruleForm = {};
       // this.userInfo.state != 0 &&
       //   (this.ruleForm = $.parseJSON(fjPublic.getLocalData("ybssItem")));

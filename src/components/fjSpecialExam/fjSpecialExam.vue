@@ -213,7 +213,7 @@
           <el-table-column prop="useTime" label="用时" :key="Math.random()"></el-table-column>
           <el-table-column label="操作" :key="Math.random()">
             <template slot-scope="scope">
-              <span class="ope-txt" @click="goFraction(scope.row.id)">查看</span>
+              <span class="ope-txt" @click="goFraction(1,scope.row.id)">查看</span>
             </template>
           </el-table-column>
         </el-table>
@@ -384,6 +384,7 @@ export default {
         success: function(data) {
           vm.tableDataList = null;
           vm.tableDataList = data.list;
+          url=="/getExamResultList"&&(vm.tableDataList = data);
           vm.total = data.total;
         },
         error: function(err) {}
@@ -411,15 +412,11 @@ export default {
     /**
      * 考试分数查看，编辑，新建
      * @param {*} state 状态0=新增，1=查看，2=编辑
-     */ goFraction(state, items) {
-      let item = items;
-      !item && (item = { id: "" });
+     */ goFraction(state, id) {
       this.$router.push({
         path: "/special-exam-fraction",
-        query: { index: this.activeIndex, state: state, id: item.id }
+        query: {  state: state, id:id }
       });
-      //设置缓存，到编辑回显
-      state != 0 && fjPublic.setLocalData("ybssItem", JSON.stringify(item));
     },
     // 时间格式化
     timeFormatter(row, type) {

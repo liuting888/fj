@@ -83,6 +83,7 @@
                 v-for="(item, index) in ruleForm.list"
                 @mouseover="item.editIcon=true,item.edt==true&&(item.edit=false)"
                 @mouseout="item.editIcon=false,item.edit=true"
+                :key="index"
               >
                 <div class="topic">
                   {{index+1}}.

@@ -82,7 +82,7 @@
                   <el-form-item prop="houseNumber" label="考试日期">
                     <el-date-picker
                       v-bind:disabled="userInfo.state == 1"
-                      v-model="ruleForm.data.instime"
+                      v-model="ruleForm.data.examTime"
                       type="date"
                       placeholder="请选择"
                     ></el-date-picker>
@@ -145,7 +145,7 @@
               <el-button @click="createPaper()" v-if="userInfo.state != 1">重新生成试卷</el-button>
               <el-button
                 type="primary"
-                @click="submitForm('ruleForm')"
+                @click="postRuleForm()"
                 v-if="userInfo.state != 1"
               >保存试卷</el-button>
             </p>
@@ -187,26 +187,37 @@
                     v-for="(item, index) in ruleForm.list"
                     @mouseover="item.editIcon=true"
                     @mouseout="item.editIcon=false"
+                    :key="index"
                   >
                     <div class="topic">
                       {{index+1}}.
-                      <el-input type="text" :disabled="true" v-model="item.title"></el-input>
+                      <el-input type="text" :disabled="true" v-model="item.question"></el-input>
                     </div>
                     <ul>
+                      <el-checkbox-group
+                        v-model="item.rightOptions"
+                        :min="item.rightOptions.length"
+                        :max="item.rightOptions.length"
+                      >
+                        <el-checkbox label="0" :disabled="(item.rightOptions.indexOf('0')==-1)"></el-checkbox>
+                        <el-checkbox label="1" :disabled="(item.rightOptions.indexOf('1')==-1)"></el-checkbox>
+                        <el-checkbox label="2" :disabled="(item.rightOptions.indexOf('2')==-1)"></el-checkbox>
+                        <el-checkbox label="3" :disabled="(item.rightOptions.indexOf('3')==-1)"></el-checkbox>
+                      </el-checkbox-group>
                       <li>
-                        <el-radio :disabled="!(item.daan==1)" v-model="item.daan" label="1"></el-radio>A:
+                        A:
                         <el-input :disabled="true" type="text" v-model="item.A"></el-input>
                       </li>
                       <li>
-                        <el-radio v-model="item.daan" :disabled="!(item.daan==2)" label="2"></el-radio>B:
+                        B:
                         <el-input type="text" :disabled="true" v-model="item.B"></el-input>
                       </li>
                       <li>
-                        <el-radio v-model="item.daan" :disabled="!(item.daan==3)" label="3"></el-radio>C:
+                        C:
                         <el-input type="text" :disabled="true" v-model="item.C"></el-input>
                       </li>
                       <li>
-                        <el-radio v-model="item.daan" :disabled="!(item.daan==4)" label="4"></el-radio>D:
+                        D:
                         <el-input type="text" :disabled="true" v-model="item.D"></el-input>
                       </li>
                       <div class="right-revise" v-if="item.editIcon&&userInfo.state != 1">
@@ -223,7 +234,7 @@
     </div>
     <!-- 适用人员弹出框 -->
     <el-dialog
-      :title="信息采集表"
+      title="信息采集表"
       :visible.sync="checkDialogVisible"
       :append-to-body="true"
       :close-on-click-modal="false"
@@ -323,34 +334,47 @@ export default {
       isTitleDisabled: true,
       ruleForm: {
         data: {
-          title: "这里是题库的标题",
-          score: 100,
-          time: 30,
-          examType: 30,
-          type: 30,
-          people: 30,
-          instime: 30,
-          amount: 10,
+          // title: "这里是题库的标题",
+          // score: 100,
+          // time: 30,
+          // examType: 30,
+          // type: 30,
+          // people: 30,
+          // instime: 30,
+          // amount: 10,
+          // id: "",
+          // type: []
           id: "",
-          type: []
+          title: "这里是题库的标题",
+          type: [],
+          score: "10",
+          time: "60",
+          people: "适合人群",
+          // state:状态，0启用，1停用，-1删除，默认1
+          examList: "题目id集合，用逗号隔开",
+          selectRules: "选题规则",
+          place: "考试地点",
+          content: "内容",
+          examType: "考试类型",
+          examTime: "2019-01-01"
         },
         list: [
           {
-            title: "题目1",
+            question: "题目1",
             A: "hahaA",
             B: "hahaB",
             C: "hahaC",
             D: "hahaD",
-            daan: "1",
+            rightOptions: ["2"],
             editIcon: false //用来判断是否展示侧边栏图标
           },
           {
-            title: "题目2",
+            question: "题目2",
             A: "hahaA2",
             B: "hahaB2",
             C: "hahaC2",
             D: "hahaD2",
-            daan: "2",
+            rightOptions: ["1"],
             editIcon: false //用来判断是否展示侧边栏图标
           }
         ]
@@ -456,47 +480,107 @@ export default {
         success: function(data) {
           console.log(data);
           vm.ruleForm.data = data.data;
-          // for (let i = 0; i < data.list.length; i++) {
-          //   let tm = {
-          //     id: data.list[i].id,
-          //     question: data.list[i].question,
-          //     A: data.list[i].options.split("&GXCF&")[0],
-          //     B: data.list[i].options.split("&GXCF&")[1],
-          //     C: data.list[i].options.split("&GXCF&")[2],
-          //     D: data.list[i].options.split("&GXCF&")[3],
-          //     rightOptions: data.list[i].rightOptions.split("|"),
-          //     edit: true, //用来判断是否可以编辑
-          //     edt: false, //用来判断是否点击修改图标
-          //     editIcon: false //用来判断是否展示侧边栏图标
-          //   };
-          //   vm.ruleForm.list.unshift(tm);
-          // }
+          for (let i = 0; i < data.list.length; i++) {
+            let tm = {
+              id: data.list[i].id,
+              question: data.list[i].question,
+              A: data.list[i].options.split("&GXCF&")[0],
+              B: data.list[i].options.split("&GXCF&")[1],
+              C: data.list[i].options.split("&GXCF&")[2],
+              D: data.list[i].options.split("&GXCF&")[3],
+              rightOptions: data.list[i].rightOptions.split("|"),
+              editIcon: false //用来判断是否展示侧边栏图标
+            };
+            vm.ruleForm.list.unshift(tm);
+          }
         },
         error: function(err) {}
       });
     },
+    // 搜索题库
+    searchAttendHistory: function() {
+      var defer = $.Deferred();
+      var vm = this;
+      console.log(555);
+      // return new Promise((resolve, reject) => {
+      // $.ajax({
+      //   url: fjPublic.ajaxUrlDNN + "/addExamPaper",
+      //   type: "POST",
+      //   data: VM.examTime.data,
+      //   dataType: "json",
+      //   success: function(data) {
+      //     // vm.ruleForm.data.id = data.id;
+      //     // resolve(data);
+      //   },
+      //   error: function(err) {}
+      // });
+      // });
+    },
+    // // 新增试卷
+    // addExam: function() {
+    //   var defer = $.Deferred();
+    //   var vm = this;
+    //   // return new Promise((resolve, reject) => {
+    //   $.ajax({
+    //     url: fjPublic.ajaxUrlDNN + "/addExamPaper",
+    //     type: "POST",
+    //     data: VM.examTime.data,
+    //     dataType: "json",
+    //     success: function(data) {
+    //       // vm.ruleForm.data.id = data.id;
+    //       // resolve(data);
+    //     },
+    //     error: function(err) {}
+    //   });
+    //   // });
+    // },
+    // // 更新试卷
+    // updExam: function() {
+    //   var defer = $.Deferred();
+    //   var vm = this;
+    //   $.ajax({
+    //     url: fjPublic.ajaxUrlDNN + "/updExamPaper",
+    //     type: "POST",
+    //     data: {
+    //       id: vm.ruleForm.data.id,
+    //       title: vm.ruleForm.data.title,
+    //       type: vm.ruleForm.data.type,
+    //       content: vm.ruleForm.data.content,
+    //       examPeople: vm.ruleForm.data.examPeople
+    //     },
+    //     dataType: "json",
+    //     success: function(data) {
+    //       // console.log(data);
+    //     },
+    //     error: function(err) {}
+    //   });
+    // },
     // 提交或者编辑数据
     postRuleForm: function() {
       let vm = this;
-      let url = vm.userInfo.state == 0 ? "/addInfo" : "/updInfo";
+      let url = vm.userInfo.state == 0 ? "/addExamPaper" : "/updExamPaper";
       if (vm.userInfo.id) {
         vm.ruleForm.data.id = vm.userInfo.id;
       }
+      console.log(123);
+      vm.ruleForm.data.type="单选";
+      vm.ruleForm.data.examList="";
       // vm.ruleForm.data.tableName = vm.activeList[vm.userInfo.index].tableName;
-      vm.ruleForm.data.userId = $.parseJSON(
-        fjPublic.getLocalData("userInfo")
-      ).userId;
+      // vm.ruleForm.data.userId = $.parseJSON(
+      //   fjPublic.getLocalData("userInfo")
+      // ).userId;
       $.ajax({
         url: fjPublic.ajaxUrlDNN + url,
         type: "POST",
-        data: vm.ruleForm,
+        data: vm.ruleForm.data,
         dataType: "json",
         success: function(data) {},
         error: function(err) {
           if (err.responseText == "success") {
-            vm.$router.push({
-              path: "/fjWorkManage-YiBiaoSanShi"
-            });
+            console.log(123);
+            // vm.$router.push({
+            //   path: "/fjWorkManage-YiBiaoSanShi"
+            // });
           } else {
           }
         }
@@ -520,12 +604,12 @@ export default {
         console.log(val, oldval);
         if (val.length > oldval.length) {
           let list = {};
-          list.title = val[val.length - 1];
+          list.question = val[val.length - 1];
           list.A = "66";
           list.B = "66";
           list.C = "66";
           list.D = "66";
-          list.daan = "2";
+          list.rightOptions = ["2"];
           list.editIcon = false;
           this.ruleForm.list.unshift(list);
         } else {
@@ -632,6 +716,21 @@ export default {
       .body {
         .check-topic {
           position: relative;
+          .el-checkbox-group {
+            position: absolute;
+            margin-top: -16px;
+            width: 20px;
+            .el-checkbox {
+              margin-top: 24px;
+              margin-left: 0;
+            }
+            .el-checkbox__label {
+              display: none;
+            }
+          }
+          .el-checkbox__input.is-disabled .el-checkbox__inner {
+            cursor: auto;
+          }
           .right-revise {
             width: 60px;
             height: 100%;
@@ -670,7 +769,7 @@ export default {
             }
           }
           li {
-            margin: 10px 0;
+            margin: 10px 20px;
             .el-input {
               width: 480px;
             }
