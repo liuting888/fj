@@ -39,7 +39,6 @@
                         <div class="item fj-fl">
                             <el-button class="fj-fl" type="primary" @click="getRulesDataByNR"><i class="el-icon-search"></i><span>查询</span></el-button>
                             <el-button class="fj-fl" type="primary" @click="addRules"><i class="el-icon-circle-plus"></i><span>添加规则</span></el-button>
-                          <el-button class="fj-fl" :hidden="tabName == '0'" type="primary" @click="confirmCopyRules"><i class="el-icon-refresh"></i><span>同步当月考核规则</span></el-button>
                         </div>
                     </li>
                 </ul>
@@ -303,49 +302,49 @@ export default {
         next(function(vm){});
     },
     methods:{
-      confirmCopyRules: function(){
-        var vm = this;
-        this.$confirm('此操作将同步当月考核规则, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          fjPublic.openLoad('提交中...');
-        $.Deferred(function(defer){
-          $.ajax({
-            url:fjPublic.ajaxUrlDNN + '/copyAppraiseRules',
-            type:'POST',
-            data:{
-              // nowUser:$.cookie(fjPublic.loginCookieKey),
-              // id:info.id,
-              // status: '1'
-            },
-            dataType:'json',
-            success:function(data){
-              //console.log(data);
-              if(data.errorCode==0){
-                defer.resolve();
-              }else{
-                fjPublic.closeLoad();
-                vm.$message({type:'warning',message:data.errorMsg});
-              }
-            },
-            error:function(err){
-              defer.reject();
-            }
-          });
-        }).promise().then(function(){
-          fjPublic.closeLoad();
-          vm.$message({type:'success',message:'操作成功！'});
-          //
-          vm.cancelRulesPop();
-          vm.getRulesDataByArgs() //刷新列表
-        },function(){
-          fjPublic.closeLoad();
-          vm.$message({type:'warning',message:'操作失败！'});
-        });
-      }).catch(()=>{});
-      },
+      // confirmCopyRules: function(){
+      //   var vm = this;
+      //   this.$confirm('此操作将同步当月考核规则, 是否继续?', '提示', {
+      //     confirmButtonText: '确定',
+      //     cancelButtonText: '取消',
+      //     type: 'warning'
+      //   }).then(() => {
+      //     fjPublic.openLoad('提交中...');
+      //   $.Deferred(function(defer){
+      //     $.ajax({
+      //       url:fjPublic.ajaxUrlDNN + '/copyAppraiseRules',
+      //       type:'POST',
+      //       data:{
+      //         nowUser:$.cookie(fjPublic.loginCookieKey)
+      //         // id:info.id,
+      //         // status: '1'
+      //       },
+      //       dataType:'json',
+      //       success:function(data){
+      //         //console.log(data);
+      //         if(data.errorCode==0){
+      //           defer.resolve();
+      //         }else{
+      //           fjPublic.closeLoad();
+      //           vm.$message({type:'warning',message:data.errorMsg});
+      //         }
+      //       },
+      //       error:function(err){
+      //         defer.reject();
+      //       }
+      //     });
+      //   }).promise().then(function(){
+      //     fjPublic.closeLoad();
+      //     vm.$message({type:'success',message:'操作成功！'});
+      //     //
+      //     vm.cancelRulesPop();
+      //     vm.getRulesDataByArgs() //刷新列表
+      //   },function(){
+      //     fjPublic.closeLoad();
+      //     vm.$message({type:'warning',message:'操作失败！'});
+      //   });
+      // }).catch(()=>{});
+      // },
         deleteRules:function(info){
             var vm = this;
             this.$confirm('此操作将删除该条考核规则, 是否继续?', '提示', {

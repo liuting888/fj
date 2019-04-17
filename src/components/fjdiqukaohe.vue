@@ -48,7 +48,7 @@
               <el-button plain @click="allEdit" :class="{'is-disabled':!isCurMonth}">批量操作</el-button>
               <!--<el-button plain @click="getALog">记录查询</el-button>-->
               <el-button plain @click="exportData">导出</el-button>
-              <form name="formExcle" class="fj-fu" :action="ajaxUrlDNN+'/exportPoliceStationAppraiseList?supDeptId='+supDeptId+'&month='+selectedRTmonthVal+'&page='+currentPage+'&deptName='+deptName+'&rows='+pageSize"
+              <form name="formExcle" class="fj-fu" :action="ajaxUrlDNN+'/exportDeptReportList?supDeptId='+supDeptId+'&month='+selectedRTmonthVal+'&page='+currentPage+'&deptName='+deptName+'&rows='+pageSize+'&type=2'"
                 method="post" enctype="multipart/form-data">
               </form>
             </div>

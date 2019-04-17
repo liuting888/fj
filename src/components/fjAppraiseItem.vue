@@ -50,7 +50,7 @@
             </el-form-item>
             <el-form-item>
               <el-button @click="openDialog(null)">添加</el-button>
-              <el-button @click="copyAppraiseItems">同步当月考核项</el-button>
+              <el-button @click="copyAppraiseItems">同步当月考核项及规则</el-button>
             </el-form-item>
           </el-col>
         </el-form>
@@ -247,27 +247,41 @@ export default {
       return defer;
     },
     copyAppraiseItems: function() {
-      var defer = $.Deferred();
       var vm = this;
-      $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/copyAppraiseItems",
-        type: "POST",
-        data: {
-          type: vm.tabName
-        },
-        dataType: "json",
-        success: function(data) {
-          if(data.errorCode == 0) {
-            vm.getAppraiseItems(vm.tabName);
-          }
-          vm.$message({type: 'warning', message: data.errorMsg});
-          defer.resolve();
-        },
-        error: function(err) {
-          defer.reject();
-        }
-      });
-      return defer;
+      this.$confirm('此操作将同步当月考核项及规则, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          fjPublic.openLoad('提交中...');
+        $.Deferred(function(defer){
+          $.ajax({
+            url: fjPublic.ajaxUrlDNN + "/copyAppraiseItems",
+            type: "POST",
+            data: {
+              type: vm.tabName
+            },
+            dataType: "json",
+            success: function(data) {
+              if(data.errorCode == 0) {
+                vm.getAppraiseItems(vm.tabName);
+              }
+              vm.$message({type: 'warning', message: data.errorMsg});
+              defer.resolve();
+            },
+            error: function(err) {
+              defer.reject();
+            }
+          });
+        }).promise().then(function(){
+          fjPublic.closeLoad();
+          vm.$message({type:'success',message:'操作成功！'});
+          vm.getAppraiseItems(vm.tabName);
+        },function(){
+          fjPublic.closeLoad();
+          vm.$message({type:'warning',message:'操作失败！'});
+        });
+      }).catch(()=>{});
     },
     handleClick(tab) {
       this.tabName = tab.name;

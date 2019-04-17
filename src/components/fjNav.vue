@@ -530,6 +530,19 @@ export default {
             }
           ]
         },
+        // {
+        //   title: '人事管理',
+        //   own: '',
+        //   src: 'static/images/fj-sider-icon_jpgl.png',
+        //   selectSrc: 'static/images/fj-sider-icon_jpgl1.png',
+        //   arrowSrc: 'static/images/fj-sider-arrow.png',
+        //   arrowSelectedSrc: 'static/images/fj-sider-arrow1.png',
+        //   children: [{
+        //     title: '招聘管理',
+        //     route: '/personnel-recruit'
+        //   }
+        //   ]
+        // },
         {
           title: "人事管理",
           own: "",
@@ -596,6 +609,7 @@ export default {
           this.navData.splice(5, 2);
           this.navData[3].children.splice(0, 1); //去掉考核管理->单位考核
           this.navData[5].children.splice(1, 1); //去掉考核管理->单位考核
+          this.navData.splice(4, 1); //去掉数据中心
           return this.navData;
         },
         [fjPublic.userRoles.sj]: function() {

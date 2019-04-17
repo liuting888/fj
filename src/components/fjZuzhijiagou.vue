@@ -51,7 +51,7 @@
                         <div class="tree-item-info" slot-scope="{node,data}">
                             <span v-text="data.label" v-if="data.label.length<=10"></span>
                             <el-tooltip v-else class="item" effect="dark" :content="data.label" placement="top">
-                                <span v-text="data.label"></span> 
+                                <span v-text="data.label"></span>
                             </el-tooltip>
                             <div class="icon-box" v-if="userInfo.userRole==userRoleCg||userInfo.userRole==userRoleSj">
                                 <i class="el-icon-circle-plus" v-if="data.id.substr(6,6)=='000000'" @click.stop="addDept(data)"></i>
@@ -72,6 +72,7 @@
                     <div class="depts-btn-area" :style="[userInfo.userRole==userRolePcs?{'margin-bottom':'20px'}:'']">
                         <el-button type="primary" @click.stop="addUser">添加人员</el-button>
                         <el-button type="default" plain @click="setBatchTransfer" v-show="userInfo.userRole!=userRolePcs"><!-- <i class="el-icon-edit"></i> --><span>批量调动</span></el-button>
+                      <el-button type="default" plain @click="setBatchTransferSuper" v-show="userInfo.userRole!=userRolePcs"><!-- <i class="el-icon-edit"></i> --><span>批量上级</span></el-button>
                         <!-- <el-button type="default" plain icon="el-icon-refresh">刷新</el-button> -->
                     </div>
                     <div class="depts-select-info" v-show="userInfo.userRole!=userRolePcs">
@@ -357,6 +358,24 @@
                 <el-button type="primary" @click="confirmBatchTransfer">确 定</el-button>
             </div>
         </el-dialog>
+      <!-- 批量调动 -->
+      <el-dialog
+        :visible.sync="toggleBatchTransferPopSuper"
+        title="批量上级"
+        :modal-append-to-body = "toggleUserPopModal"
+        :close-on-click-modal="toggleUserPopModal"
+        @close="cancelBatchTransferSuper"
+      >
+        <div class="fj-block">
+          <el-select v-model="superUserId" clearable >
+            <el-option v-for="item in superUsers" :key="item.id" :label="item.label" :value="item.id"></el-option>
+          </el-select>
+        </div>
+        <div slot="footer" style="text-align:center;" >
+          <el-button @click="cancelBatchTransferSuper">取 消</el-button>
+          <el-button type="primary" @click="confirmBatchTransferSuper">确 定</el-button>
+        </div>
+      </el-dialog>
         <!-- 部门操作 -->
         <el-dialog
         id="DeptPop"
@@ -540,7 +559,7 @@ export default {
         };
         //电话号码
         //var telRegExp=/^((1[3|5|7|8][0-9])\d{8})|((0[1-9][0-9])\d{8})|((0[1-9][0-9])\d{7})|((0[1-9][0-9][0-9])\d{7})$/;
-        var telRegExp = /^1(3|4|5|7|8)\d{9}$/;
+        var telRegExp = /^1(3|4|5|6|7|8|9)\d{9}$/;
         var validateTel = function(rule,value,callback){
             var telBool = telRegExp.test(value);
             if(!telBool){
@@ -970,6 +989,11 @@ export default {
             //人员表格批量操作
             selectedLines:0,  //选择了多少个
             selectedUsers:null, //选中的人员信息
+          //批量上级
+          toggleBatchTransferPopSuper:false,
+          superUserId: '',
+          userIds: '',
+          superUsers:[],
             //批量调动弹层
             toggleBatchTransferPop:false,
             BTpcsDeptData:null, //批量调动的派出所数据
@@ -2203,7 +2227,7 @@ export default {
             },this);
             if(!this.deptId||!this.deptName)return;
             if(!superiorUserNameObj){
-                this.$message({type:'warning',message:'当前设置的上级不能对应所选的角色，请更换上级！'});
+                this.$message({type:'warning',message:'修改用户角色或部门需要重新选择上级！'});
                 return;
             }
             var superiorUserName = superiorUserNameObj.label;
@@ -2574,7 +2598,132 @@ export default {
                 vm.deptId = tmpDeptId;
                 fjPublic.removeModalMask();
             });
+        },
+        setBatchTransferSuper:function(){ //批量上级
+          if(!this.selectedUsers||!this.selectedUsers.length){
+            this.$message({type:'warning',message:'请选择要调动的人员！'});
+            return;
+          }
+          var tmpObj = _.find(this.selectedUsers,function(item){
+            return item.userRole==this.userInfo.userRole&&item.userId!=this.userInfo.userId;
+          },this);
+          if(tmpObj){
+            this.$message({type:'warning',message:'所选的人员中，存在与您权限相同的，不能对其进行操作！'});
+            return;
+          }
+          var userRole = this.selectedUsers[0].userRole;
+          var tmpObj1 = _.find(this.selectedUsers,function(item){
+            return item.userRole!=userRole;
+          },this);
+          if(tmpObj1){
+            this.$message({type:'warning',message:'所选的人员权限不一致，不能对其进行操作！'});
+            return;
+          }
+          var deptId = this.selectedUsers[0].deptId;
+          // 辅警角色只能操作同一部门辅警
+          if(userRole == '1000') {
+            var tmpObj2 = _.find(this.selectedUsers,function(item){
+              return item.deptId!=deptId;
+            },this);
+            if(tmpObj2){
+              this.$message({type:'warning',message:'所选的辅警人员不是同一个部门，不能对其进行操作！'});
+              return;
+            }
+          }
+          // 查询上级列表
+          this.getSuperUsers(deptId, userRole);
+          this.toggleBatchTransferPopSuper = true;
+          fjPublic.wrapperAddScroll();
+        },
+      cancelBatchTransferSuper:function(){ //批量上级
+        this.superUserId = '';  //清空id
+        this.toggleBatchTransferPopSuper = false;
+        fjPublic.wrapperRemoveScroll();
+      },
+      confirmBatchTransferSuper:function(){ //确认批量上级
+        if(!this.superUserId) {
+          this.$message({type:'warning',message:'请选择上级人员！'});
+          return;
         }
+        var ids = [];
+        this.selectedUsers.forEach(el => {
+          ids.push(el.userId);
+      });
+        this.userIds = ids.join(",");
+        var vm = this;
+        this.$confirm('此操作将进行上级更新，是否提交？','提示',{
+          type:'warning',
+          confirmButtonText:'提交',
+          cancelButtonText:'取消'
+        }).then(()=>{
+          fjPublic.removeModalMask();
+              $.ajax({
+                url:fjPublic.ajaxUrlDNN + '/updateSuperior',
+                type:'POST',
+                data:{
+                  "superId":vm.superUserId, //当前用户信息
+                  "ids":vm.userIds, //警号
+                },
+                dataType:'json',
+                success:function(data){
+                  if (data.errorCode == 0) {
+                    vm.$message.success({
+                      message: data.errorMsg
+                    });
+                    vm.toggleBatchTransferPopSuper = false;
+                    //刷新人员列表
+                    $.when(vm.getUsersByDept()).then(function(){
+                      vm.cancelUserPop();
+                    },function(){
+                      vm.$message({type:'warning',message:'列表更新失败！'});
+                    });
+                  } else {
+                    vm.$message.error({
+                      message: data.errorMsg
+                    });
+                  }
+                },
+                error:function(err){
+                  vm.$message.error({
+                    message: '操作失败！'
+                  });
+                }
+              })
+      }).catch(()=>{
+        fjPublic.removeModalMask();
+      });
+      },
+      // 查询批量上级列表
+      getSuperUsers: function(deptId, userRole) {
+          var vm = this;
+        $.ajax({
+          url:fjPublic.ajaxUrlDNN + '/getSuperiorList',
+          type:'POST',
+          data:{
+            userRole:userRole, //所选择的角色编号
+            deptId:deptId    //部门编号
+          },
+          dataType:'json',
+          success:function(data){
+            console.log(data);
+            if($.isArray(data)&&data.length){
+              vm.superUsers.splice(0,vm.superUsers.length);
+              vm.superUsers = null;
+              vm.superUsers = data;
+              vm.resizeELinputHeight();
+            }else{
+              vm.superUsers.splice(0,this.superUsers.length);
+              vm.$message({type:'warning',message:'暂无所选部门或角色对应的上级信息！'});
+            }
+            //
+            vm.tmpDeptIdOfSU = vm.deptIdOfSU;
+          },
+          error:function(err){
+            vm.superUsers.splice(0,this.superiorUserData.length);
+            vm.$message({type:'warning',message:'暂无所选部门或角色对应的上级信息！'});
+          }
+        });
+      }
     },
     filter:{
     },

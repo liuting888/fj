@@ -149,6 +149,16 @@ export default new Router({
             name: 'personnel-locus',
             component: resolve => require(['@/components/fjPersonnelLocus'], resolve)
         },
+        { //人事管理 -> 招聘管理
+            path: '/personnel-recruit',
+            name: 'personnel-recruit',
+            component: resolve => require(['@/components/fjPersonnel-Recruit'], resolve)
+        },
+        { //人事管理 -> 招聘管理 -> 招聘详情
+            path: '/recruit-detail',
+            name: 'recruit-detail',
+            component: resolve => require(['@/components/fjRecruit-detail'], resolve)
+        },
         { //403
             path: '/403',
             name: '403',
@@ -202,7 +212,8 @@ export default new Router({
         }, { //人事管理 ->招聘管理->详情
             path: '/personnel-recruitment-detail',
             name: 'personnel-recruitment-detail',
-            component: resolve => require(['@/components/fjPersonnel/fjRecruitment-detail'], resolve)
+            component: resolve => require(['@/components/fjPersonnel/fjRecruitment-detail'], resolve),
+            meta: { noKeepAlive: true }
         }, { //人事管理 ->合同管理
             path: '/personnel-contract',
             name: 'personnel-contract',

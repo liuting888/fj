@@ -68,7 +68,14 @@
                   </el-input>
                   <div class="search-btn">
                     <el-button type="primary" @click="searchAttendLeave">导入</el-button>
-                    <el-button @click="searchAttendLeave">导出</el-button>
+                    <form
+                      style="display:none;"
+                      name="exportForm"
+                      :action="ajaxUrlDNN + '/exportRecruits?nowUser=' + nowUser + '&endTime=' + searchForm.endTime + '&deptId=' + searchForm.deptId + '&startTime=' + searchForm.startTime + '&page=' + currentPage + '&nameOrPhone=' + searchForm.nameOrPhone + '&rows=' + pageSize"
+                      method="post"
+                      enctype="multipart/form-data"
+                    ></form>
+                    <el-button @click="exportExcl">导出</el-button>
                   </div>
                 </el-form-item>
               </el-col>
@@ -154,127 +161,127 @@
             <el-form-item label="入职时间">
               <el-input
                 v-model="ruleForm.road"
-                :disabled="userInfo.state == 1"
-                :placeholder="userInfo.state == 1?'':'请输入'"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="基本工资">
               <el-input
                 v-model="ruleForm.road"
-                :disabled="userInfo.state == 1"
-                :placeholder="userInfo.state == 1?'':'请输入'"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="绩效工资">
               <el-input
                 v-model="ruleForm.road"
-                :disabled="userInfo.state == 1"
-                :placeholder="userInfo.state == 1?'':'请输入'"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="层级工资">
               <el-input
                 v-model="ruleForm.road"
-                :disabled="userInfo.state == 1"
-                :placeholder="userInfo.state == 1?'':'请输入'"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="岗位工资">
               <el-input
                 v-model="ruleForm.road"
-                :disabled="userInfo.state == 1"
-                :placeholder="userInfo.state == 1?'':'请输入'"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="生活补贴">
               <el-input
                 v-model="ruleForm.road"
-                :disabled="userInfo.state == 1"
-                :placeholder="userInfo.state == 1?'':'请输入'"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="信息采集费">
               <el-input
                 v-model="ruleForm.road"
-                :disabled="userInfo.state == 1"
-                :placeholder="userInfo.state == 1?'':'请输入'"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="流量补助费">
               <el-input
                 v-model="ruleForm.road"
-                :disabled="userInfo.state == 1"
-                :placeholder="userInfo.state == 1?'':'请输入'"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="其他">
               <el-input
                 v-model="ruleForm.road"
-                :disabled="userInfo.state == 1"
-                :placeholder="userInfo.state == 1?'':'请输入'"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="应发合计">
               <el-input
                 v-model="ruleForm.road"
-                :disabled="userInfo.state == 1"
-                :placeholder="userInfo.state == 1?'':'请输入'"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="养老保险">
               <el-input
                 v-model="ruleForm.road"
-                :disabled="userInfo.state == 1"
-                :placeholder="userInfo.state == 1?'':'请输入'"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="医疗保险">
               <el-input
                 v-model="ruleForm.road"
-                :disabled="userInfo.state == 1"
-                :placeholder="userInfo.state == 1?'':'请输入'"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="失业保险">
               <el-input
                 v-model="ruleForm.road"
-                :disabled="userInfo.state == 1"
-                :placeholder="userInfo.state == 1?'':'请输入'"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="工商保险">
               <el-input
                 v-model="ruleForm.road"
-                :disabled="userInfo.state == 1"
-                :placeholder="userInfo.state == 1?'':'请输入'"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="生育保险">
               <el-input
                 v-model="ruleForm.road"
-                :disabled="userInfo.state == 1"
-                :placeholder="userInfo.state == 1?'':'请输入'"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="大病互助保险">
               <el-input
                 v-model="ruleForm.road"
-                :disabled="userInfo.state == 1"
-                :placeholder="userInfo.state == 1?'':'请输入'"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="扣发合计">
               <el-input
                 v-model="ruleForm.road"
-                :disabled="userInfo.state == 1"
-                :placeholder="userInfo.state == 1?'':'请输入'"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="实发合计">
               <el-input
                 v-model="ruleForm.road"
-                :disabled="userInfo.state == 1"
-                :placeholder="userInfo.state == 1?'':'请输入'"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
           </el-form>
@@ -354,6 +361,7 @@ export default {
       total: 0,
       editDialogVisible: false,
       checkDialogTitle: "",
+      isDisabled: false,//是否可以编辑
       //审核人参数
       checkInfoForm: {
         userName: "", //提交辅警姓名
@@ -367,7 +375,7 @@ export default {
       //审核人参数
       ruleForm: {
         status: ""
-      },
+      }
       // 审核参数
       // checkForm: {
       //   tableName: "", //表格类型
@@ -424,6 +432,10 @@ export default {
       this.currentPage = 1;
       this.pageSize = pageSize;
       this.searchUserLeave();
+    },
+    exportExcl: function() {
+      // 导出
+      document.forms["exportForm"].submit();
     },
     // 初始化分局
     initSupDeptIds: function() {
@@ -526,11 +538,14 @@ export default {
     },
     // 打开工资列表详情页
     openDetail: function(id, status) {
-      console.log(123);
+      // console.log(123);
+      this.editDialogVisible = true;
+      this.isDisabled = true;
     },
     // 打开工资编辑弹框
     editDialog: function(id, status) {
       this.editDialogVisible = true;
+      this.isDisabled = false;
     },
     // 时间格式化
     timeFormatter(row, type) {
@@ -643,6 +658,11 @@ export default {
       }
       .el-form-item:last-child {
         border-bottom: 1px solid #e8e8e8;
+      }
+      .is-disabled{
+        input{
+          cursor: auto;
+        }
       }
     }
   }

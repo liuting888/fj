@@ -1,5 +1,5 @@
 <template>
-  <div class="fj-content_view Exam-Manage">
+  <div class="fj-content_view Exam-Fraction">
     <div class="fj-content_view_mask">
       <div class="fj-block title">
         <fj-breadNav :bread-data="breadData"></fj-breadNav>
@@ -103,7 +103,7 @@
 <script>
 import fjBreadNav from "@/components/fjBreadNav";
 export default {
-  name: "fjSpecial-Exam-Manage",
+  name: "fjSpecial-Exam-Fraction",
   data() {
     return {
       breadData: [
@@ -245,180 +245,101 @@ export default {
 };
 </script>
 <style scope lang="less">
-.foot-body {
-  padding: 10px 0;
-  .el-container {
-    width: 100%;
-    .aside-left {
-      margin-left: 200px;
-    }
-    .el-main {
-      .head {
-        width: 100%;
-        height: 40px;
-        margin-top: -20px;
-        padding-left: 16px;
-        line-height: 40px;
-        background: rgba(230, 247, 255, 1);
-        border: 1px solid rgba(186, 231, 255, 1);
-        opacity: 1;
+.Exam-Fraction {
+  .foot-body {
+    padding: 10px 0;
+    .el-container {
+      width: 100%;
+      .aside-left {
+        margin-left: 200px;
       }
-      .body {
-        .check-topic {
-          position: relative;
-          .topic {
-            margin: 15px 0;
-          }
-          li {
-            margin: 18px 0;
-            font-size: 14px;
-            font-weight: 400;
-            color: rgba(0, 0, 0, 0.85);
-            i {
-              margin-right: 6px;
+      .el-main {
+        .head {
+          width: 100%;
+          height: 40px;
+          margin-top: -20px;
+          padding-left: 16px;
+          line-height: 40px;
+          background: rgba(230, 247, 255, 1);
+          border: 1px solid rgba(186, 231, 255, 1);
+          opacity: 1;
+        }
+        .body {
+          .check-topic {
+            position: relative;
+            .topic {
+              margin: 15px 0;
             }
-            .el-icon-success {
-              color: #1f93ff;
-            }
-            .el-icon-error {
-              color: #d54c4c;
-            }
-            .el-icon-info {
-              color: #fff;
-              border: 1px solid #ccc;
-              border-radius: 50%;
+            li {
+              margin: 18px 0;
+              font-size: 14px;
+              font-weight: 400;
+              color: rgba(0, 0, 0, 0.85);
+              i {
+                margin-right: 6px;
+              }
+              .el-icon-success {
+                color: #1f93ff;
+              }
+              .el-icon-error {
+                color: #d54c4c;
+              }
+              .el-icon-info {
+                color: #fff;
+                border: 1px solid #ccc;
+                border-radius: 50%;
+              }
             }
           }
         }
       }
     }
   }
-}
-.Exam-Manage-form-area {
-  margin-top: 10px;
-  p {
-    margin-left: 18px;
-    font-weight: 500;
-    color: rgba(0, 0, 0, 0.85);
+  .Exam-Fraction-form-area {
+    margin-top: 10px;
+    p {
+      margin-left: 18px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.85);
+    }
+    .el-form {
+      .el-form-item {
+        position: relative;
+        height: 44px;
+        line-height: 44px;
+        margin-bottom: 0;
+        border-bottom: 1px solid #e8e8e8;
+        border-right: 1px solid #e8e8e8;
+        .el-form-item__label,
+        .el-form-item__content {
+          line-height: 44px;
+        }
+        label {
+          position: absolute;
+          width: 200px;
+          text-align: left;
+          padding-right: 0;
+          padding-left: 20px;
+          border-right: 1px solid #e8e8e8;
+          color: rgba(0, 0, 0, 0.65);
+        }
+        .el-form-item__content {
+          padding-left: 200px;
+        }
+      }
+      .el-row:nth-child(1) {
+        border-top: 1px solid #e8e8e8;
+      }
+      .el-row {
+        .el-col:nth-child(1) {
+          border-left: 1px solid #e8e8e8;
+        }
+      }
+    }
   }
-  .el-input.is-disabled .el-input__inner {
-    cursor: auto;
-    background-color: #fff;
-  }
 }
-.fj-content_view.Exam-Manage {
-  background: #fff;
-}
-.fj-content_view_mask {
-  background: #f0f2f5;
-}
-.fj-content_view.Exam-Manage .Exam-Manage-form-area.x-scroll {
-  overflow-x: scroll;
-}
-.fj-content_view.Exam-Manage .Exam-Manage-form-area > .el-form {
-  margin-bottom: 15px;
-}
-.fj-content_view.Exam-Manage .el-form {
-  border: 1px solid #e8e8e8;
-}
-.fj-content_view.Exam-Manage .el-form.has-table {
-  border: none;
-}
-.fj-content_view.Exam-Manage .el-form .el-form-item {
-  margin-bottom: 0px;
-  border-right: 1px solid #e8e8e8;
-  border-bottom: 1px solid #e8e8e8;
-}
-.fj-content_view.Exam-Manage .el-form .el-form-item.noBR {
-  border-right: none;
-}
-.fj-content_view.Exam-Manage .el-form .el-form-item.noBB {
-  border-bottom: none;
-}
-/* 表单->表格调整 */
-.Exam-Manage-form-area .el-table th {
-  text-align: left;
-  color: rgba(0, 0, 0, 0.65);
-}
-.Exam-Manage-form-area
-  .el-table--enable-row-hover
-  .el-table__body
-  tr:hover
-  > td {
-  background-color: transparent;
-}
-.Exam-Manage-form-area .el-table td {
-  padding: 6px 0px;
-}
-.Exam-Manage-form-area .el-table td .el-input {
-  width: 100%;
-}
-.Exam-Manage-form-area .el-table td .el-input .el-input__inner {
-  padding: 0px 4px;
-  border: none;
-  color: rgba(0, 0, 0, 0.65);
-}
-.Exam-Manage-form-area .el-table td .el-textarea .el-textarea__inner {
-  border: none;
-  padding: 0px;
-}
-/*  */
-.fj-content_view.Exam-Manage .el-form .el-form-item__label {
-  min-width: 160px;
-  padding: 0px 0px 0px 20px;
-  line-height: 44px;
-  background-color: #fafafa;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  border-right: 1px solid #e8e8e8;
-  text-align: left;
-}
-.fj-content_view.Exam-Manage .el-form .el-form-item__content {
-  padding-left: 160px;
-  line-height: 44px;
-}
-.fj-content_view.Exam-Manage .el-form .el-form-item.NPL .el-form-item__content {
-  padding-left: 0px;
-}
-/* el-form样式修改 */
-.fj-content_view.Exam-Manage .el-form.no-title .el-form-item__label,
-.fj-content_view.Exam-Manage .el-form.no-content .el-form-item__content {
-  display: none;
-}
-.fj-content_view.Exam-Manage .el-form.no-title .el-form-item__label,
-.fj-content_view.Exam-Manage .el-form.no-content .el-form-item__label {
-  border-right: none;
-}
-.fj-content_view.Exam-Manage .el-form.no-content .el-form-item__label {
-  float: none;
-  display: block;
-}
-.fj-content_view.Exam-Manage .el-form.no-content + .el-form.no-title {
-  border-left: none;
-}
-.fj-content_view.Exam-Manage .el-form[class*="no"] {
-  float: left;
-}
-.fj-content_view.Exam-Manage .el-form.no-title .el-form-item__content {
-  padding-left: 0px;
-}
-.fj-content_view.Exam-Manage .el-form.no-content .el-form-item__label,
-.fj-content_view.Exam-Manage .el-form.no-title .el-form-item__content {
-  position: relative;
-  min-width: 160px;
-}
-.fj-content_view.Exam-Manage
-  .el-form.no-title
-  .el-form-item__content
-  .el-input.is-disabled
-  .el-input__inner {
-  background-color: #fafafa;
-  color: rgba(0, 0, 0, 0.65);
-}
-
 @media screen and (min-width: 1920px) {
-  /* .fj-content_view.Exam-Manage .el-form .el-form-item__content .el-select {width:60%;} */
+  /* .fj-content_view.Exam-Fraction .el-form .el-form-item__content .el-select {width:60%;} */
 }
 </style>
 

@@ -30,7 +30,7 @@
           <el-date-picker class="fj-fl" v-model="selectedDeptsMonth" value-format='yyyy-MM' @change="selectMonthForListData" type="month"
             placeholder="请选择月份">
           </el-date-picker>
-          <form name="formExcle" class="fj-fu" :action="ajaxUrlDNN+'/exportDeptAppraiseList?month='+selectedDeptsMonth" method="post"
+          <form name="formExcle" class="fj-fu" :action="ajaxUrlDNN+'/exportDeptReportList?month='+selectedDeptsMonth+'&type=1'" method="post"
             enctype="multipart/form-data"></form>
           <el-button plain @click="exportData">导出</el-button>
         </div>

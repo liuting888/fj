@@ -71,11 +71,11 @@ window.FjGrkhDetail.prototype = {
     resultInfoHtml:'<div class="count-state fj-clear">\
         <p class="fj-fl count"><span class="count-name">分值：</span><span class="count-val"></span></p>\
         <p class="fj-fl state"><span class="state-name fj-fl"></span><img class="fj-fl state-icon" src="" alt=""></p>\
-    </div>\
-    <div class="result-info">\
-        <p class="add-user"><span>添加人：</span><span class="name"></span></p>\
     </div>',
-    /* <p><span>审批人：</span><span class="name"></span></p>\
+    /* <div class="result-info">
+        <p class="add-user"><span>添加人：</span><span class="name"></span></p>
+    </div>
+    <p><span>审批人：</span><span class="name"></span></p>\
         <p><span>审批时间：</span><span class="time"></span></p>\
         <p><span>备注：</span><span class="remark"></span></p>\ */
     init:function(listData,vueComp){
@@ -133,7 +133,11 @@ window.FjGrkhDetail.prototype = {
         this.footerResult = this.detailFooter.children('.result');
         //
         this.footerTime.text(this.year+'年'+this.month+'月份');
-        this.footerResult.text(this.userName+'：加分'+this.$vueComp.bonusNum+'次，共计'+this.$vueComp.bonusScore+'分。减分'+this.$vueComp.deductNum+'次，共计'+this.$vueComp.deductScore+'分。');
+        var str = this.userName + '：';
+      $.each(this.$vueComp.details, $.proxy(function(i, item){
+        str += item.itemName + item.num + '条，共计' + item.score + '分；';
+      },this));
+        this.footerResult.text(str);
     },
     clearContent:function(){ //清空信息内容
         this.$vueComp = null;
@@ -278,6 +282,7 @@ window.FjGrkhDetailBlock.prototype={
             //获取元素
         this.titleTime = this.block.find('.time-title > span');   //日期
         this.desc = this.block.find('.desc > span:eq(1)');   //描述
+        this.khItem = this.block.find('.kh-item-desc > span:eq(1)'); //考核标题
         this.countVal = this.block.find('.count-state .count-val');   //加减分的值
         this.stateName = this.block.find('.count-state .state-name'); //状态名
         this.stateIcon = this.block.find('.count-state .state-icon'); //状态图标
@@ -294,6 +299,7 @@ window.FjGrkhDetailBlock.prototype={
         //加数据
         this.titleTime.text(this.infoData.insertTime);
         this.desc.text(this.infoData.regulation);
+        this.khItem.text(this.infoData.itemName);
         this.countVal.text(this.infoData.type==1?'+'+this.infoData.score:'-'+this.infoData.score);
         this.spMan.text(this.infoData.checkUserName);
         this.spTIme.text(this.infoData.checkTime);
@@ -330,7 +336,6 @@ window.FjGrkhDetailBlock.prototype={
             },
             dataType:'json',
             success:function(data){
-                console.log(data);
                 if(data.errorCode==0){
                     defer.resolve(data);
                 }else{
@@ -374,14 +379,12 @@ export default {
                 {status:1,statusName:'通过',state:'done',resultState:'pass'},
                 {status:2,statusName:'拒绝',state:'done',resultState:'refuse'} */
                 {status:0,statusName:'',state:'wait',resultState:''},
-                {status:1,statusName:'已撤销',state:'wait',resultState:'refuse'}
+                {status:1,statusName:'已撤销',state:'wait',resultState:'refuse'},
+              {status:2,statusName:'通过',state:'done',resultState:'pass'}
             ],
             oFjGrkhDetail:null,  //个人考核明细栏
             infoListData:null,  //获取的个人考核明细数据
-            deductScore:'', //减分总分
-            bonusScore:'',  //加分总分
-            deductNum:'',   //减分次数
-            bonusNum:'',     //加分次数
+            details: [],
             selectedKHMonth:fjPublic.date2Month(new Date())  //默认当月
         };
     },
@@ -427,7 +430,6 @@ export default {
         },
         getUserKhinfo:function(){ //获取个人考核明细数据并添加至页面
             $.when(this.requestDatas()).then(_.bind(function(){
-                console.log(this.infoListData);
                 _.each(this.infoListData,function(item){
                     var tmpObj = _.find(this.statusData,function(item2){
                         return item2.status == item.status;
@@ -463,17 +465,17 @@ export default {
 				success:function(data){
                     //console.log(data);
                     if($.isArray(data.list)&&data.list.length){
-                        vm.deductScore = data.deductScore; //减分总分
-                        vm.bonusScore = data.bonusScore;   //加分总分
-                        vm.deductNum = data.deductNum;     //减分次数
-                        vm.bonusNum = data.bonusNum;       //加分次数
+                      vm.details = null;
+                        vm.details = data.details;
                         vm.infoListData = null;
                         vm.infoListData = data.list;
                         defer.resolve();
                     }else{
                         vm.infoListData = null;
                         vm.infoListData = [];
-                        defer.resolve();
+                      vm.details = null;
+                      vm.details = [];
+                      defer.resolve();
                     }
 				},
 				error:function(err){

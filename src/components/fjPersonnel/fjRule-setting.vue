@@ -99,7 +99,7 @@
         </div>-->
         <div class="add-list-btn" v-if="activeIndex==0" @click="addWage()">+ 新增工资规则</div>
         <div class="add-list-btn" v-if="activeIndex==1" @click="addContract('',0)">+ 新增合同规则</div>
-        <el-table :data="attendLeaveData" v-if="activeIndex==0">
+        <el-table :data="tableDataList" v-if="activeIndex==0">
           <el-table-column prop="userAccount" label="规则名称" :key="Math.random()"></el-table-column>
           <el-table-column prop="userAccount" label="适用岗位" :key="Math.random()"></el-table-column>
           <el-table-column prop="userAccount" label="适用单位" :key="Math.random()"></el-table-column>
@@ -140,7 +140,7 @@
             </template>
           </el-table-column>
         </el-table>
-        <el-table :data="attendLeaveData" v-if="activeIndex==1">
+        <el-table :data="tableDataList" v-if="activeIndex==1">
           <el-table-column prop="userId" label="合同名称" :key="Math.random()"></el-table-column>
           <el-table-column prop="userAccount" label="适用单位" :key="Math.random()"></el-table-column>
           <el-table-column prop="userAccount" label="适用岗位" :key="Math.random()"></el-table-column>
@@ -222,7 +222,7 @@
       class="check-dialogs"
     >
       <div class="form-info">
-        <el-form :model="ruleForm" :rules="rules">
+        <el-form :model="ruleForm">
           <el-form-item label="模板名称">
             <el-input v-model="ruleForm.road" placeholder="请输入"></el-input>
           </el-form-item>
@@ -280,7 +280,7 @@
     </el-dialog>
     <!-- 配置工资规则弹出框 -->
     <el-dialog
-      :title="配置工资规则"
+      title="配置工资规则"
       :visible.sync="setWageVisible"
       :append-to-body="true"
       :close-on-click-modal="false"
@@ -289,7 +289,7 @@
       class="check-dialogs"
     >
       <div class="wage-set">
-        <el-form :model="ruleForm" :rules="rules">
+        <el-form :model="ruleForm">
           <el-form-item label="适用岗位：">
             <el-radio v-model="radio" label="1">城区辅警</el-radio>
             <el-radio v-model="radio" label="2">乡镇辅警</el-radio>
@@ -315,7 +315,7 @@
       <div>
         <h3>配置合同规则</h3>
         <div class="wage-set">
-          <el-form :model="ruleForm" :rules="rules">
+          <el-form :model="ruleForm">
             <el-form-item label="适用岗位：">
               <el-radio v-model="radio" label="1">城区辅警</el-radio>
               <el-radio v-model="radio" label="2">乡镇辅警</el-radio>
@@ -343,9 +343,10 @@
 </template>
 <script>
 import fjBreadNav from "@/components/fjBreadNav";
-
+import mixin from "@/scripts/mixin.js";
 export default {
   name: "fjAttendHistory",
+  mixins: [mixin], // 使用mixins
   data: function() {
     return {
       breadData: [
@@ -383,26 +384,7 @@ export default {
         supDeptId: "", // 公安局
         status: "" // 状态
       },
-      // 列表数据
-      attendLeaveData: [
-        // {
-        //   apply_time: "",
-        //   end_time: "",
-        //   leader_content: "",
-        //   leader_name: "",
-        //   leader_time: "",
-        //   leaveId: "",
-        //   leave_reason: "",
-        //   leave_state: "",
-        //   start_time: "",
-        //   userId: "",
-        //   userAccount: ""
-        // }
-      ],
-      // 分页数据
-      currentPage: 1,
-      pageSize: 10,
-      total: 0,
+      searchListUrl: "/searchUserLeave", //获取列表数据URL
       addWageVisible: false,
       setWageVisible: false,
       setContractVisible: false,
@@ -443,7 +425,7 @@ export default {
     // 初始化派出所下拉列表
     this.initSupDeptIds();
     // 初始化请假休假列表
-    this.searchUserLeave();
+    this.searchList();
 
     return;
   },
@@ -464,27 +446,6 @@ export default {
     }
   },
   methods: {
-    currentPageChange: function(pageNum) {
-      // 点击某个分页按钮
-      this.currentPage = pageNum;
-      this.searchUserLeave();
-    },
-    prevPageChange: function(pageNum) {
-      // 点击分页的上一页
-      this.currentPage = pageNum;
-      this.searchUserLeave();
-    },
-    nextPageChange: function(pageNum) {
-      // 点击分页的下一页
-      this.currentPage = pageNum;
-      this.searchUserLeave();
-    },
-    sizePageChange: function(pageSize) {
-      // 改变每页条数时
-      this.currentPage = 1;
-      this.pageSize = pageSize;
-      this.searchUserLeave();
-    },
     //获取被选中的标签 tab 实例
     handleClick(tab) {
       console.log(tab);
@@ -538,61 +499,28 @@ export default {
     // 修改单位下拉框查询
     changeSupDeptId: function(supDeptId) {
       this.searchForm["supDeptId"] = supDeptId;
-      this.searchUserLeave();
+      this.searchList();
     },
     // 修改单位下拉框查询
     changeDeptId: function(deptId) {
       this.searchForm["deptId"] = deptId;
-      this.searchUserLeave();
+      this.searchList();
     },
     // 修改状态下拉框查询
     changeStatus: function(status) {
       this.searchForm["status"] = status;
-      this.searchUserLeave();
+      this.searchList();
     },
     // 标题或负责人名称查询
     searchAttendLeave: function() {
-      this.searchUserLeave();
+      this.searchList();
     },
-    // 修改查询时间
-    changeSearchTime: function(searchTime) {
-      if (searchTime) {
-        this.searchForm["startTime"] = fjPublic.dateFormatYYMMDD(searchTime[0]);
-        this.searchForm["endTime"] = fjPublic.dateFormatYYMMDD(searchTime[1]);
-      } else {
-        this.searchForm["startTime"] = "";
-        this.searchForm["endTime"] = "";
-      }
-      this.searchUserLeave();
-    },
-    // 获取采集列表
-    searchUserLeave: function() {
-      var defer = $.Deferred();
-      var vm = this;
-      // 参数
+    // 设置获取列表参数
+    setSearchList: function() {
       this.searchForm["page"] = this.currentPage;
       this.searchForm["rows"] = this.pageSize;
       // 传入当前用户信息
       this.searchForm["nowUser"] = this.nowUser;
-      $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/searchUserLeave",
-        type: "POST",
-        data: vm.searchForm,
-        dataType: "json",
-        success: function(data) {
-          vm.attendLeaveData = null;
-          vm.attendLeaveData = data.list;
-          vm.total = data.total;
-          _.each(vm.attendLeaveData, function(item, i) {
-            vm.$set(item, "rank", i + 1);
-          });
-          defer.resolve();
-        },
-        error: function(err) {
-          defer.reject();
-        }
-      });
-      return defer;
     },
     // 打开工资配置弹框
     openWageDialog: function(id, status) {

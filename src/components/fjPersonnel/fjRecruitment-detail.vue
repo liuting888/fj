@@ -6,34 +6,51 @@
       </div>
       <div class="fj-block content">
         <div class="fj-block-head kaohe">
-          <p class="title">辅警报名表</p>
+          <p class="title fj-fl">招聘详情</p>
+          <div class="title-btn">
+            <form
+              style="display:none;"
+              name="exportForm"
+              :action="ajaxUrlDNN + '/exportRecruitDetail?id=' + userInfo.id"
+              method="post"
+              enctype="multipart/form-data"
+            ></form>
+            <el-button type="primary" @click="openMFSpopMultiple">
+              <span>审核</span>
+            </el-button>
+            <el-button plain @click="exportRecruitDetail">
+              <!-- <i class="el-icon-upload2"></i> -->
+              <span>导出</span>
+            </el-button>
+            <!--<el-button plain @click="printRecruitDetail">&lt;!&ndash; <i class="el-icon-upload2"></i> &ndash;&gt;<span>打印</span></el-button>-->
+          </div>
         </div>
         <div class="fj-block-body">
           <!-- 表单输入区域 -->
           <div class="recruit-form-area">
-            <el-form :model="ruleForm" :rules="rules">
+            <el-form :model="ruleForm">
               <!-- 基本信息 -->
               <div class="form-info">
-                <div class="info-img">
-                  <img src="static/images/recruit-people.svg" alt="个人照片">
-                </div>
                 <el-row>
                   <el-col :span="12">
                     <el-form-item label="姓名">
                       <el-input
-                        v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        v-model="ruleForm.name"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="12">
-                    <el-form-item class="noBR" label="性别">
-                      <el-input
-                        v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
-                      ></el-input>
+                  <el-col :span="12" class="row-img-padding">
+                    <el-form-item label="性别">
+                      <el-select
+                        :disabled="isDisabled"
+                        v-model="ruleForm.sex"
+                        :placeholder="isDisabled?'':'请选择'"
+                      >
+                        <el-option label="男" value="1"></el-option>
+                        <el-option label="女" value="2"></el-option>
+                      </el-select>
                     </el-form-item>
                   </el-col>
                 </el-row>
@@ -41,18 +58,18 @@
                   <el-col :span="12">
                     <el-form-item label="出生年月">
                       <el-input
-                        v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        v-model="ruleForm.birth"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </el-form-item>
                   </el-col>
                   <el-col :span="12">
-                    <el-form-item class="noBR" label="民族">
+                    <el-form-item label="民族" class="row-img-padding">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </el-form-item>
                   </el-col>
@@ -61,19 +78,22 @@
                   <el-col :span="12">
                     <el-form-item label="籍贯">
                       <el-input
-                        v-model="ruleForm.houseNumber"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        v-model="ruleForm.birthPlace"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </el-form-item>
                   </el-col>
                   <el-col :span="12">
-                    <el-form-item class="noBR" label="婚否">
-                      <el-input
+                    <el-form-item label="婚否" class="row-img-padding">
+                      <el-select
+                        :disabled="isDisabled"
                         v-model="ruleForm.plots"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
-                      ></el-input>
+                        :placeholder="isDisabled?'':'请选择'"
+                      >
+                        <el-option label="未婚" value="1"></el-option>
+                        <el-option label="已婚" value="2"></el-option>
+                      </el-select>
                     </el-form-item>
                   </el-col>
                 </el-row>
@@ -81,18 +101,18 @@
                   <el-col :span="12">
                     <el-form-item label="本人电话">
                       <el-input
-                        v-model="ruleForm.houseNumber"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        v-model="ruleForm.phone"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </el-form-item>
                   </el-col>
                   <el-col :span="12">
-                    <el-form-item class="noBR" label="政治面貌">
+                    <el-form-item label="政治面貌" class="row-img-padding">
                       <el-input
                         v-model="ruleForm.plots"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </el-form-item>
                   </el-col>
@@ -100,19 +120,22 @@
                 <el-row>
                   <el-col :span="12">
                     <el-form-item label="是否退役士兵/见义勇为人员">
-                      <el-input
-                        v-model="ruleForm.entityName"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
-                      ></el-input>
+                      <el-select
+                        :disabled="isDisabled"
+                        v-model="ruleForm.plots"
+                        :placeholder="isDisabled?'':'请选择'"
+                      >
+                        <el-option label="是" value="1"></el-option>
+                        <el-option label="否" value="2"></el-option>
+                      </el-select>
                     </el-form-item>
                   </el-col>
                   <el-col :span="12">
-                    <el-form-item class="noBR" label="身高">
+                    <el-form-item label="身高">
                       <el-input
-                        v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        v-model="ruleForm.hw"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </el-form-item>
                   </el-col>
@@ -121,18 +144,18 @@
                   <el-col :span="12">
                     <el-form-item label="紧急联系人">
                       <el-input
-                        v-model="ruleForm.houseName"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        v-model="ruleForm.ePerson"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </el-form-item>
                   </el-col>
                   <el-col :span="12">
-                    <el-form-item class="noBR" label="最高学位">
+                    <el-form-item label="最高学位">
                       <el-input
                         v-model="ruleForm.legalName"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </el-form-item>
                   </el-col>
@@ -141,29 +164,32 @@
                   <el-col :span="12">
                     <el-form-item label="紧急联系人电话">
                       <el-input
-                        v-model="ruleForm.idCard"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        v-model="ruleForm.ePersonPhone"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </el-form-item>
                   </el-col>
                   <el-col :span="12">
-                    <el-form-item class="noBR" label="身份证号码">
+                    <el-form-item label="身份证号码">
                       <el-input
-                        v-model="ruleForm.phone"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        v-model="ruleForm.idNum"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </el-form-item>
                   </el-col>
                 </el-row>
                 <el-row>
                   <el-col :span="24">
-                    <el-form-item class="noBR noBB" label="现居地址">
-                      <el-input v-bind:disabled="userInfo.state == 1" v-model="ruleForm.remark"></el-input>
+                    <el-form-item label="现居地址">
+                      <el-input :disabled="isDisabled" v-model="ruleForm.address"></el-input>
                     </el-form-item>
                   </el-col>
                 </el-row>
+                <div class="info-img">
+                  <img src="static/images/recruit-people.svg" alt="个人照片">
+                </div>
               </div>
             </el-form>
             <!-- 教育经历 -->
@@ -176,22 +202,22 @@
                     <div class="title title-left">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                     <div class="title title-left">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                     <div class="title title-left title-bottom">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                   </div>
@@ -200,22 +226,22 @@
                     <div class="title">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                     <div class="title">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                     <div class="title title-bottom">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                   </div>
@@ -226,22 +252,22 @@
                     <div class="title">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                     <div class="title">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                     <div class="title title-bottom">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                   </div>
@@ -250,22 +276,22 @@
                     <div class="title">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                     <div class="title">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                     <div class="title title-bottom">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                   </div>
@@ -282,22 +308,22 @@
                     <div class="title title-left">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                     <div class="title title-left">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                     <div class="title title-left title-bottom">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                   </div>
@@ -306,22 +332,22 @@
                     <div class="title">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                     <div class="title">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                     <div class="title title-bottom">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                   </div>
@@ -332,22 +358,22 @@
                     <div class="title">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                     <div class="title">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                     <div class="title title-bottom">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                   </div>
@@ -364,22 +390,22 @@
                     <div class="title title-left">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                     <div class="title title-left">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                     <div class="title title-left title-bottom">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                   </div>
@@ -388,22 +414,22 @@
                     <div class="title">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                     <div class="title">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                     <div class="title title-bottom">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                   </div>
@@ -414,22 +440,22 @@
                     <div class="title">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                     <div class="title">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                     <div class="title title-bottom">
                       <el-input
                         v-model="ruleForm.road"
-                        v-bind:disabled="userInfo.state == 1"
-                        v-bind:placeholder="userInfo.state == 1?'':'请输入'"
+                        :disabled="isDisabled"
+                        :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
                     </div>
                   </div>
@@ -437,10 +463,10 @@
               </el-row>
             </div>
           </div>
-          <div class="recruit-footer-btn" v-if="userInfo.state==0||userInfo.state==2">
+          <!-- <div class="recruit-footer-btn" v-if="userInfo.state==0||userInfo.state==2">
             <el-button type="primary" @click="submitForm(1)">通过</el-button>
             <el-button @click="submitForm(2)">不通过</el-button>
-          </div>
+          </div>-->
         </div>
       </div>
     </div>
@@ -458,6 +484,18 @@ export default {
         { name: "招聘管理", path: "/personnel-recruitment" },
         { name: "详情", path: "" }
       ],
+      ajaxUrlDNN: fjPublic.ajaxUrlDNN,
+      nowUser: $.cookie(fjPublic.loginCookieKey),
+      id: "", // 编号
+      step: "", // 流程
+      // 招聘步骤
+      items: [
+        { label: "资格审查" },
+        { label: "笔试" },
+        { label: "面试" },
+        { label: "公示" },
+        { label: "录用" }
+      ],
       activeList: [],
       userInfo: {},
       ruleForm: {
@@ -466,66 +504,110 @@ export default {
       randomCityList: [], //抽查地点
       subofficeList: [], //房屋所属分局
       policeList: [], //房屋所属派出所
+      isDisabled: false, //判断是否为编辑状态
       whether: [
         {
-          value: "是",
+          value: "0",
           label: "是"
         },
         {
-          value: "否",
+          value: "1",
           label: "否"
         }
-      ], //是否
-      rules: []
+      ]
     };
   },
   // created() {
   //   this.setCreated();
   // },
   mounted() {
-    // this.getTeamList();
-    // this.getDownDepts();
     this.setCreated();
+    this.getRecruitDetail();
   },
   methods: {
+    openMFSpopMultiple: function() {
+      // 审核
+      this.$confirm(
+        "（" + this.items[parseInt(this.userInfo.step)].label + "）审核",
+        "提示",
+        {
+          confirmButtonText: "通过",
+          cancelButtonText: "拒绝",
+          type: "warning",
+          center: true
+        }
+      )
+        .then(() => {
+          this.confirmUpdateRecruit(this.userInfo.id, "1");
+        })
+        .catch(() => {
+          this.confirmUpdateRecruit(this.userInfo.id, "2");
+        });
+    },
+    confirmUpdateRecruit: function(id, status) {
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/updRecruitStatus",
+        type: "POST",
+        data: {
+          id: id,
+          status: status
+        },
+        dataType: "json",
+        success: function(data) {
+          if (data.errorCode == 0) {
+            vm.$message({
+              type: "success",
+              message: data.errorMsg
+            });
+          } else {
+            vm.$message({
+              type: "error",
+              message: data.errorMsg
+            });
+          }
+          defer.resolve();
+        },
+        error: function(err) {
+          defer.reject();
+        }
+      });
+      return defer;
+    },
+    getRecruitDetail: function() {
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/getRecruitDetail",
+        type: "POST",
+        data: {
+          id: vm.userInfo.id
+        },
+        dataType: "json",
+        success: function(data) {
+          // console.log(data);
+          vm.ruleForm = data;
+          defer.resolve();
+        },
+        error: function(err) {
+          defer.reject();
+        }
+      });
+      return defer;
+    },
+    exportRecruitDetail: function() {
+      // 导出
+      document.forms["exportForm"].submit();
+    },
+    printRecruitDetail: function() {
+      // 打印
+    },
     submitForm(state) {
       console.log(state);
       window.history.go(-1);
     },
-    // 获取抽查地点数据
-    getTeamList: function(state) {
-      var vm = this;
-      // 参数
-      $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/searchDeptsByFenju",
-        type: "POST",
-        data: {},
-        dataType: "json",
-        success: function(data) {
-          console.log(data);
-          vm.policeList = data.list;
-        },
-        error: function(err) {}
-      });
-    },
-    // 获取所属地分局
-    getDownDepts: function(state) {
-      var vm = this;
-      // 参数
-      $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/getDownDepts",
-        type: "POST",
-        data: {
-          deptid: $.parseJSON(fjPublic.getLocalData("userInfo")).deptId
-        },
-        dataType: "json",
-        success: function(data) {
-          console.log(data);
-          vm.subofficeList = data;
-        },
-        error: function(err) {}
-      });
-    },
+
     // 提交或者编辑数据
     postRuleForm: function() {
       let vm = this;
@@ -555,9 +637,9 @@ export default {
     },
     setCreated() {
       this.userInfo = this.$route.query;
-      // this.userInfo.state != 0 &&
-      //   (this.ruleForm = $.parseJSON(fjPublic.getLocalData("recruitItem")));
-      // this.$refs["ruleForm"].resetFields();
+      this.userInfo.state == 1
+        ? (this.isDisabled = true)
+        : (this.isDisabled = false);
     }
   },
   watch: {
@@ -574,15 +656,80 @@ export default {
 </script>
 <style scope lang="less">
 .recruit {
+  .el-form {
+    .form-info {
+      .el-form-item {
+        position: relative;
+        height: 44px;
+        line-height: 44px;
+        margin-bottom: 0;
+        border-bottom: 1px solid #e8e8e8;
+        border-right: 1px solid #e8e8e8;
+        .el-form-item__label,
+        .el-form-item__content {
+          line-height: 44px;
+        }
+        label {
+          position: absolute;
+          width: 200px;
+          text-align: left;
+          padding-right: 0;
+          padding-left: 20px;
+          border-right: 1px solid #e8e8e8;
+        }
+        .el-form-item__content {
+          padding-left: 200px;
+        }
+        .el-input {
+          width: 100%;
+          input {
+            height: 42px;
+            border: none;
+          }
+        }
+        .el-select {
+          width: 100%;
+          .el-input {
+            padding-left: 0;
+
+            input {
+              height: 42px !important;
+            }
+          }
+          .is-disabled {
+            span {
+              display: none;
+            }
+          }
+        }
+      }
+      .el-row:nth-child(1) {
+        border-top: 1px solid #e8e8e8;
+      }
+      .el-row {
+        .el-col:nth-child(1) {
+          border-left: 1px solid #e8e8e8;
+        }
+        .el-input.is-disabled .el-input__inner {
+          color: rgba(0, 0, 0, 0.9);
+        }
+      }
+      .row-img-padding {
+        .el-form-item__content {
+          padding-right: 150px;
+        }
+      }
+    }
+  }
   .recruit-form-area {
     .form-info {
       position: relative;
       .info-img {
         position: absolute;
-        top: 0;
-        right: 0;
+        top: 2px;
+        right: 1px;
         width: 150px;
-        height: 179px;
+        height: 174px;
         z-index: 1;
         background-color: #fff;
         border-left: 1px solid #e8e8e8;
@@ -602,7 +749,6 @@ export default {
         opacity: 1;
       }
       .form-table-col {
-        // border: 1px solid #e8e8e8;
         div {
           display: inline-block;
           height: 44px;
@@ -669,9 +815,13 @@ export default {
   }
 }
 .recruit-form-area {
+  .el-input {
+    color: rgba(0, 0, 0, 0.9);
+  }
   .el-input.is-disabled .el-input__inner {
     cursor: auto;
     background-color: #fff;
+    color: rgba(0, 0, 0, 0.9);
   }
   .el-form-item__error {
     display: none;
@@ -693,198 +843,12 @@ export default {
 .fj-content_view_mask {
   background: #f0f2f5;
   .fj-block-head {
-    border-bottom: 0px;
+    margin-bottom: 20px;
+    .title-btn {
+      float: right;
+      margin-top: 10px;
+    }
   }
-  .title {
-    text-align: center;
-  }
-}
-.fj-content_view.recruit .recruit-form-area.x-scroll {
-  overflow-x: scroll;
-}
-.fj-content_view.recruit .el-form {
-  border: 1px solid #e8e8e8;
-}
-.fj-content_view.recruit .el-form.has-table {
-  border: none;
-}
-.fj-content_view.recruit .el-form .el-form-item {
-  margin-bottom: 0px;
-  border-right: 1px solid #e8e8e8;
-  border-bottom: 1px solid #e8e8e8;
-}
-.fj-content_view.recruit .el-form .el-form-item.noBR {
-  border-right: none;
-}
-.fj-content_view.recruit .el-form .el-form-item.noBB {
-  border-bottom: none;
-}
-/* 表单->表格调整 */
-.recruit-form-area .el-table th {
-  text-align: left;
-  color: rgba(0, 0, 0, 0.65);
-}
-.recruit-form-area .el-table--enable-row-hover .el-table__body tr:hover > td {
-  background-color: transparent;
-}
-.recruit-form-area .el-table td {
-  padding: 6px 0px;
-}
-.recruit-form-area .el-table td .el-input {
-  width: 100%;
-}
-.recruit-form-area .el-table td .el-input .el-input__inner {
-  padding: 0px 4px;
-  border: none;
-  color: rgba(0, 0, 0, 0.65);
-}
-.recruit-form-area .el-table td .el-textarea .el-textarea__inner {
-  border: none;
-  padding: 0px;
-}
-/*  */
-.fj-content_view.recruit .el-form .el-form-item__label {
-  min-width: 200px;
-  padding: 0px 0px 0px 20px;
-  line-height: 44px;
-  background-color: #fafafa;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  border-right: 1px solid #e8e8e8;
-  text-align: left;
-}
-.fj-content_view.recruit .el-form .el-form-item__content {
-  padding-left: 200px;
-  line-height: 44px;
-}
-.fj-content_view.recruit .el-form .el-form-item.NPL .el-form-item__content {
-  padding-left: 0px;
-}
-/* el-form样式修改 */
-.fj-content_view.recruit .el-form.no-title .el-form-item__label,
-.fj-content_view.recruit .el-form.no-content .el-form-item__content {
-  display: none;
-}
-.fj-content_view.recruit .el-form.no-title .el-form-item__label,
-.fj-content_view.recruit .el-form.no-content .el-form-item__label {
-  border-right: none;
-}
-.fj-content_view.recruit .el-form.no-content .el-form-item__label {
-  float: none;
-  display: block;
-}
-.fj-content_view.recruit .el-form.no-content + .el-form.no-title {
-  border-left: none;
-}
-.fj-content_view.recruit .el-form[class*="no"] {
-  float: left;
-}
-.fj-content_view.recruit .el-form.no-title .el-form-item__content {
-  padding-left: 0px;
-}
-.fj-content_view.recruit .el-form.no-content .el-form-item__label,
-.fj-content_view.recruit .el-form.no-title .el-form-item__content {
-  position: relative;
-  min-width: 160px;
-}
-.fj-content_view.recruit
-  .el-form.no-title
-  .el-form-item__content
-  .el-input.is-disabled
-  .el-input__inner {
-  background-color: #fafafa;
-  color: rgba(0, 0, 0, 0.65);
-}
-/*  */
-/* 表单调整 */
-.fj-content_view.recruit .el-form .el-form-item__content .el-select,
-.fj-content_view.recruit .el-form .el-form-item__content .el-input {
-  display: block;
-  width: 100%;
-}
-.fj-content_view.recruit
-  .el-form
-  .el-form-item__content
-  .el-input
-  > .el-input__inner {
-  height: 44px;
-  line-height: 44px;
-  border-color: #fff;
-  border-radius: 0;
-  color: rgba(0, 0, 0, 0.65);
-}
-.el-form-item.is-error .el-input__inner,
-.el-form-item.is-error .el-input__inner:focus {
-  border-color: #f56c6c !important;
-}
-/* 弹层操作 */
-.fj-content_view.recruit .el-dialog .el-dialog__header {
-  padding: 40px 56px;
-  font-size: 20px;
-  color: rgba(0, 0, 0, 0.85);
-}
-.fj-content_view.recruit .el-dialog .el-dialog__body {
-  padding: 0px 56px 20px;
-}
-.fj-content_view.recruit .el-dialog .el-dialog__body .columns {
-  display: flex;
-}
-.fj-content_view.recruit .el-dialog .el-dialog__body .fj-column,
-.fj-content_view.recruit .el-dialog .el-dialog__body .fj-column {
-  flex: 1 0 auto;
-}
-.fj-content_view.recruit .el-dialog .el-dialog__body .title-column {
-  flex: 0 0 auto;
-  width: 200px;
-}
-.fj-content_view.recruit .el-dialog .el-dialog__body .title-column > .el-form {
-  border-right: none;
-}
-.fj-content_view.recruit .el-dialog .el-dialog__body .fj-column > .el-form {
-  border-right: none;
-}
-.fj-content_view.recruit .el-dialog .el-dialog__body .el-form[class*="no"] {
-  float: none;
-}
-.fj-content_view.recruit
-  .el-dialog
-  .el-dialog__body
-  .title-column
-  .el-form
-  .el-form-item__label {
-  background-color: transparent;
-}
-/*  */
-.fj-content_view.recruit
-  .el-dialog
-  .el-dialog__body
-  [class*="-column"]
-  .el-form:first-child {
-  border-bottom: none;
-}
-/*  */
-.fj-content_view.recruit
-  .el-dialog
-  .el-dialog__body
-  .title-column
-  > .el-form
-  .el-form-item:nth-of-type(2n),
-.fj-content_view.recruit
-  .el-dialog
-  .el-dialog__body
-  .fj-column
-  > .el-form
-  .el-form-item:nth-of-type(2n)
-  .el-input__inner,
-.fj-content_view.recruit
-  .el-dialog
-  .el-dialog__body
-  .mj-column
-  > .el-form
-  .el-form-item:nth-of-type(2n)
-  .el-input__inner {
-  background-color: #f0faff;
 }
 @media screen and (min-width: 1920px) {
   /* .fj-content_view.recruit .el-form .el-form-item__content .el-select {width:60%;} */

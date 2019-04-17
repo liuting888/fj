@@ -10,7 +10,16 @@
           <!-- <div class="contract-footer-btn" v-if="userInfo.state==0||userInfo.state==2"> -->
           <div class="contract-head-btn">
             <el-button type="primary" @click="review()">签订</el-button>
-            <el-button @click="submitForm(2)">导出</el-button>
+            <!-- <form
+              style="display:none;"
+              name="exportForm"
+              :action="ajaxUrlDNN + '/exportRecruits?nowUser=' + nowUser + '&endTime=' + searchForm.endTime + '&deptId=' + searchForm.deptId + '&startTime=' + searchForm.startTime + '&page=' + currentPage + '&nameOrPhone=' + searchForm.nameOrPhone + '&rows=' + pageSize"
+              method="post"
+              enctype="multipart/form-data"
+            ></form> -->
+            <el-button @click="exportExcl">
+              <span>导出</span>
+            </el-button>
           </div>
         </div>
         <div class="fj-block-body">
@@ -101,6 +110,10 @@ export default {
       console.log(state);
       window.history.go(-1);
     },
+    exportExcl: function() {
+      // 导出
+      document.forms["exportForm"].submit();
+    },
     //签订
     review() {
       this.$message({
@@ -163,7 +176,7 @@ export default {
     right: 0px;
   }
   .fj-block-body {
-    height: 800px;
+    height: 860px;
     padding: 20px;
   }
   .el-dialog__body {

@@ -94,7 +94,7 @@
           <el-table-column label="操作">
             <template slot-scope="scope">
               <span class="ope-txt" @click="openAddOrDetailDialog(scope.row)">详情</span>
-              <span class="ope-txt" @click="isDeleteMission(scope.row.id)">删除</span>
+              <span class="ope-txt" v-if="scope.row.status==0||scope.row.status==1" @click="isDeleteMission(scope.row.id)">删除</span>
             </template>
           </el-table-column>
         </el-table>

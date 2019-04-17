@@ -54,7 +54,8 @@
 						<el-table-column label="考核记录数">
               <el-table-column v-for="(item, index) in itemNames" :key="item" :label="item">
                 <template slot-scope="scope">
-                  <p>{{scope.row.itemNums | getFormatScore(index)}}</p>
+                  <p v-if="itemTypes[index] != '0'">{{scope.row.itemNums | getFormatScore(index)}}</p>
+                  <p v-else>--</p>
                 </template>
               </el-table-column>
             </el-table-column>
@@ -657,6 +658,7 @@ export default {
 			noRecordUserData:null, //五日内未上传工作记录人员
 			auxDeptsSearch:'',  //人员-单位情况 搜索字段
           itemNames: [],
+          itemTypes: [],
 			qqMap:null,  //腾讯地图
 			labelInfos:{
 				'绥宁县':'<div class="infoWindow"><p class="title">绥宁县</p><p class="title">215个工作站</p></div>',
@@ -1575,6 +1577,7 @@ export default {
 					vm.totalLeaveCount = data.allLeaveCount;  //当前请假人数
 					vm.stateTableData = data.users;  //人员状态列表
           vm.itemNames = data.itemNames.split(',');
+          vm.itemTypes = data.itemTypes.split(',');
 					defer.resolve();
 				},
 				error:function(err){

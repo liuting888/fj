@@ -1,0 +1,48 @@
+﻿1. element-ui
+ npm install -s element-ui
+
+//--------------------------------
+
+2. echarts
+npm install echarts --save
+
+//---------------------------------
+
+3.less 
+npm install less less-loader --save
+
+//--------------------------------
+
+4.jquery
+npm install jquery --save
+
+webpack.base.config.js������������ã�
+
+const webpack = require('webpack')
+
+  plugins: [
+    new webpack.ProvidePlugin({  //����Jquery
+      $: 'jquery',
+      jQuery: 'jquery',
+      'window.jQuery':'jquery'
+    })
+  ]
+
+//--------------------------------------------
+5.vue-resource
+npm install vue-resource --save
+//-----------------------------
+6.vue-quill-editor 
+npm install vue-quill-editor  --save
+mian.js
+import vueQuillEditor from 'vue-quill-editor';
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+Vue.use(vueQuillEditor);
+//---------------------------------------
+7.viewer
+npm install viewerjs
+
+8. @riophae/vue-treeselect
+npm install @riophae/vue-treeselect  --save

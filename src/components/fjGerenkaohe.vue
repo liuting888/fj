@@ -57,7 +57,7 @@
                         <el-input class="fj-fl search" v-model="userNameOrAccount" suffix-icon="el-icon-search" clearable placeholder="请输入姓名或警号" @input="changeRnakListDataNA" @clear="changeRnakListDataNA"></el-input>
                     </div>
                     <div class="btn-box">
-                        <form style="display:none;" name="exportRankForm" :action="exportFileUrl+'/exportPoliceAppraiseList?deptId='+rankPcsId+'&month='+selectedRankMonth+'&page='+currentPage+'&userNameOrAccount='+userNameOrAccount+'&rows='+pageSize"
+                        <form style="display:none;" name="exportRankForm" :action="exportFileUrl+'/exportUserReportList?deptId='+rankPcsId+'&month='+selectedRankMonth+'&page='+currentPage+'&userNameOrAccount='+userNameOrAccount+'&rows='+pageSize"
                             method="post" enctype="multipart/form-data"></form>
                         <el-button :class="{'is-disabled':notCurMonthTime}" type="primary" @click="openMFSpopMultiple"><!-- <i class="el-icon-edit"></i> --><span>批量考核</span></el-button>
                         <el-button plain @click="exportPoliceAppraiseList"><!-- <i class="el-icon-upload2"></i> --><span>导出</span></el-button>
@@ -1020,7 +1020,6 @@ export default {
         },
         exportPoliceAppraiseList:function(){ //导出
             document.forms['exportRankForm'].submit();
-            window.print();
         },
         gotoDetailsList:function(data){   //显示个人考核-明细列表
             //console.log(data);

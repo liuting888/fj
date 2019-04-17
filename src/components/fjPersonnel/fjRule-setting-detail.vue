@@ -16,7 +16,7 @@
             <div class="rule-block-title">
               <i class="el-icon-edit"></i>
               <el-input
-                v-bind:disabled="userInfo.state == 1"
+                :disabled="userInfo.state == 1"
                 v-model="ruleForm.people"
                 placeholder="请输入合同名称"
               ></el-input>
@@ -35,10 +35,17 @@
           </div>
           <div class="rule-block-btn">
             <el-button type="primary" @click="review()" v-if="url">导入</el-button>
-            <el-button  @click="goList()" v-if="url">返回列表</el-button>
+            <el-button @click="goList()" v-if="url">返回列表</el-button>
             <el-button type="primary" @click="review()" v-if="!url">配置</el-button>
             <el-button type="primary" @click="review()" v-if="!url">替换</el-button>
-            <el-button @click="submitForm(2)" v-if="!url">导出</el-button>
+            <!-- <form
+              style="display:none;"
+              name="exportForm"
+              :action="ajaxUrlDNN + '/exportRecruits?nowUser=' + nowUser + '&endTime=' + searchForm.endTime + '&deptId=' + searchForm.deptId + '&startTime=' + searchForm.startTime + '&page=' + currentPage + '&nameOrPhone=' + searchForm.nameOrPhone + '&rows=' + pageSize"
+              method="post"
+              enctype="multipart/form-data"
+            ></form> -->
+            <el-button @click="exportExcl" v-if="!url">导出</el-button>
           </div>
         </div>
       </div>
@@ -98,7 +105,7 @@ export default {
       ruleForm: {
         name: ""
       },
-      url:"22",
+      url: "22",
       // 审核弹出框数据
       checkDialogVisible: false,
       checkDialogVisibleModal: false,
@@ -129,6 +136,10 @@ export default {
     submitForm(state) {
       console.log(state);
       window.history.go(-1);
+    },
+    exportExcl: function() {
+      // 导出
+      document.forms["exportForm"].submit();
     },
     //签订
     review() {

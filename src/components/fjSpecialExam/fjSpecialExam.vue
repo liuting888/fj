@@ -110,10 +110,17 @@
                     @click="goManage(0)"
                     v-if="activeIndex==1"
                   >添加试卷</el-button>
+                  <form
+                    style="display:none;"
+                    name="exportForm"
+                    :action="ajaxUrlDNN + '/exportRecruits?nowUser=' + nowUser + '&endTime=' + searchForm.endTime + '&deptId=' + searchForm.deptId + '&startTime=' + searchForm.startTime + '&page=' + currentPage + '&nameOrPhone=' + searchForm.nameOrPhone + '&rows=' + pageSize"
+                    method="post"
+                    enctype="multipart/form-data"
+                  ></form>
                   <el-button
                     type="primary"
                     class="tj-btn"
-                    @click="goFraction(0)"
+                    @click="exportExcl"
                     v-if="activeIndex==2"
                   >导出</el-button>
                 </el-form-item>
@@ -237,8 +244,10 @@
 </template>
 <script>
 import fjBreadNav from "@/components/fjBreadNav";
+import mixin from "@/scripts/mixin.js";
 export default {
   name: "specialExam",
+  mixins: [mixin], // 使用mixins
   data() {
     return {
       breadData: [
@@ -266,19 +275,13 @@ export default {
         supDeptId: "", // 公安局
         status: "" // 状态
       },
-      // table列表数据
-      tableDataList: [],
-      multipleSelection: [],
-      // 分页数据
-      currentPage: 1,
-      pageSize: 10,
-      total: 0
+      searchListUrl: "" //获取列表数据URL
     };
   },
   mounted() {
     fjPublic.closeLoad();
     // 初始化任务列表
-    this.searchSign();
+    this.searchList();
     return;
   },
   beforeRouteEnter(to, from, next) {
@@ -287,35 +290,12 @@ export default {
     });
   },
   methods: {
-    currentPageChange(pageNum) {
-      // 点击某个分页按钮
-      this.currentPage = pageNum;
-      this.searchSign();
-    },
-    prevPageChange(pageNum) {
-      // 点击分页的上一页
-      this.currentPage = pageNum;
-      this.searchSign();
-    },
-    nextPageChange(pageNum) {
-      // 点击分页的下一页
-      this.currentPage = pageNum;
-      this.searchSign();
-    },
-    sizePageChange(pageSize) {
-      // 改变每页条数时
-      this.currentPage = 1;
-      this.pageSize = pageSize;
-      this.searchSign();
-    },
-    handleSelectionChange(val) {
-      this.multipleSelection = val;
-    },
     //获取被选中的标签 tab 实例
     handleClick(tab) {
       console.log(tab);
       this.activeIndex = tab.index;
-      this.searchSign();
+      this.currentPage = 1;
+      this.searchList();
     },
     //获取被选中的标签 tab 实例
     changeSwitch(id, state) {
@@ -324,22 +304,11 @@ export default {
     // 修改单位下拉框查询
     changeDeptId: function(deptId) {
       this.searchForm["deptId"] = deptId;
-      this.searchSign();
+      this.searchList();
     },
     // 标题或负责人名称查询
     searchAttendLeave: function() {
-      this.searchSign();
-    },
-    // 修改查询时间
-    changeSearchTime: function(searchTime) {
-      if (searchTime) {
-        this.searchForm["startTime"] = fjPublic.dateFormatYYMMDD(searchTime[0]);
-        this.searchForm["endTime"] = fjPublic.dateFormatYYMMDD(searchTime[1]);
-      } else {
-        this.searchForm["startTime"] = "";
-        this.searchForm["endTime"] = "";
-      }
-      this.searchSign();
+      this.searchList();
     },
     // 更新题库
     updExam: function(id, state) {
@@ -357,37 +326,45 @@ export default {
           console.log(data);
         },
         error: function(err) {
-          vm.searchSign();
+          vm.searchList();
         }
       });
     },
-    // 获取采集列表
-    searchSign: function() {
-      var defer = $.Deferred();
-      var vm = this;
-      let url =
+    // 设置获取列表参数
+    setSearchList: function() {
+      let vm = this;
+      vm.searchListUrl =
         vm.activeIndex == 0
           ? "/getExamWarehouseList"
           : vm.activeIndex == 1
           ? "/getExamPaperList"
           : "/getExamResultList";
-      console.log(url);
       // 参数
       vm.searchForm["pageNumber"] = vm.currentPage;
       vm.searchForm["pageSize"] = vm.pageSize;
+    },
+    // 获取列表
+    searchList: function() {
+      fjPublic.openLoad("数据加载中...");
+      let vm = this;
+      vm.setSearchList();
       $.ajax({
-        // url: fjPublic.ajaxUrlDNN + "/searchSign",
-        url: fjPublic.ajaxUrlDNN + url,
+        // url: fjPublic.ajaxUrlDNN + "/searchList",
+        url: fjPublic.ajaxUrlDNN + vm.searchListUrl,
         type: "POST",
         data: vm.searchForm,
         dataType: "json",
         success: function(data) {
           vm.tableDataList = null;
           vm.tableDataList = data.list;
-          url=="/getExamResultList"&&(vm.tableDataList = data);
+          vm.searchListUrl == "/getExamResultList" && (vm.tableDataList = data);
           vm.total = data.total;
+          fjPublic.closeLoad();
         },
-        error: function(err) {}
+        error: function(err) {
+          fjPublic.closeLoad();
+          vm.$message({ type: "warning", message: "请求数据失败！！！" });
+        }
       });
     },
     /**
@@ -415,7 +392,7 @@ export default {
      */ goFraction(state, id) {
       this.$router.push({
         path: "/special-exam-fraction",
-        query: {  state: state, id:id }
+        query: { state: state, id: id }
       });
     },
     // 时间格式化
@@ -435,9 +412,9 @@ export default {
     }
   },
   filters: {
-    getSignType: function(value) {
-      return value == "1" ? "上班未签到" : value == 2 ? "下班未签退" : "";
-    }
+    // getSignType: function(value) {
+    //   return value == "1" ? "上班未签到" : value == 2 ? "下班未签退" : "";
+    // }
   },
   components: {
     fjBreadNav

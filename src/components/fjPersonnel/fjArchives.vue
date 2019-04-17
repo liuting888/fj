@@ -41,7 +41,7 @@
                   ></el-date-picker>
                 </el-form-item>
               </el-col>
-              <el-col :lg="6" :xl="5">
+              <el-col :lg="6" :xl="6">
                 <el-form-item label="派出所：">
                   <el-select
                     @change="changeDeptId"
@@ -70,7 +70,7 @@
                   </el-input>
                 </el-form-item>
               </el-col>
-              <el-col :lg="6" :xl="6">
+              <el-col :lg="6" :xl="5">
                 <el-form-item label="在职状态：">
                   <el-select
                     @change="changeStatus"
@@ -86,17 +86,24 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label=" ">
+                <el-form-item>
+                  <form
+                    style="display:none;"
+                    name="exportForm"
+                    :action="ajaxUrlDNN + '/exportRecruits?nowUser=' + nowUser + '&endTime=' + searchForm.endTime + '&deptId=' + searchForm.deptId + '&startTime=' + searchForm.startTime + '&page=' + currentPage + '&nameOrPhone=' + searchForm.nameOrPhone + '&rows=' + pageSize"
+                    method="post"
+                    enctype="multipart/form-data"
+                  ></form>
                   <el-button
                     type="primary"
-                    @click="review"
+                    @click="exportExcl"
                   >{{multipleSelection.length>1?'批量导出':'导出'}}</el-button>
                 </el-form-item>
               </el-col>
             </el-form>
           </el-row>
         </div>
-        <el-table :data="attendLeaveData" @selection-change="handleSelectionChange">
+        <el-table :data="tableDataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="55"></el-table-column>
           <el-table-column prop="userId" label="所在区域" width="100px" show-overflow-tooltip></el-table-column>
           <el-table-column prop="userId" label="姓名" width="80px"></el-table-column>
@@ -161,9 +168,10 @@
 </template>
 <script>
 import fjBreadNav from "@/components/fjBreadNav";
-
+import mixin from "@/scripts/mixin.js";
 export default {
   name: "fjRecruitment",
+  mixins: [mixin], // 使用mixins
   data: function() {
     return {
       breadData: [
@@ -171,7 +179,6 @@ export default {
         { name: "人事管理", path: "" },
         { name: "档案管理", path: "" }
       ],
-      multipleSelection: [],
       nowUser: $.cookie(fjPublic.loginCookieKey),
       // 分局
       supDeptIds: null,
@@ -200,26 +207,7 @@ export default {
         supDeptId: "", // 公安局
         status: "" // 状态
       },
-      // 列表数据
-      attendLeaveData: [
-        // {
-        //   apply_time: "",
-        //   end_time: "",
-        //   leader_content: "",
-        //   leader_name: "",
-        //   leader_time: "",
-        //   leaveId: "",
-        //   leave_reason: "",
-        //   leave_state: "",
-        //   start_time: "",
-        //   userId: "",
-        //   userAccount: ""
-        // }
-      ],
-      // 分页数据
-      currentPage: 1,
-      pageSize: 10,
-      total: 0,
+      searchListUrl: "/searchUserLeave", //获取列表数据URL
       checkDialogTitle: "",
       checkDialogForm: {
         id: "",
@@ -244,7 +232,7 @@ export default {
     // 初始化派出所下拉列表
     this.initSupDeptIds();
     // 初始化请假休假列表
-    this.searchUserLeave();
+    this.searchList();
 
     return;
   },
@@ -265,30 +253,6 @@ export default {
     }
   },
   methods: {
-    currentPageChange: function(pageNum) {
-      // 点击某个分页按钮
-      this.currentPage = pageNum;
-      this.searchUserLeave();
-    },
-    prevPageChange: function(pageNum) {
-      // 点击分页的上一页
-      this.currentPage = pageNum;
-      this.searchUserLeave();
-    },
-    nextPageChange: function(pageNum) {
-      // 点击分页的下一页
-      this.currentPage = pageNum;
-      this.searchUserLeave();
-    },
-    sizePageChange: function(pageSize) {
-      // 改变每页条数时
-      this.currentPage = 1;
-      this.pageSize = pageSize;
-      this.searchUserLeave();
-    },
-    handleSelectionChange(val) {
-      this.multipleSelection = val;
-    },
     //审核
     review() {
       this.$message({
@@ -339,61 +303,28 @@ export default {
     // 修改单位下拉框查询
     changeSupDeptId: function(supDeptId) {
       this.searchForm["supDeptId"] = supDeptId;
-      this.searchUserLeave();
+      this.searchList();
     },
     // 修改单位下拉框查询
     changeDeptId: function(deptId) {
       this.searchForm["deptId"] = deptId;
-      this.searchUserLeave();
+      this.searchList();
     },
     // 修改状态下拉框查询
     changeStatus: function(status) {
       this.searchForm["status"] = status;
-      this.searchUserLeave();
+      this.searchList();
     },
     // 标题或负责人名称查询
     searchAttendLeave: function() {
-      this.searchUserLeave();
+      this.searchList();
     },
-    // 修改查询时间
-    changeSearchTime: function(searchTime) {
-      if (searchTime) {
-        this.searchForm["startTime"] = fjPublic.dateFormatYYMMDD(searchTime[0]);
-        this.searchForm["endTime"] = fjPublic.dateFormatYYMMDD(searchTime[1]);
-      } else {
-        this.searchForm["startTime"] = "";
-        this.searchForm["endTime"] = "";
-      }
-      this.searchUserLeave();
-    },
-    // 获取采集列表
-    searchUserLeave: function() {
-      var defer = $.Deferred();
-      var vm = this;
-      // 参数
+    // 设置获取列表参数
+    setSearchList: function() {
       this.searchForm["page"] = this.currentPage;
       this.searchForm["rows"] = this.pageSize;
       // 传入当前用户信息
       this.searchForm["nowUser"] = this.nowUser;
-      $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/searchUserLeave",
-        type: "POST",
-        data: vm.searchForm,
-        dataType: "json",
-        success: function(data) {
-          vm.attendLeaveData = null;
-          vm.attendLeaveData = data.list;
-          vm.total = data.total;
-          _.each(vm.attendLeaveData, function(item, i) {
-            vm.$set(item, "rank", i + 1);
-          });
-          defer.resolve();
-        },
-        error: function(err) {
-          defer.reject();
-        }
-      });
-      return defer;
     },
     /**
      * 查看，编辑，新建
@@ -434,7 +365,7 @@ export default {
           success: function(data) {
             if (data.errorCode == 0) {
               // vm.checkDialogVisible = false;
-              vm.searchUserLeave();
+              vm.searchList();
             }
             vm.$message({
               type: "success",

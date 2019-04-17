@@ -1,37 +1,20 @@
 <template>
-  <div class="fj-content_view work-mis recuit">
+  <div class="fj-content_view work-mis workLog">
     <div class="fj-block title">
       <fj-breadNav :bread-data="breadData"></fj-breadNav>
     </div>
     <div class="fj-block content">
       <div class="fj-block-head kaohe">
-        <p class="title fj-fl">招聘列表</p>
+        <p class="title fj-fl">招聘信息列表</p>
       </div>
       <div class="fj-block-body">
-        <!-- <a href="./test2.pdf">Download PDF</a> -->
-        <!-- <iframe
-          src="http://storage.xuetangx.com/public_assets/xuetangx/PDF/PlayerAPI_v1.0.6.pdf"
-          width="100%"
-          height="200px"
-        >
-          This browser does not support PDFs. Please download the PDF to view it:
-          <a href="/test2.pdf" rel="external nofollow">Download PDF</a>
-        </iframe>-->
-
-        <!-- src="https://view.officeapps.live.com/op/view.aspx?src=http://storage.xuetangx.com/public_assets/xuetangx/PDF/1.xls" -->
-        <!-- <iframe
-          src="https://view.officeapps.live.com/op/view.aspx?src=http://storage.xuetangx.com/public_assets/xuetangx/PDF/1.xls"
-          width="100%"
-          height="800px"
-          frameborder="1"
-        ></iframe>-->
         <div class="fj-search-inline">
           <el-row>
-            <el-form inline label-width="85px" label-position="left">
-              <el-col :lg="8" :xl="7" class="time-item">
-                <el-form-item label="区县分局：">
+            <el-form inline label-position="left">
+              <el-col :lg="6" :xl="6">
+                <el-form-item label="分局：">
                   <el-select
-                    @change="changeSupDeptId"
+                    @change="changeDeptId"
                     clearable
                     filterable
                     v-model="searchForm.supDeptId"
@@ -45,50 +28,7 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-
-                <el-form-item label="起始日期：" class="datepicker">
-                  <el-date-picker
-                    v-model="searchForm.searchTime"
-                    type="daterange"
-                    range-separator="至"
-                    start-placeholder="开始日期"
-                    end-placeholder="结束日期"
-                    @change="changeSearchTime"
-                    size="small"
-                  ></el-date-picker>
-                </el-form-item>
-              </el-col>
-              <el-col :lg="6" :xl="5">
-                <el-form-item label="派出所：">
-                  <el-select
-                    @change="changeDeptId"
-                    clearable
-                    filterable
-                    v-model="searchForm.deptId"
-                    size="small"
-                  >
-                    <el-option
-                      v-for="item in deptIds"
-                      :key="item.deptId"
-                      :label="item.deptName"
-                      :value="item.deptId"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="输入查询：">
-                  <el-input
-                    v-model="searchForm.nameOrAccount"
-                    clearable
-                    placeholder="请输入姓名或电话"
-                    size="small"
-                    class="search-input"
-                  >
-                    <el-button slot="append" @click="searchAttendLeave">搜索</el-button>
-                  </el-input>
-                </el-form-item>
-              </el-col>
-              <el-col :lg="6" :xl="6">
-                <el-form-item label="审核结果：">
+                <el-form-item label="状态：">
                   <el-select
                     @change="changeStatus"
                     clearable
@@ -103,97 +43,130 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label=" ">
-                  <el-button
-                    type="primary"
-                    @click="review"
-                  >{{multipleSelection.length>1?'批量审核':'审核'}}</el-button>
-                  <el-button>导出</el-button>
+              </el-col>
+              <el-col :lg="6" :xl="6">
+                <el-form-item label="派出所：">
+                  <el-select
+                    @change="changeRecruitsByDeptId"
+                    clearable
+                    filterable
+                    v-model="searchForm.deptId"
+                    size="small"
+                  >
+                    <el-option
+                      v-for="item in deptIds"
+                      :key="item.deptId"
+                      :label="item.deptName"
+                      :value="item.deptId"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item>
+                  <el-input
+                    v-model="searchForm.nameOrPhone"
+                    clearable
+                    placeholder="请输入名称或手机号"
+                    size="small"
+                    class="search-input"
+                  >
+                    <el-button slot="append" @click="searchList">搜索</el-button>
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :lg="8" :xl="8" class="time-item">
+                <el-form-item label="起止日期：" class="datepicker">
+                  <el-date-picker
+                    v-model="searchForm.searchTime"
+                    type="daterange"
+                    range-separator="至"
+                    start-placeholder="开始日期"
+                    end-placeholder="结束日期"
+                    @change="changeSearchTime"
+                    size="small"
+                  ></el-date-picker>
+                </el-form-item>
+                <el-form-item>
+                  <form
+                    style="display:none;"
+                    name="exportForm"
+                    :action="ajaxUrlDNN + '/exportRecruits?nowUser=' + nowUser + '&endTime=' + searchForm.endTime + '&deptId=' + searchForm.deptId + '&startTime=' + searchForm.startTime + '&page=' + currentPage + '&nameOrPhone=' + searchForm.nameOrPhone + '&rows=' + pageSize"
+                    method="post"
+                    enctype="multipart/form-data"
+                  ></form>
+                  <el-button type="primary" @click="openMFSpopMultiple">
+                    <span>{{multipleSelection.length>1?'批量审核':'审核'}}</span>
+                  </el-button>
+                  <el-button plain @click="exportExcl">
+                    <!-- <i class="el-icon-upload2"></i> -->
+                    <span>导出</span>
+                  </el-button>
+                  <el-button plain @click="addRecruit">
+                    <span>添加</span>
+                  </el-button>
                 </el-form-item>
               </el-col>
             </el-form>
           </el-row>
         </div>
-        <el-table :data="attendLeaveData" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="55"></el-table-column>
-          <el-table-column prop="userId" label="地区" width="100px" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="userId" label="姓名" width="80px"></el-table-column>
-          <el-table-column prop="userId" label="电话"></el-table-column>
-          <el-table-column prop="userAccount" label="报名职位"></el-table-column>
-          <!-- <el-table-column
-            prop="leave_reason"
-            label="请假理由"
-            show-overflow-tooltip
-            class-name="textLeft"
-            width="400px"
-          ></el-table-column>-->
-          <el-table-column
-            label="报名日期"
-            show-overflow-tooltip
-            :formatter="timeFormatter"
-            prop="apply_time"
-          >
-            <!-- <template slot-scope="scope">
-              <p>{{scope.row.apply_time | getFormatTime}}</p>
-            </template>-->
+        <el-table :data="tableDataList" class="el-tables" @selection-change="handleSelectionChange">
+          <el-table-column type="selection" width="40"></el-table-column>
+          <el-table-column prop="deptName" label="地区"></el-table-column>
+          <el-table-column prop="name" label="姓名"></el-table-column>
+          <el-table-column prop="phone" label="手机号码"></el-table-column>
+          <el-table-column label="提交时间">
+            <template slot-scope="scope">
+              <p>{{scope.row.insTime | getFormatInsTime}}</p>
+            </template>
           </el-table-column>
-          <el-table-column label="资格审查" prop="leave_state" width="120px">
+          <!-- <el-table-column label="招聘流程"> -->
+          <el-table-column v-for="(item, index) in items" :key="item.label" :label="item.label">
+            <template slot-scope="scope">
+              <p v-if="scope.row.status == 0">--</p>
+              <p v-if="scope.row.status == 1">
+                <template v-if="index < scope.row.step">
+                  <i class="el-icon-check"></i>
+                </template>
+                <template v-else>--</template>
+              </p>
+              <p v-if="scope.row.status == 2">
+                <template v-if="index < scope.row.step - 1 ">
+                  <i class="el-icon-check"></i>
+                </template>
+                <template v-else-if="index == scope.row.step - 1">
+                  <i class="el-icon-close"></i>
+                </template>
+                <template v-else>--</template>
+              </p>
+            </template>
+          </el-table-column>
+          <!-- </el-table-column> -->
+          <el-table-column label="审核结果" show-overflow-tooltip prop="status" width="80px">
             <template slot-scope="scope">
               <span
                 class="circle-status"
-                :class="scope.row.leave_state == 0 ? 'grey' : scope.row.leave_state == 1 ? 'green' : 'red'"
+                :class="((scope.row.status == 0) || (scope.row.status == 1 && scope.row.step != 5)) ? 'grey' : (scope.row.status == 1 && scope.row.step == 5) ? 'green' : 'red'"
               >
-                {{parseInt( scope.row.leave_state) === 0 ? '待审核' : parseInt( scope.row.leave_state) === 1 ?'已通过'
-                : '被驳回'}}
+                {{((scope.row.status == 0) || (scope.row.status == 1 && scope.row.step != 5)) ? '待审核' : (scope.row.status == 1 && scope.row.step == 5) ? '已通过'
+                : '未通过'}}
               </span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="userAccount" label="笔试">
-            <template slot-scope="scope">
-              <span v-if="scope.row.leave_state == 0">--</span>
-              <span v-if="scope.row.leave_state == 1">✓</span>
-              <span v-if="scope.row.leave_state == 2">✗</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="userAccount" label="面试">
-            <template slot-scope="scope">
-              <span v-if="scope.row.leave_state == 0">--</span>
-              <span v-if="scope.row.leave_state == 1">✓</span>
-              <span v-if="scope.row.leave_state == 2">✗</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="userAccount" label="公示">
-            <template slot-scope="scope">
-              <span v-if="scope.row.leave_state == 0">--</span>
-              <span v-if="scope.row.leave_state == 1">✓</span>
-              <span v-if="scope.row.leave_state == 2">✗</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="userAccount" label="录用">
-            <template slot-scope="scope">
-              <span v-if="scope.row.leave_state == 0">--</span>
-              <span v-if="scope.row.leave_state == 1">✓</span>
-              <span v-if="scope.row.leave_state == 2">✗</span>
             </template>
           </el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
-              <span class="ope-txt" v-if="scope.row.leave_state != 0">--</span>
-              <span
+              <a href="javascript:;" class="ope-txt" @click.stop="goDetails(scope.row,1)">详情</a>
+              <!-- <a href="javascript:;" class="ope-txt" @click.stop="goDetails(scope.row,2)">编辑</a> -->
+              <a
+                v-if="(scope.row.status == 2) || (scope.row.status == 1 && scope.row.step == 5)"
+                href="javascript:;"
                 class="ope-txt"
-                v-if="scope.row.leave_state == 0"
-                @click="goDetails(scope.row.leaveId,1)"
-              >详情</span>
-              <span
+                @click.stop="deleteRecruit(scope.row)"
+              >删除</a>
+              <a
+                v-else
+                href="javascript:;"
                 class="ope-txt"
-                v-if="scope.row.leave_state == 0"
-                @click="goDetails(scope.row.leaveId, 2)"
-              >编辑</span>
-              <span
-                class="ope-txt"
-                v-if="scope.row.leave_state == 0"
-                @click="goDetails(scope.row.leaveId, 3)"
-              >删除</span>
+                @click.stop="updateRecruit(scope.row)"
+              >审核</a>
             </template>
           </el-table-column>
         </el-table>
@@ -212,44 +185,13 @@
         </div>
       </div>
     </div>
-    <!-- 审核弹出框 -->
-    <el-dialog
-      :title="checkDialogTitle"
-      :visible.sync="checkDialogVisible"
-      :modal-append-to-body="checkDialogVisibleModal"
-      style="position: absolute"
-      width="450px"
-      @close="closeDialog"
-      :close-on-click-modal="false"
-      top="25vh"
-      class="check-dialog"
-    >
-      <div>请选择需要审核的内容</div>
-      <div>
-        <el-checkbox-group v-model="checkList">
-          <el-checkbox label="笔试"></el-checkbox>
-          <el-checkbox label="面试"></el-checkbox>
-          <el-checkbox label="公示"></el-checkbox>
-          <el-checkbox label="录用"></el-checkbox>
-        </el-checkbox-group>
-      </div>
-      <div>请选择审核状态</div>
-      <div>
-        <el-radio v-model="radio" label="1">通过</el-radio>
-        <el-radio v-model="radio" label="2">不通过</el-radio>
-      </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="checkDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="updateLeaveStatus(false)">确 定</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 <script>
 import fjBreadNav from "@/components/fjBreadNav";
-
+import mixin from "@/scripts/mixin.js";
 export default {
-  name: "fjRecruitment",
+  mixins: [mixin], // 使用mixins
   data: function() {
     return {
       breadData: [
@@ -257,14 +199,22 @@ export default {
         { name: "人事管理", path: "" },
         { name: "招聘管理", path: "" }
       ],
-      multipleSelection: [],
-      radio: "1",
-      checkList: ["选中且禁用", "复选框 A"],
+      ajaxUrlDNN: fjPublic.ajaxUrlDNN,
       nowUser: $.cookie(fjPublic.loginCookieKey),
       // 分局
-      supDeptIds: null,
+      supDeptIds: [],
       // 派出所
       deptIds: null,
+      // 招聘步骤
+      items: [
+        { label: "资格审查" },
+        { label: "笔试" },
+        { label: "面试" },
+        { label: "公示" },
+        { label: "录用" }
+      ],
+      // switch开关
+      switchDisabled: true,
       // 状态
       statuses: [
         {
@@ -277,128 +227,125 @@ export default {
         },
         {
           value: "2",
-          label: "被驳回"
+          label: "未通过"
         }
       ],
       // 列表查询参数
       searchForm: {
-        searchTime: "", // 查询时间
-        nameOrAccount: "", // 警号或负责人名称
+        searchTime: "", // 查询时或手机号
         deptId: "", // 派出所
-        supDeptId: "", // 公安局
-        status: "" // 状态
+        status: "", // 状态
+        supDeptId: "", // 分局
+        startTime: "",
+        endTime: "",
+        nameOrPhone: ""
       },
-      // 列表数据
-      attendLeaveData: [
-        // {
-        //   apply_time: "",
-        //   end_time: "",
-        //   leader_content: "",
-        //   leader_name: "",
-        //   leader_time: "",
-        //   leaveId: "",
-        //   leave_reason: "",
-        //   leave_state: "",
-        //   start_time: "",
-        //   userId: "",
-        //   userAccount: ""
-        // }
-      ],
-      // 分页数据
-      currentPage: 1,
-      pageSize: 10,
-      total: 0,
-      // 审核弹出框数据
-      checkDialogVisible: false,
-      checkDialogVisibleModal: false,
-      checkDialogTitle: "",
-      checkDialogForm: {
-        id: "",
-        status: "",
-        reason: ""
-      },
-      reasonDisabled: true,
-      formLabelWidth: "120px",
-      // 不批准弹出框校验
-      checkRule: {
-        reason: {
-          required: true,
-          message: "请输入不通过理由",
-          trigger: "blur"
-        }
+      searchListUrl: "/getRecruits", //获取列表数据URL
+      // 详情表单
+      dialogForm: {
+        keyNo: "",
+        content: "",
+        insTime: "",
+        leadId: "",
+        userId: "",
+        weather: "",
+        work_date: "",
+        files: [],
+        status: 0,
+        reason: "",
+        currentRow: {}
       }
     };
   },
   mounted: function() {
     // 初始化派出所下拉列表
-    this.initDeptIds();
-    // 初始化派出所下拉列表
     this.initSupDeptIds();
-    // 初始化请假休假列表
-    this.searchUserLeave();
-
+    // 初始化采集列表
+    this.searchList();
     return;
   },
   filters: {
-    // 状态处理
-    getLeaveStatus: function(value) {
-      return value == "0"
-        ? "待批"
-        : value == 1
-        ? "已批准"
-        : value == 2
-        ? "未批准"
-        : "";
-    },
-    getFormatTime: function(value) {
-      // return value ? fjPublic.dateStrFormat(value) : '';
-      return value ? value.substring(0, value.length - 2) : "";
+    getFormatInsTime: function(value) {
+      return value ? value.substr(0, 10) : "";
     }
   },
   methods: {
-    currentPageChange: function(pageNum) {
-      // 点击某个分页按钮
-      this.currentPage = pageNum;
-      this.searchUserLeave();
-    },
-    prevPageChange: function(pageNum) {
-      // 点击分页的上一页
-      this.currentPage = pageNum;
-      this.searchUserLeave();
-    },
-    nextPageChange: function(pageNum) {
-      // 点击分页的下一页
-      this.currentPage = pageNum;
-      this.searchUserLeave();
-    },
-    sizePageChange: function(pageSize) {
-      // 改变每页条数时
-      this.currentPage = 1;
-      this.pageSize = pageSize;
-      this.searchUserLeave();
-    },
-    handleSelectionChange(val) {
-      this.multipleSelection = val;
-    },
-    //审核
-    review() {
-      this.$message({
-        message: "请保证人员审核进度一致",
-        type: "warning"
+    openMFSpopMultiple: function() {
+      // 批量审核
+      if (!this.multipleSelection || !this.multipleSelection.length) {
+        this.$message({
+          type: "warning",
+          message: "请选择要进行批量审核的人员招聘信息！"
+        });
+        return;
+      }
+      var tmpObj = _.find(
+        this.multipleSelection,
+        function(item) {
+          return item.status == 2 || (item.status == 1 && item.step == 5);
+        },
+        this
+      );
+      if (tmpObj) {
+        this.$message({
+          type: "warning",
+          message: "所选的人员招聘信息包含已审核完成的，请重新选择！"
+        });
+        return;
+      }
+      var step = this.multipleSelection[0].step;
+      var tmpObj1 = _.find(
+        this.multipleSelection,
+        function(item) {
+          return item.step != step;
+        },
+        this
+      );
+      if (tmpObj1) {
+        this.$message({
+          type: "warning",
+          message: "所选的人员招聘信息流程不一致，请重新选择！"
+        });
+        return;
+      }
+      var ids = [];
+      this.multipleSelection.forEach(el => {
+        ids.push(el.id);
       });
-      this.checkDialogVisible = true;
+      this.$confirm("（" + this.items[step].label + "）审核", "提示", {
+        distinguishCancelAndClose: true,
+        confirmButtonText: "通过",
+        cancelButtonText: "拒绝",
+        type: "warning",
+        center: true
+      })
+        .then(() => {
+          this.confirmUpdateRecruit(ids.join(","), "1");
+        })
+        .catch(action => {
+          action === "cancel" && this.confirmUpdateRecruit(ids.join(","), "2");
+        });
+    },
+    // 设置获取列表参数
+    setSearchList: function() {
+      this.searchForm["page"] = this.currentPage;
+      this.searchForm["rows"] = this.pageSize;
+      // 传入当前用户信息
+      this.searchForm["nowUser"] = this.nowUser;
     },
     // 初始化分局
     initSupDeptIds: function() {
       var defer = $.Deferred();
       var vm = this;
       $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/searchDepListBySearch",
+        url: fjPublic.ajaxUrlDNN + "/searchDeptByRole",
         type: "POST",
-        data: {},
+        data: {
+          nowUser: vm.nowUser
+        },
         dataType: "json",
         success: function(data) {
-          vm.supDeptIds = data.list;
+          vm.supDeptIds = data;
           defer.resolve();
         },
         error: function(err) {
@@ -408,14 +355,19 @@ export default {
       return defer;
     },
     // 初始化派出所
-    initDeptIds: function() {
+    changeRecruitsByDeptId: function() {
+      // 刷新列表
+      this.searchList();
+    },
+    // 分局级联查询派出所
+    changeDeptId: function() {
       var defer = $.Deferred();
       var vm = this;
       $.ajax({
         url: fjPublic.ajaxUrlDNN + "/searchDeptsByFenju",
         type: "POST",
         data: {
-          parentDeptId: ""
+          parentDeptId: vm.searchForm.supDeptId
         },
         dataType: "json",
         success: function(data) {
@@ -428,57 +380,94 @@ export default {
       });
       return defer;
     },
-    // 修改单位下拉框查询
-    changeSupDeptId: function(supDeptId) {
-      this.searchForm["supDeptId"] = supDeptId;
-      this.searchUserLeave();
-    },
-    // 修改单位下拉框查询
-    changeDeptId: function(deptId) {
-      this.searchForm["deptId"] = deptId;
-      this.searchUserLeave();
-    },
     // 修改状态下拉框查询
-    changeStatus: function(status) {
-      this.searchForm["status"] = status;
-      this.searchUserLeave();
+    changeStatus: function() {
+      this.searchList();
     },
-    // 标题或负责人名称查询
-    searchAttendLeave: function() {
-      this.searchUserLeave();
+    // 删除
+    deleteRecruit: function(item) {
+      this.$confirm("确定删除该招聘信息吗", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+        center: true
+      })
+        .then(() => {
+          this.confirmDeleteRecruit(item.id);
+        })
+        .catch(() => {});
     },
-    // 修改查询时间
-    changeSearchTime: function(searchTime) {
-      if (searchTime) {
-        this.searchForm["startTime"] = fjPublic.dateFormatYYMMDD(searchTime[0]);
-        this.searchForm["endTime"] = fjPublic.dateFormatYYMMDD(searchTime[1]);
-      } else {
-        this.searchForm["startTime"] = "";
-        this.searchForm["endTime"] = "";
-      }
-      this.searchUserLeave();
+    // 审核
+    updateRecruit(item) {
+      this.$confirm("（" + this.items[item.step].label + "）审核", "提示", {
+        distinguishCancelAndClose: true,
+        confirmButtonText: "通过",
+        cancelButtonText: "拒绝",
+        type: "warning",
+        center: true
+      })
+        .then(() => {
+          this.confirmUpdateRecruit(item.id, "1");
+        })
+        .catch(action => {
+          action === "cancel" && this.confirmUpdateRecruit(item.id, "2");
+        });
     },
-    // 获取采集列表
-    searchUserLeave: function() {
+    confirmUpdateRecruit: function(id, status) {
       var defer = $.Deferred();
       var vm = this;
-      // 参数
-      this.searchForm["page"] = this.currentPage;
-      this.searchForm["rows"] = this.pageSize;
-      // 传入当前用户信息
-      this.searchForm["nowUser"] = this.nowUser;
       $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/searchUserLeave",
+        url: fjPublic.ajaxUrlDNN + "/updRecruitStatus",
         type: "POST",
-        data: vm.searchForm,
+        data: {
+          id: id,
+          status: status
+        },
         dataType: "json",
         success: function(data) {
-          vm.attendLeaveData = null;
-          vm.attendLeaveData = data.list;
-          vm.total = data.total;
-          _.each(vm.attendLeaveData, function(item, i) {
-            vm.$set(item, "rank", i + 1);
-          });
+          if (data.errorCode == 0) {
+            vm.$message({
+              type: "success",
+              message: data.errorMsg
+            });
+            vm.searchList();
+          } else {
+            vm.$message({
+              type: "error",
+              message: data.errorMsg
+            });
+          }
+          defer.resolve();
+        },
+        error: function(err) {
+          defer.reject();
+        }
+      });
+      return defer;
+    },
+    confirmDeleteRecruit: function(id) {
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/delRecruit",
+        type: "POST",
+        data: {
+          id: id
+        },
+        dataType: "json",
+        success: function(data) {
+          if (data.errorCode == 0) {
+            vm.$message({
+              type: "success",
+              message: data.errorMsg
+            });
+            vm.searchList();
+          } else {
+            vm.$message({
+              type: "error",
+              message: data.errorMsg
+            });
+          }
           defer.resolve();
         },
         error: function(err) {
@@ -491,104 +480,101 @@ export default {
      * 查看，编辑，新建
      * @param {*} state 状态0=新增，1=查看，2=编辑
      */
-    goDetails(state, items) {
-      // let item = items;
-      // !item && (item = { id: "" });
+    goDetails: function(data, state) {
+      // 招聘详情
+      fjPublic.getContentScrollTop();
+      fjPublic.contentScrollTop();
+      fjPublic.setLocalData("recruitId", data.id);
+      fjPublic.setLocalData("recruitStep", data.step);
       this.$router.push({
         path: "/personnel-recruitment-detail",
-        query: { state: items, id: state }
+        query: { id: data.id, step: data.step, state: state }
       });
-      //设置缓存，到编辑回显
-      // state != 0 && fjPublic.setLocalData("ybssItem", JSON.stringify(item));
     },
-    // 打开审核弹出框
-    // openCheckDialog: function(id, status) {
-    //   this.checkDialogForm["id"] = id;
-    //   this.checkDialogForm["status"] = status;
-    //   this.checkDialogTitle = status == 1 ? "批准？" : "不批准？";
-    //   this.reasonDisabled = status == 1 ? true : false;
-    //   this.checkDialogVisible = true;
-    // },
-    // 确认批准直接询问并发请求
-    // checkUpdate(id, status) {
-    //   this.$confirm("确认批准该条请假(休假)?", "提示", {
-    //     confirmButtonText: "确定",
-    //     cancelButtonText: "取消",
-    //     type: "warning"
-    //   }).then(() => {
-    //     this.checkDialogForm["id"] = id;
-    //     this.checkDialogForm["status"] = status;
-    //     this.updateLeaveStatus(true);
-    //   });
-    // },
-    // 保存请假批准
-    updateLeaveStatus: function(isConfirm) {
+    addRecruit: function() {
       var defer = $.Deferred();
       var vm = this;
-      let ajax = () => {
-        $.ajax({
-          url: fjPublic.ajaxUrlDNN + "/dealLeave",
-          type: "POST",
-          data: vm.checkDialogForm,
-          dataType: "json",
-          success: function(data) {
-            if (data.errorCode == 0) {
-              // vm.checkDialogVisible = false;
-              vm.searchUserLeave();
-            }
+      var educations = [
+        {
+          eduDate: "2011/09-2014/06",
+          schoolName: "四川大学锦城学院",
+          majorName: "艺术系表演专业",
+          degrees: "全国微电影金锚奖、年度新锐剧星"
+        }
+      ];
+      var works = [
+        {
+          worDate: "2015/09-2019/03",
+          companyName: "唐嫣工作室",
+          positionName: "演员"
+        }
+      ];
+      var families = [
+        {
+          name: "邓辉",
+          relation: "丈夫",
+          positionName: "导演"
+        }
+      ];
+      console.log(JSON.stringify(families));
+      console.log(JSON.stringify(works));
+      console.log(JSON.stringify(educations));
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/addRecruit",
+        type: "POST",
+        data: {
+          name: "陈钰琪",
+          sex: "2",
+          birth: "1992-07",
+          nation: "01",
+          birthPlace: "四川省成都市",
+          marriage: "10",
+          phone: "17673055002",
+          politics: "01",
+          soldier: "0",
+          hw: "170/45",
+          education: "20",
+          idNum: "501104199207297869",
+          ePerson: "邓辉",
+          ePersonPhone: "17673055042",
+          address: "四川省成都市锦城区",
+          deptId: "430501010000",
+          edus: JSON.stringify(educations),
+          fams: JSON.stringify(families),
+          wors: JSON.stringify(works)
+        },
+        dataType: "json",
+        success: function(data) {
+          if (data.errorCode == 0) {
             vm.$message({
               type: "success",
               message: data.errorMsg
             });
-            defer.resolve();
-          },
-          error: function(err) {
-            defer.reject();
+            vm.searchList();
+          } else {
+            vm.$message({
+              type: "error",
+              message: data.errorMsg
+            });
           }
-        });
-      };
-      // 传入当前用户信息
-      vm.checkDialogForm["nowUser"] = $.cookie(fjPublic.loginCookieKey);
-      // 直接批准
-
-      if (isConfirm) {
-        ajax();
-      } else {
-        this.$refs.checkDialogForm.validate(validate => {
-          if (validate) {
-            ajax();
-          }
-        });
-      }
-    },
-    // 时间格式化
-    timeFormatter(row, type) {
-      let dateStr = row[type.property];
-      if (!dateStr) {
-        return "";
-      }
-      return (
-        dateStr.substr(5, 2) +
-        "/" +
-        dateStr.substr(8, 2) +
-        " " +
-        dateStr.substr(11, 2) +
-        ":" +
-        dateStr.substr(14, 2)
-      );
-    },
-    // 弹窗关闭事件
-    closeDialog() {
-      this.$refs.checkDialogForm.resetFields();
+          defer.resolve();
+        },
+        error: function(err) {
+          defer.reject();
+        }
+      });
+      return defer;
     }
   },
+  computed: {},
+  beforeDestroy() {},
   components: {
     fjBreadNav
   }
 };
 </script>
 <style scope lang="less">
-.recuit {
+.workLog {
   .fj-search-inline {
     // 上下间距
     @media screen and (max-width: 1366px) {
@@ -628,17 +614,7 @@ export default {
       }
     }
   }
-  .textLeft {
-    text-align: left;
-  }
-  .check-dialog {
-    /deep/ .el-form-item {
-      textarea {
-        width: 300px;
-      }
-    }
-  }
-  /deep/ .el-table {
+  .el-tables {
     .circle-status {
       position: relative;
       &.red {
@@ -669,14 +645,27 @@ export default {
         left: -9px;
       }
     }
+    /deep/ .textLeft {
+      text-align: left;
+    }
   }
-  .el-dialog__body{
-    div{
-      margin: 20px;
-      .el-radio{
-        margin-left: 20px;
+  .check-dialog {
+    /deep/ .el-form-item {
+      textarea {
+        width: 300px;
+      }
+    }
+  }
+  .detail-dialog {
+    /deep/ .el-form-item {
+      .el-textarea {
+        textarea {
+          width: 240px;
+        }
       }
     }
   }
 }
 </style>
+
+

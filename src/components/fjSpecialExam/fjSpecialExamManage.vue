@@ -23,7 +23,7 @@
                       <el-checkbox label="多选"></el-checkbox>
                       <el-checkbox label="其他"></el-checkbox>
                     </el-checkbox-group>
-                    <p v-if="userInfo.state == 1">单选，单选</p>
+                    <p v-if="isDisabled">单选，单选</p>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -32,7 +32,7 @@
                   <el-form-item prop="city" label="选题规则">
                     <el-select
                       v-model="ruleForm.data.selectRules"
-                      v-bind:disabled="userInfo.state == 1"
+                      :disabled="isDisabled"
                       placeholder="请选择（必选）"
                     >
                       <el-option :value="1" label="单选题"></el-option>
@@ -44,7 +44,7 @@
                   <el-form-item class="noBR" prop="street" label="考试类型">
                     <el-select
                       v-model="ruleForm.data.examType"
-                      v-bind:disabled="userInfo.state == 1"
+                      :disabled="isDisabled"
                       placeholder="请选择（必选）"
                     >
                       <el-option :value="1" label="单选题"></el-option>
@@ -58,8 +58,9 @@
                   <el-form-item prop="community" label="题目数量">
                     <el-select
                       v-model="ruleForm.data.amount"
-                      v-bind:disabled="userInfo.state == 1"
+                      :disabled="isDisabled"
                       placeholder="请选择（必选）"
+                      @change="amountChange"
                     >
                       <el-option :value="10" label="10"></el-option>
                       <el-option :value="20" label="20"></el-option>
@@ -69,11 +70,7 @@
                 </el-col>
                 <el-col :span="12">
                   <el-form-item class="noBR" prop="road" label="试卷分数">
-                    <el-input
-                      v-model="ruleForm.data.score"
-                      v-bind:disabled="userInfo.state == 1"
-                      placeholder="100分"
-                    ></el-input>
+                    <el-input v-model="ruleForm.data.score" disabled placeholder="100分"></el-input>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -81,9 +78,10 @@
                 <el-col :span="12">
                   <el-form-item prop="houseNumber" label="考试日期">
                     <el-date-picker
-                      v-bind:disabled="userInfo.state == 1"
+                      :disabled="isDisabled"
                       v-model="ruleForm.data.examTime"
                       type="date"
+                      value-format="yyyy-MM-dd"
                       placeholder="请选择"
                     ></el-date-picker>
                   </el-form-item>
@@ -92,7 +90,7 @@
                   <el-form-item class="noBR" prop="plots" label="考试时长">
                     <el-select
                       v-model="ruleForm.data.time"
-                      v-bind:disabled="userInfo.state == 1"
+                      :disabled="isDisabled"
                       placeholder="请选择（必选）"
                     >
                       <el-option :value="30" label="30"></el-option>
@@ -107,8 +105,9 @@
                   <el-form-item prop="entityName" label="题目分数">
                     <el-select
                       v-model="ruleForm.data.community"
-                      v-bind:disabled="userInfo.state == 1"
+                      :disabled="isDisabled"
                       placeholder="请选择（必选）"
+                      @change="communityChange"
                     >
                       <el-option :value="4" label="4"></el-option>
                       <el-option :value="5" label="5"></el-option>
@@ -120,7 +119,7 @@
                   <el-form-item class="noBR" label="题序随机">
                     <el-radio v-model="radio" label="1" v-if="userInfo.state != 1">是</el-radio>
                     <el-radio v-model="radio" label="2" v-if="userInfo.state != 1">否</el-radio>
-                    <p v-if="userInfo.state == 1">是</p>
+                    <p v-if="isDisabled">是</p>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -128,7 +127,7 @@
                 <el-col :span="24">
                   <el-form-item class="noBR noBB" label="适用人员">
                     <el-input
-                      v-bind:disabled="userInfo.state == 1"
+                      :disabled="isDisabled"
                       v-model="ruleForm.data.people"
                       @focus="checkDialogVisible=true"
                     ></el-input>
@@ -143,11 +142,7 @@
             <p class="title">
               <span>试卷内容</span>
               <el-button @click="createPaper()" v-if="userInfo.state != 1">重新生成试卷</el-button>
-              <el-button
-                type="primary"
-                @click="postRuleForm()"
-                v-if="userInfo.state != 1"
-              >保存试卷</el-button>
+              <el-button type="primary" @click="postRuleForm()" v-if="userInfo.state != 1">保存试卷</el-button>
             </p>
           </div>
           <div class="foot-body">
@@ -169,7 +164,7 @@
                   <el-checkbox v-for="city in cities" :label="city" :key="city">{{city}}</el-checkbox>
                 </el-checkbox-group>
               </el-aside>
-              <el-main :class="userInfo.state == 1?aside-left:''">
+              <el-main :class="isDisabled?'aside-left':''">
                 <div class="head" v-if="userInfo.state != 1">
                   <span>
                     <img src="static/images/exam-manage-info.png" alt>
@@ -332,6 +327,7 @@ export default {
       checkDialogVisible: false,
       isCreatePaperShow: false,
       isTitleDisabled: true,
+      isDisabled: false,
       ruleForm: {
         data: {
           // title: "这里是题库的标题",
@@ -347,7 +343,7 @@ export default {
           id: "",
           title: "这里是题库的标题",
           type: [],
-          score: "10",
+          score: "100",
           time: "60",
           people: "适合人群",
           // state:状态，0启用，1停用，-1删除，默认1
@@ -425,6 +421,34 @@ export default {
           return false;
         }
       });
+    },
+    //题目数量变化对于改变题目分数
+    amountChange(val) {
+      switch (val) {
+        case 10:
+          this.ruleForm.data.community = 10;
+          break;
+        case 20:
+          this.ruleForm.data.community = 5;
+          break;
+        default:
+          this.ruleForm.data.community = 4;
+          break;
+      }
+    },
+    //题目分数变化对于改变题目数量
+    communityChange(val) {
+      switch (val) {
+        case 10:
+          this.ruleForm.data.amount = 10;
+          break;
+        case 5:
+          this.ruleForm.data.amount = 20;
+          break;
+        default:
+          this.ruleForm.data.amount = 25;
+          break;
+      }
     },
     //生成试卷
     createPaper() {
@@ -563,8 +587,8 @@ export default {
         vm.ruleForm.data.id = vm.userInfo.id;
       }
       console.log(123);
-      vm.ruleForm.data.type="单选";
-      vm.ruleForm.data.examList="";
+      vm.ruleForm.data.type = "单选";
+      vm.ruleForm.data.examList = "";
       // vm.ruleForm.data.tableName = vm.activeList[vm.userInfo.index].tableName;
       // vm.ruleForm.data.userId = $.parseJSON(
       //   fjPublic.getLocalData("userInfo")
@@ -589,16 +613,15 @@ export default {
     setCreated() {
       this.userInfo = this.$route.query;
       this.userInfo.state != 0 && (this.isCreatePaperShow = true);
+      this.userInfo.state == 1
+        ? (this.isDisabled = true)
+        : (this.isDisabled = false);
     },
     routerGo() {
       window.history.go(-1);
     }
   },
   watch: {
-    // checkedCities: function(val) {
-    //   console.log(val);
-    //   this.headInfo.choose=this.checkedCities.length;
-    // }
     checkedCities: {
       handler: function(val, oldval) {
         console.log(val, oldval);
@@ -781,6 +804,69 @@ export default {
 }
 .Exam-Manage-form-area {
   margin-top: 10px;
+  .el-form {
+    .el-form-item {
+      position: relative;
+      height: 44px;
+      line-height: 44px;
+      margin-bottom: 0;
+      border-bottom: 1px solid #e8e8e8;
+      border-right: 1px solid #e8e8e8;
+      .el-form-item__label,
+      .el-form-item__content {
+        line-height: 44px;
+      }
+      label {
+        position: absolute;
+        width: 200px;
+        text-align: left;
+        padding-right: 0;
+        padding-left: 20px;
+        border-right: 1px solid #e8e8e8;
+      }
+      .el-form-item__content {
+        padding-left: 200px;
+      }
+      .el-input {
+        width: 100%;
+        input {
+          height: 42px;
+          border: none;
+        }
+      }
+      .el-select {
+        width: 100%;
+        .el-input {
+          padding-left: 0;
+
+          input {
+            height: 42px !important;
+          }
+        }
+        .is-disabled {
+          span {
+            display: none;
+          }
+        }
+      }
+    }
+    .el-row:nth-child(1) {
+      border-top: 1px solid #e8e8e8;
+    }
+    .el-row {
+      .el-col:nth-child(1) {
+        border-left: 1px solid #e8e8e8;
+      }
+      .el-input.is-disabled .el-input__inner {
+        color: rgba(0, 0, 0, 0.9);
+      }
+    }
+    .row-img-padding {
+      .el-form-item__content {
+        padding-right: 150px;
+      }
+    }
+  }
   .el-checkbox-group {
     margin-left: 18px;
   }
@@ -808,210 +894,7 @@ export default {
     }
   }
 }
-.fj-content_view.Exam-Manage {
-  background: #fff;
-}
-.fj-content_view_mask {
-  background: #f0f2f5;
-}
-.fj-content_view.Exam-Manage .Exam-Manage-form-area.x-scroll {
-  overflow-x: scroll;
-}
-.fj-content_view.Exam-Manage .Exam-Manage-form-area > .el-form {
-  margin-bottom: 15px;
-}
-.fj-content_view.Exam-Manage .el-form {
-  border: 1px solid #e8e8e8;
-}
-.fj-content_view.Exam-Manage .el-form.has-table {
-  border: none;
-}
-.fj-content_view.Exam-Manage .el-form .el-form-item {
-  margin-bottom: 0px;
-  border-right: 1px solid #e8e8e8;
-  border-bottom: 1px solid #e8e8e8;
-}
-.fj-content_view.Exam-Manage .el-form .el-form-item.noBR {
-  border-right: none;
-}
-.fj-content_view.Exam-Manage .el-form .el-form-item.noBB {
-  border-bottom: none;
-}
-/* 表单->表格调整 */
-.Exam-Manage-form-area .el-table th {
-  text-align: left;
-  color: rgba(0, 0, 0, 0.65);
-}
-.Exam-Manage-form-area
-  .el-table--enable-row-hover
-  .el-table__body
-  tr:hover
-  > td {
-  background-color: transparent;
-}
-.Exam-Manage-form-area .el-table td {
-  padding: 6px 0px;
-}
-.Exam-Manage-form-area .el-table td .el-input {
-  width: 100%;
-}
-.Exam-Manage-form-area .el-table td .el-input .el-input__inner {
-  padding: 0px 4px;
-  border: none;
-  color: rgba(0, 0, 0, 0.65);
-}
-.Exam-Manage-form-area .el-table td .el-textarea .el-textarea__inner {
-  border: none;
-  padding: 0px;
-}
-/*  */
-.fj-content_view.Exam-Manage .el-form .el-form-item__label {
-  min-width: 200px;
-  padding: 0px 0px 0px 20px;
-  line-height: 44px;
-  background-color: #fafafa;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  border-right: 1px solid #e8e8e8;
-  text-align: left;
-}
-.fj-content_view.Exam-Manage .el-form .el-form-item__content {
-  padding-left: 200px;
-  line-height: 44px;
-}
-.fj-content_view.Exam-Manage .el-form .el-form-item.NPL .el-form-item__content {
-  padding-left: 0px;
-}
-/* el-form样式修改 */
-.fj-content_view.Exam-Manage .el-form.no-title .el-form-item__label,
-.fj-content_view.Exam-Manage .el-form.no-content .el-form-item__content {
-  display: none;
-}
-.fj-content_view.Exam-Manage .el-form.no-title .el-form-item__label,
-.fj-content_view.Exam-Manage .el-form.no-content .el-form-item__label {
-  border-right: none;
-}
-.fj-content_view.Exam-Manage .el-form.no-content .el-form-item__label {
-  float: none;
-  display: block;
-}
-.fj-content_view.Exam-Manage .el-form.no-content + .el-form.no-title {
-  border-left: none;
-}
-.fj-content_view.Exam-Manage .el-form[class*="no"] {
-  float: left;
-}
-.fj-content_view.Exam-Manage .el-form.no-title .el-form-item__content {
-  padding-left: 0px;
-}
-.fj-content_view.Exam-Manage .el-form.no-content .el-form-item__label,
-.fj-content_view.Exam-Manage .el-form.no-title .el-form-item__content {
-  position: relative;
-  min-width: 160px;
-}
-.fj-content_view.Exam-Manage
-  .el-form.no-title
-  .el-form-item__content
-  .el-input.is-disabled
-  .el-input__inner {
-  background-color: #fafafa;
-  color: rgba(0, 0, 0, 0.65);
-}
-/*  */
-/* 表单调整 */
-.fj-content_view.Exam-Manage .el-form .el-form-item__content .el-select,
-.fj-content_view.Exam-Manage .el-form .el-form-item__content .el-input {
-  display: block;
-  width: 100%;
-}
-.fj-content_view.Exam-Manage
-  .el-form
-  .el-form-item__content
-  .el-input
-  > .el-input__inner {
-  height: 44px;
-  line-height: 44px;
-  border-color: #fff;
-  border-radius: 0;
-  color: rgba(0, 0, 0, 0.65);
-}
-.el-form-item.is-error .el-input__inner,
-.el-form-item.is-error .el-input__inner:focus {
-  border-color: #f56c6c !important;
-}
-/* 弹层操作 */
-.fj-content_view.Exam-Manage .el-dialog .el-dialog__header {
-  padding: 40px 56px;
-  font-size: 20px;
-  color: rgba(0, 0, 0, 0.85);
-}
-.fj-content_view.Exam-Manage .el-dialog .el-dialog__body {
-  padding: 0px 56px 20px;
-}
-.fj-content_view.Exam-Manage .el-dialog .el-dialog__body .columns {
-  display: flex;
-}
-.fj-content_view.Exam-Manage .el-dialog .el-dialog__body .fj-column,
-.fj-content_view.Exam-Manage .el-dialog .el-dialog__body .fj-column {
-  flex: 1 0 auto;
-}
-.fj-content_view.Exam-Manage .el-dialog .el-dialog__body .title-column {
-  flex: 0 0 auto;
-  width: 200px;
-}
-.fj-content_view.Exam-Manage
-  .el-dialog
-  .el-dialog__body
-  .title-column
-  > .el-form {
-  border-right: none;
-}
-.fj-content_view.Exam-Manage .el-dialog .el-dialog__body .fj-column > .el-form {
-  border-right: none;
-}
-.fj-content_view.Exam-Manage .el-dialog .el-dialog__body .el-form[class*="no"] {
-  float: none;
-}
-.fj-content_view.Exam-Manage
-  .el-dialog
-  .el-dialog__body
-  .title-column
-  .el-form
-  .el-form-item__label {
-  background-color: transparent;
-}
-/*  */
-.fj-content_view.Exam-Manage
-  .el-dialog
-  .el-dialog__body
-  [class*="-column"]
-  .el-form:first-child {
-  border-bottom: none;
-}
-/*  */
-.fj-content_view.Exam-Manage
-  .el-dialog
-  .el-dialog__body
-  .title-column
-  > .el-form
-  .el-form-item:nth-of-type(2n),
-.fj-content_view.Exam-Manage
-  .el-dialog
-  .el-dialog__body
-  .fj-column
-  > .el-form
-  .el-form-item:nth-of-type(2n)
-  .el-input__inner,
-.fj-content_view.Exam-Manage
-  .el-dialog
-  .el-dialog__body
-  .mj-column
-  > .el-form
-  .el-form-item:nth-of-type(2n)
-  .el-input__inner {
-  background-color: #f0faff;
-}
+
 @media screen and (min-width: 1920px) {
   /* .fj-content_view.Exam-Manage .el-form .el-form-item__content .el-select {width:60%;} */
 }
