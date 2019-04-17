@@ -10,7 +10,7 @@
         </div>
         <div class="fj-block-body">
           <!-- 表单输入区域 -->
-          <div class="Exam-Manage-form-area">
+          <div class="Exam-Fraction-form-area">
             <el-form :model="ruleForm" ref="ruleForm" :rules="rules">
               <el-row>
                 <el-col :span="8">
