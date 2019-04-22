@@ -199,23 +199,13 @@
                 <el-col :span="12" class="noBR form-table-col">
                   <div class="left">
                     <div class="title title-left titles">起止年月</div>
-                    <div class="title title-left">
+                    <div
+                      class="title title-left"
+                      v-for="(item, index) in ruleForm.educations"
+                      :key="index"
+                    >
                       <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-left">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-left title-bottom">
-                      <el-input
-                        v-model="ruleForm.road"
+                        v-model="item.eduDate"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -223,23 +213,9 @@
                   </div>
                   <div class="right">
                     <div class="title titles">学校名称</div>
-                    <div class="title">
+                    <div class="title" v-for="(item, index) in ruleForm.educations" :key="index">
                       <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-bottom">
-                      <el-input
-                        v-model="ruleForm.road"
+                        v-model="item.schoolName"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -249,23 +225,9 @@
                 <el-col :span="12" class="form-table-col">
                   <div class="left">
                     <div class="title titles">专业</div>
-                    <div class="title">
+                    <div class="title" v-for="(item, index) in ruleForm.educations" :key="index">
                       <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-bottom">
-                      <el-input
-                        v-model="ruleForm.road"
+                        v-model="item.majorName"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -273,23 +235,9 @@
                   </div>
                   <div class="right">
                     <div class="title titles">所获学历、学位证书</div>
-                    <div class="title">
+                    <div class="title" v-for="(item, index) in ruleForm.educations" :key="index">
                       <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-bottom">
-                      <el-input
-                        v-model="ruleForm.road"
+                        v-model="item.degrees"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -305,23 +253,13 @@
                 <el-col :span="12" class="noBR form-table-col">
                   <div class="left">
                     <div class="title title-left titles">起止年月</div>
-                    <div class="title title-left">
+                    <div
+                      class="title title-left"
+                      v-for="(item, index) in ruleForm.works"
+                      :key="index"
+                    >
                       <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-left">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-left title-bottom">
-                      <el-input
-                        v-model="ruleForm.road"
+                        v-model="item.worDate"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -329,23 +267,9 @@
                   </div>
                   <div class="right">
                     <div class="title titles">单位名称</div>
-                    <div class="title">
+                    <div class="title" v-for="(item, index) in ruleForm.works" :key="index">
                       <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-bottom">
-                      <el-input
-                        v-model="ruleForm.road"
+                        v-model="item.companyName"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -355,23 +279,9 @@
                 <el-col :span="12" class="form-table-col">
                   <div class="left-over">
                     <div class="title titles">职位</div>
-                    <div class="title">
+                    <div class="title" v-for="(item, index) in ruleForm.works" :key="index">
                       <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-bottom">
-                      <el-input
-                        v-model="ruleForm.road"
+                        v-model="item.positionName"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -387,23 +297,13 @@
                 <el-col :span="12" class="noBR form-table-col">
                   <div class="left">
                     <div class="title title-left titles">关系</div>
-                    <div class="title title-left">
+                    <div
+                      class="title title-left"
+                      v-for="(item, index) in ruleForm.families"
+                      :key="index"
+                    >
                       <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-left">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-left title-bottom">
-                      <el-input
-                        v-model="ruleForm.road"
+                        v-model="item.relation"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -411,23 +311,9 @@
                   </div>
                   <div class="right">
                     <div class="title titles">姓名</div>
-                    <div class="title">
+                    <div class="title" v-for="(item, index) in ruleForm.families" :key="index">
                       <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-bottom">
-                      <el-input
-                        v-model="ruleForm.road"
+                        v-model="item.name"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -437,23 +323,9 @@
                 <el-col :span="12" class="form-table-col">
                   <div class="left-over">
                     <div class="title titles">工作单位（职业）</div>
-                    <div class="title">
+                    <div class="title" v-for="(item, index) in ruleForm.families" :key="index">
                       <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-bottom">
-                      <el-input
-                        v-model="ruleForm.road"
+                        v-model="item.positionName"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -499,7 +371,10 @@ export default {
       activeList: [],
       userInfo: {},
       ruleForm: {
-        name: ""
+        name: "",
+        works: [{}, {}, {}],
+        families: [{}, {}, {}],
+        educations: [{}, {}, {}]
       },
       randomCityList: [], //抽查地点
       subofficeList: [], //房屋所属分局
@@ -586,8 +461,10 @@ export default {
         },
         dataType: "json",
         success: function(data) {
-          // console.log(data);
           vm.ruleForm = data;
+          vm.addArrObj("educations", 3);
+          vm.addArrObj("families", 3);
+          vm.addArrObj("works", 3);
           defer.resolve();
         },
         error: function(err) {
@@ -595,6 +472,21 @@ export default {
         }
       });
       return defer;
+    },
+    /**
+     * @description: 给数组添加对象元素
+     * @param {type} arr 数组名称
+     * @param {type} index 添加数量
+     * @return:
+     */
+    addArrObj: function(arr, index) {
+      var vm = this;
+      vm.ruleForm[arr].length = index;
+      for (let i = 0; i < index; i++) {
+        if (!vm.ruleForm[arr][i]) {
+          vm.ruleForm[arr][i] = {};
+        }
+      }
     },
     exportRecruitDetail: function() {
       // 导出
@@ -753,6 +645,9 @@ export default {
           display: inline-block;
           height: 44px;
           line-height: 44px;
+          div:nth-child(4) {
+            border-bottom: 1px solid #e8e8e8;
+          }
         }
         .left {
           width: 200px;
@@ -772,6 +667,7 @@ export default {
           border-right: 1px solid #e8e8e8;
           .el-input {
             width: 100%;
+            padding-left: 5px;
             .el-input__inner {
               border: none;
             }
@@ -786,9 +682,6 @@ export default {
           text-overflow: ellipsis;
           text-align: left;
           font-weight: 400;
-        }
-        .title-bottom {
-          border-bottom: 1px solid #e8e8e8;
         }
         .title-left {
           border-left: 1px solid #e8e8e8;

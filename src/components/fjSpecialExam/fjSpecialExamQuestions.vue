@@ -388,9 +388,8 @@ export default {
     //   }
     // }
     "ruleForm.data": {
-      //监控题库是否修改，修改触发更新，在点击提交试题的时候
+      //监控题库是否修改，修改触发更新接口，在点击提交试题的时候
       handler(val) {
-        // console.log(val);
         this.isEditData = true;
       },
       deep: true
@@ -414,7 +413,7 @@ export default {
     input {
       height: 50px;
       background: rgba(255, 255, 255, 1);
-      border: 1px solid rgba(0, 0, 0, 0.14901960784313725);
+      border: 1px solid rgba(0, 0, 0, 0.15);
       opacity: 1;
       text-align: center;
       font-size: 16px;
@@ -503,7 +502,7 @@ export default {
             }
             .add-topic-btn {
               display: inline-block;
-              margin-left: 50px;
+              margin-left: 40px;
             }
           }
         }
@@ -562,20 +561,6 @@ export default {
             }
           }
         }
-        // .revise-topic {
-        //   .topic {
-        //     margin: 15px 0;
-        //     input {
-        //       width: 680px;
-        //     }
-        //   }
-        //   li {
-        //     margin: 15px 20px 0;
-        //     .el-input {
-        //       width: 480px;
-        //     }
-        //   }
-        // }
       }
     }
   }

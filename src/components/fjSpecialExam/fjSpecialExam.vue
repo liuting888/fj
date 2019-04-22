@@ -255,6 +255,7 @@ export default {
         { name: "教培管理", path: "" },
         { name: "专题考试", path: "" }
       ],
+      nowUser: $.cookie(fjPublic.loginCookieKey),
       activeIndex: "0",
       // 状态下拉框
       missionStates: [

@@ -18,10 +18,10 @@
               <el-row>
                 <el-col :span="24">
                   <el-form-item prop="houseNumber" label="题目类型">
-                    <el-checkbox-group v-model="ruleForm.data.type" v-if="userInfo.state != 1">
-                      <el-checkbox label="单选"></el-checkbox>
-                      <el-checkbox label="多选"></el-checkbox>
-                      <el-checkbox label="其他"></el-checkbox>
+                    <el-checkbox-group v-model="type" v-if="userInfo.state != 1">
+                      <el-checkbox label="1">单选</el-checkbox>
+                      <el-checkbox label="2">多选</el-checkbox>
+                      <el-checkbox label="0">其他</el-checkbox>
                     </el-checkbox-group>
                     <p v-if="isDisabled">单选，单选</p>
                   </el-form-item>
@@ -151,7 +151,7 @@
                 <div class="head">题库/行政法规</div>
                 <div class="search">
                   <el-input
-                    v-model="ruleForm.data.people"
+                    v-model="searchAttend"
                     clearable
                     placeholder="请输入"
                     size="small"
@@ -167,7 +167,8 @@
               <el-main :class="isDisabled?'aside-left':''">
                 <div class="head" v-if="userInfo.state != 1">
                   <span>
-                    <img src="static/images/exam-manage-info.png" alt>
+                    <!-- <img src="static/images/exam-manage-info.png" alt> -->
+                    <i class="el-icon-info"></i>
                   </span>
                   <span>
                     已选择
@@ -324,10 +325,12 @@ export default {
         { name: "专题考试", path: "" }
       ],
       userInfo: {},
+      searchAttend: "", //题库搜索框
       checkDialogVisible: false,
       isCreatePaperShow: false,
       isTitleDisabled: true,
       isDisabled: false,
+      type: [], //题目类型
       ruleForm: {
         data: {
           // title: "这里是题库的标题",
@@ -363,22 +366,15 @@ export default {
             D: "hahaD",
             rightOptions: ["2"],
             editIcon: false //用来判断是否展示侧边栏图标
-          },
-          {
-            question: "题目2",
-            A: "hahaA2",
-            B: "hahaB2",
-            C: "hahaC2",
-            D: "hahaD2",
-            rightOptions: ["1"],
-            editIcon: false //用来判断是否展示侧边栏图标
           }
         ]
       },
       title: "这里是试卷的标题",
       checkList: ["单选"],
-      checkedCities: ["上海", "北京"],
-      cities: ["上海", "北京", "广州", "深圳"],
+      checkedCities: [],
+      cities: [],
+      citiesId: [],
+      citiesList: [],
       headInfo: {
         //试卷题目数量信息
         all: "20",
@@ -455,6 +451,7 @@ export default {
       this.isCreatePaperShow = true;
       this.ruleForm.list = [];
       this.checkedCities = [];
+      this.searchAttendHistory();
     },
     treeAudit(i) {
       // console.log(this.$refs.tree.getCheckedNodes());
@@ -473,10 +470,10 @@ export default {
     },
     //删除考题
     delTopic(index) {
-      let title = this.ruleForm.list[index].title;
+      let title = this.ruleForm.list[index].question;
       this.ruleForm.list.splice(index, 1);
       this.checkedCities.forEach((item, i) => {
-        if (item == title) {
+        if (item.slice(item.indexOf(".") + 1) == title) {
           this.checkedCities.splice(i, 1);
         }
       });
@@ -521,24 +518,32 @@ export default {
         error: function(err) {}
       });
     },
-    // 搜索题库
+    // 获取题库列表数据
     searchAttendHistory: function() {
       var defer = $.Deferred();
       var vm = this;
       console.log(555);
-      // return new Promise((resolve, reject) => {
-      // $.ajax({
-      //   url: fjPublic.ajaxUrlDNN + "/addExamPaper",
-      //   type: "POST",
-      //   data: VM.examTime.data,
-      //   dataType: "json",
-      //   success: function(data) {
-      //     // vm.ruleForm.data.id = data.id;
-      //     // resolve(data);
-      //   },
-      //   error: function(err) {}
-      // });
-      // });
+      // vm.ruleForm.data.type
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/getExamList",
+        type: "POST",
+        data: {
+          question: vm.searchAttend,
+          type: vm.type.join(",")
+        },
+        dataType: "json",
+        success: function(data) {
+          console.log(data);
+          vm.citiesList = data;
+          vm.cities = [];
+          vm.citiesId = [];
+          for (let i = 0; i < data.length; i++) {
+            vm.cities.push(i + 1 + "." + data[i].question);
+            vm.citiesId.push(data[i].id);
+          }
+        },
+        error: function(err) {}
+      });
     },
     // // 新增试卷
     // addExam: function() {
@@ -587,28 +592,34 @@ export default {
         vm.ruleForm.data.id = vm.userInfo.id;
       }
       console.log(123);
-      vm.ruleForm.data.type = "单选";
-      vm.ruleForm.data.examList = "";
+      vm.ruleForm.data.type = vm.type.join(",");
+      let idList = [];
+      for (let i = 0; i < vm.ruleForm.list.length; i++) {
+        idList.push(vm.ruleForm.list[i].id);
+      }
+
+      vm.ruleForm.data.examList = idList.join(",");
+      console.log(vm.ruleForm.data.examList);
       // vm.ruleForm.data.tableName = vm.activeList[vm.userInfo.index].tableName;
       // vm.ruleForm.data.userId = $.parseJSON(
       //   fjPublic.getLocalData("userInfo")
       // ).userId;
-      $.ajax({
-        url: fjPublic.ajaxUrlDNN + url,
-        type: "POST",
-        data: vm.ruleForm.data,
-        dataType: "json",
-        success: function(data) {},
-        error: function(err) {
-          if (err.responseText == "success") {
-            console.log(123);
-            // vm.$router.push({
-            //   path: "/fjWorkManage-YiBiaoSanShi"
-            // });
-          } else {
-          }
-        }
-      });
+      // $.ajax({
+      //   url: fjPublic.ajaxUrlDNN + url,
+      //   type: "POST",
+      //   data: vm.ruleForm.data,
+      //   dataType: "json",
+      //   success: function(data) {},
+      //   error: function(err) {
+      //     if (err.responseText == "success") {
+      //       console.log(123);
+      //       // vm.$router.push({
+      //       //   path: "/fjWorkManage-YiBiaoSanShi"
+      //       // });
+      //     } else {
+      //     }
+      //   }
+      // });
     },
     setCreated() {
       this.userInfo = this.$route.query;
@@ -624,21 +635,33 @@ export default {
   watch: {
     checkedCities: {
       handler: function(val, oldval) {
+        let vm = this;
         console.log(val, oldval);
         if (val.length > oldval.length) {
-          let list = {};
-          list.question = val[val.length - 1];
-          list.A = "66";
-          list.B = "66";
-          list.C = "66";
-          list.D = "66";
-          list.rightOptions = ["2"];
-          list.editIcon = false;
-          this.ruleForm.list.unshift(list);
+          let index = val[val.length - 1].split(".")[0] - 1;
+          let data = vm.citiesList[index];
+          let tm = {
+            id: data.id,
+            question: data.question,
+            A: data.options.split("&GXCF&")[0],
+            B: data.options.split("&GXCF&")[1],
+            C: data.options.split("&GXCF&")[2],
+            D: data.options.split("&GXCF&")[3],
+            rightOptions: data.rightOptions.split("|"),
+            editIcon: false //用来判断是否展示侧边栏图标
+          };
+          vm.ruleForm.list.unshift(tm);
         } else {
+          //对比取出2个数组之间不同的元素
+          function getArrDifference(arr1, arr2) {
+            return arr1.concat(arr2).filter(function(v, i, arr) {
+              return arr.indexOf(v) === arr.lastIndexOf(v);
+            });
+          }
+          let tm = getArrDifference(val, oldval)[0];
           this.ruleForm.list.forEach((item, i) => {
             for (const key in item) {
-              if (item[key] == oldval[oldval.length - 1]) {
+              if (item[key] == vm.citiesId[tm.split(".")[0] - 1]) {
                 this.ruleForm.list.splice(i, 1);
               }
             }
@@ -702,6 +725,9 @@ export default {
           }
         }
       }
+      .el-checkbox-group {
+        max-height: 800px;
+      }
       .el-checkbox {
         width: 100%;
         height: 50px;
@@ -726,10 +752,8 @@ export default {
         background: rgba(230, 247, 255, 1);
         border: 1px solid rgba(186, 231, 255, 1);
         opacity: 1;
-        img {
-          width: 14px;
-          height: 14px;
-          vertical-align: middle;
+        .el-icon-info {
+          color: #1890ff;
         }
         .text-blue {
           color: #1890ff;
@@ -803,7 +827,7 @@ export default {
   }
 }
 .Exam-Manage-form-area {
-  margin-top: 10px;
+  padding: 10px 0;
   .el-form {
     .el-form-item {
       position: relative;
@@ -815,6 +839,21 @@ export default {
       .el-form-item__label,
       .el-form-item__content {
         line-height: 44px;
+        .el-checkbox-group {
+          margin-left: 18px;
+          .el-checkbox {
+            border: none;
+            position: relative;
+            width: 40px;
+            padding-left: 0;
+          }
+        }
+        .el-radio {
+          border: none;
+          position: relative;
+          width: 40px;
+          padding-left: 0;
+        }
       }
       label {
         position: absolute;
@@ -867,9 +906,7 @@ export default {
       }
     }
   }
-  .el-checkbox-group {
-    margin-left: 18px;
-  }
+
   .el-radio {
     margin-left: 18px;
   }
