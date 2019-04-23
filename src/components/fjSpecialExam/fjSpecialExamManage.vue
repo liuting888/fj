@@ -35,8 +35,8 @@
                       :disabled="isDisabled"
                       placeholder="请选择（必选）"
                     >
-                      <el-option :value="1" label="单选题"></el-option>
-                      <el-option :value="0" label="单选题"></el-option>
+                      <el-option :value="'1'" label="单选题"></el-option>
+                      <el-option :value="'0'" label="单选题"></el-option>
                     </el-select>
                   </el-form-item>
                 </el-col>
@@ -47,8 +47,8 @@
                       :disabled="isDisabled"
                       placeholder="请选择（必选）"
                     >
-                      <el-option :value="1" label="单选题"></el-option>
-                      <el-option :value="0" label="单选题"></el-option>
+                      <el-option :value="'1'" label="单选题"></el-option>
+                      <el-option :value="'0'" label="单选题"></el-option>
                     </el-select>
                   </el-form-item>
                 </el-col>
@@ -104,7 +104,7 @@
                 <el-col :span="12">
                   <el-form-item prop="entityName" label="题目分数">
                     <el-select
-                      v-model="ruleForm.data.community"
+                      v-model="ruleForm.data.oneScore"
                       :disabled="isDisabled"
                       placeholder="请选择（必选）"
                       @change="communityChange"
@@ -172,8 +172,8 @@
                   </span>
                   <span>
                     已选择
-                    <span class="text-blue">{{headInfo.choose}}</span>
-                    项，单选题{{headInfo.radio}}题，多选题{{headInfo.selection}}题，本套试卷共{{headInfo.all}}题（共计{{ruleForm.data.score}}分）。
+                    <span class="text-blue">{{ruleForm.list.length}}</span>
+                    项，单选题{{headInfo.radio}}题，多选题{{headInfo.selection}}题，本套试卷共{{ruleForm.data.amount}}题（共计{{ruleForm.data.score}}分）。
                   </span>
                   <span class="text-blue" @click="createPaper()">清空</span>
                 </div>
@@ -333,40 +333,31 @@ export default {
       type: [], //题目类型
       ruleForm: {
         data: {
-          // title: "这里是题库的标题",
-          // score: 100,
-          // time: 30,
-          // examType: 30,
-          // type: 30,
-          // people: 30,
-          // instime: 30,
-          // amount: 10,
-          // id: "",
-          // type: []
           id: "",
           title: "这里是题库的标题",
           type: [],
           score: "100",
           time: "60",
-          people: "适合人群",
+          oneScore: "",
+          people: "",
           // state:状态，0启用，1停用，-1删除，默认1
-          examList: "题目id集合，用逗号隔开",
-          selectRules: "选题规则",
+          examList: "",
+          selectRules: "1",
           place: "考试地点",
           content: "内容",
-          examType: "考试类型",
-          examTime: "2019-01-01"
+          examType: "1",
+          examTime: ""
         },
         list: [
-          {
-            question: "题目1",
-            A: "hahaA",
-            B: "hahaB",
-            C: "hahaC",
-            D: "hahaD",
-            rightOptions: ["2"],
-            editIcon: false //用来判断是否展示侧边栏图标
-          }
+          // {
+          //   question: "题目1",
+          //   A: "hahaA",
+          //   B: "hahaB",
+          //   C: "hahaC",
+          //   D: "hahaD",
+          //   rightOptions: ["2"],
+          //   editIcon: false //用来判断是否展示侧边栏图标
+          // }
         ]
       },
       title: "这里是试卷的标题",
@@ -377,7 +368,6 @@ export default {
       citiesList: [],
       headInfo: {
         //试卷题目数量信息
-        all: "20",
         radio: "10",
         selection: "10",
         choose: "0"
@@ -402,6 +392,7 @@ export default {
   mounted() {
     this.setCreated();
     this.getDetailList();
+    this.userInfo.state == 2 && this.searchAttendHistory();
   },
   methods: {
     // 验证规则
@@ -422,13 +413,13 @@ export default {
     amountChange(val) {
       switch (val) {
         case 10:
-          this.ruleForm.data.community = 10;
+          this.ruleForm.data.oneScore = 10;
           break;
         case 20:
-          this.ruleForm.data.community = 5;
+          this.ruleForm.data.oneScore = 5;
           break;
         default:
-          this.ruleForm.data.community = 4;
+          this.ruleForm.data.oneScore = 4;
           break;
       }
     },
@@ -499,8 +490,8 @@ export default {
         },
         dataType: "json",
         success: function(data) {
-          console.log(data);
           vm.ruleForm.data = data.data;
+          vm.type = data.data.type.split(",");
           for (let i = 0; i < data.list.length; i++) {
             let tm = {
               id: data.list[i].id,
@@ -522,8 +513,6 @@ export default {
     searchAttendHistory: function() {
       var defer = $.Deferred();
       var vm = this;
-      console.log(555);
-      // vm.ruleForm.data.type
       $.ajax({
         url: fjPublic.ajaxUrlDNN + "/getExamList",
         type: "POST",
@@ -533,7 +522,6 @@ export default {
         },
         dataType: "json",
         success: function(data) {
-          console.log(data);
           vm.citiesList = data;
           vm.cities = [];
           vm.citiesId = [];
@@ -545,53 +533,19 @@ export default {
         error: function(err) {}
       });
     },
-    // // 新增试卷
-    // addExam: function() {
-    //   var defer = $.Deferred();
-    //   var vm = this;
-    //   // return new Promise((resolve, reject) => {
-    //   $.ajax({
-    //     url: fjPublic.ajaxUrlDNN + "/addExamPaper",
-    //     type: "POST",
-    //     data: VM.examTime.data,
-    //     dataType: "json",
-    //     success: function(data) {
-    //       // vm.ruleForm.data.id = data.id;
-    //       // resolve(data);
-    //     },
-    //     error: function(err) {}
-    //   });
-    //   // });
-    // },
-    // // 更新试卷
-    // updExam: function() {
-    //   var defer = $.Deferred();
-    //   var vm = this;
-    //   $.ajax({
-    //     url: fjPublic.ajaxUrlDNN + "/updExamPaper",
-    //     type: "POST",
-    //     data: {
-    //       id: vm.ruleForm.data.id,
-    //       title: vm.ruleForm.data.title,
-    //       type: vm.ruleForm.data.type,
-    //       content: vm.ruleForm.data.content,
-    //       examPeople: vm.ruleForm.data.examPeople
-    //     },
-    //     dataType: "json",
-    //     success: function(data) {
-    //       // console.log(data);
-    //     },
-    //     error: function(err) {}
-    //   });
-    // },
-    // 提交或者编辑数据
+    // 提交或者编辑试卷
     postRuleForm: function() {
       let vm = this;
+      if (vm.ruleForm.list.length != vm.ruleForm.data.amount) {
+        return this.$message({
+          message: "请确认题目总数",
+          type: "warning"
+        });
+      };
       let url = vm.userInfo.state == 0 ? "/addExamPaper" : "/updExamPaper";
       if (vm.userInfo.id) {
         vm.ruleForm.data.id = vm.userInfo.id;
       }
-      console.log(123);
       vm.ruleForm.data.type = vm.type.join(",");
       let idList = [];
       for (let i = 0; i < vm.ruleForm.list.length; i++) {
@@ -599,27 +553,21 @@ export default {
       }
 
       vm.ruleForm.data.examList = idList.join(",");
-      console.log(vm.ruleForm.data.examList);
-      // vm.ruleForm.data.tableName = vm.activeList[vm.userInfo.index].tableName;
-      // vm.ruleForm.data.userId = $.parseJSON(
-      //   fjPublic.getLocalData("userInfo")
-      // ).userId;
-      // $.ajax({
-      //   url: fjPublic.ajaxUrlDNN + url,
-      //   type: "POST",
-      //   data: vm.ruleForm.data,
-      //   dataType: "json",
-      //   success: function(data) {},
-      //   error: function(err) {
-      //     if (err.responseText == "success") {
-      //       console.log(123);
-      //       // vm.$router.push({
-      //       //   path: "/fjWorkManage-YiBiaoSanShi"
-      //       // });
-      //     } else {
-      //     }
-      //   }
-      // });
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + url,
+        type: "POST",
+        data: vm.ruleForm.data,
+        dataType: "json",
+        success: function(data) {},
+        error: function(err) {
+          if (err.responseText == "success") {
+            vm.$router.push({
+              path: "/special-exam"
+            });
+          } else {
+          }
+        }
+      });
     },
     setCreated() {
       this.userInfo = this.$route.query;
@@ -636,7 +584,6 @@ export default {
     checkedCities: {
       handler: function(val, oldval) {
         let vm = this;
-        console.log(val, oldval);
         if (val.length > oldval.length) {
           let index = val[val.length - 1].split(".")[0] - 1;
           let data = vm.citiesList[index];
@@ -667,7 +614,18 @@ export default {
             }
           });
         }
-        this.headInfo.choose = this.checkedCities.length;
+      }
+    },
+    //获取单选题和多选题的数量
+    "ruleForm.list": {
+      handler: function(val, oldval) {
+        let vm = this;
+        vm.headInfo.radio = 0;
+        vm.headInfo.selection = 0;
+        for (let i = 0; i < val.length; i++) {
+          val[i].rightOptions.length == 1 && (vm.headInfo.radio += 1);
+          val[i].rightOptions.length > 1 && (vm.headInfo.selection += 1);
+        }
       }
     }
   },

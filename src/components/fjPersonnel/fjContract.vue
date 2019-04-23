@@ -209,13 +209,13 @@ export default {
       ],
       // 列表查询参数
       searchForm: {
-        searchTime: "", // 查询时间
-        nameOrAccount: "", // 警号或负责人名称
-        deptId: "", // 派出所
-        supDeptId: "", // 公安局
-        status: "" // 状态
+        // searchTime: "", // 查询时间
+        // nameOrAccount: "", // 警号或负责人名称
+        // deptId: "", // 派出所
+        // supDeptId: "", // 公安局
+        // status: "" // 状态
       },
-      searchListUrl: "/searchUserLeave", //获取列表数据URL
+      searchListUrl: "/getContractList", //获取列表数据URL
       checkDialogTitle: "",
       checkDialogForm: {
         id: "",
@@ -329,10 +329,10 @@ export default {
     },
     // 设置获取列表参数
     setSearchList: function() {
-      this.searchForm["page"] = this.currentPage;
-      this.searchForm["rows"] = this.pageSize;
+      this.searchForm["pageNumber"] = this.currentPage;
+      this.searchForm["pageSize"] = this.pageSize;
       // 传入当前用户信息
-      this.searchForm["nowUser"] = this.nowUser;
+      // this.searchForm["nowUser"] = this.nowUser;
     },
     /**
      * 查看，编辑，新建

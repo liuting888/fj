@@ -17,8 +17,8 @@
             <div class="search-item">
               <span class="span-title">题库类型：</span>
               <el-select v-model="ruleForm.data.type" clearable>
-                <el-option :value="单选题" label="单选题"></el-option>
-                <el-option :value="多选题" label="多选题"></el-option>
+                <el-option :value="'1'" label="单选题"></el-option>
+                <el-option :value="'2'" label="多选题"></el-option>
               </el-select>
             </div>
             <div class="search-item hidden-lg-and-down">
@@ -44,7 +44,7 @@
                 <el-checkbox-group
                   v-model="addTopicList.rightOptions"
                   :min="1"
-                  :max="ruleForm.data.type=='单选题'?1:4"
+                  :max="ruleForm.data.type=='1'?1:4"
                 >
                   <el-checkbox label="0"></el-checkbox>
                   <el-checkbox label="1"></el-checkbox>
@@ -93,7 +93,7 @@
                   <el-checkbox-group
                     v-model="item.rightOptions"
                     :min="item.edit?item.rightOptions.length:1"
-                    :max="ruleForm.data.type=='单选题'?1:4"
+                    :max="ruleForm.data.type=='1'?1:4"
                   >
                     <el-checkbox
                       label="0"
@@ -304,7 +304,7 @@ export default {
               edt: false, //用来判断是否点击修改图标
               editIcon: false //用来判断是否展示侧边栏图标
             };
-            vm.ruleForm.list.unshift(tm);
+            vm.ruleForm.list.push(tm);
           }
         },
         error: function(err) {}

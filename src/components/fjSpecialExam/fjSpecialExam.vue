@@ -54,14 +54,14 @@
               <el-col :lg="6" :xl="5" v-if="activeIndex==2">
                 <el-form-item label="区县分局：">
                   <el-select
-                    @change="changeDeptId"
+                    @change="changeSupDeptId"
                     clearable
                     filterable
-                    v-model="searchForm.deptId"
+                    v-model="searchForm.supDeptId"
                     size="small"
                   >
                     <el-option
-                      v-for="item in missionStates"
+                      v-for="item in supDeptIds"
                       :key="item.deptId"
                       :label="item.deptName"
                       :value="item.deptId"
@@ -79,7 +79,7 @@
                     size="small"
                   >
                     <el-option
-                      v-for="item in missionStates"
+                      v-for="item in deptIds"
                       :key="item.deptId"
                       :label="item.deptName"
                       :value="item.deptId"
@@ -182,7 +182,7 @@
           <el-table-column label="题目数量" prop="amount" :key="Math.random()"></el-table-column>
           <el-table-column label="操作" :key="Math.random()">
             <template slot-scope="scope">
-              <span class="ope-txt" v-if="scope.row.state != 0">--</span>
+              <!-- <span class="ope-txt" v-if="scope.row.state != 0">--</span> -->
               <span class="ope-txt" v-if="scope.row.state == -1">复用</span>
               <span class="ope-txt" v-if="scope.row.state != 0" @click="goManage(1,scope.row.id)">查看</span>
               <span
@@ -214,7 +214,7 @@
           <el-table-column prop="title" label="试卷标题" :key="Math.random()"></el-table-column>
           <el-table-column prop="userName" label="姓名" :key="Math.random()"></el-table-column>
           <el-table-column prop="score" label="分数" :key="Math.random()"></el-table-column>
-          <el-table-column prop="time" label="考试日期" :key="Math.random()"></el-table-column>
+          <el-table-column prop="time" :formatter="timeFormatter" label="考试日期" :key="Math.random()"></el-table-column>
           <el-table-column prop="userAccount" label="警号" :key="Math.random()"></el-table-column>
           <el-table-column prop="deptName" label="单位" :key="Math.random()"></el-table-column>
           <el-table-column prop="useTime" label="用时" :key="Math.random()"></el-table-column>
@@ -257,6 +257,8 @@ export default {
       ],
       nowUser: $.cookie(fjPublic.loginCookieKey),
       activeIndex: "0",
+      deptIds: null, //派出所下拉框数据
+      supDeptIds: null, //分局下拉框数据
       // 状态下拉框
       missionStates: [
         {
@@ -283,10 +285,13 @@ export default {
     fjPublic.closeLoad();
     // 初始化任务列表
     this.searchList();
+    this.initSupDeptIds();
+    this.initDeptIds();
     return;
   },
   beforeRouteEnter(to, from, next) {
     next(function(vm) {
+      vm.searchList();
       fjPublic.closeLoad();
     });
   },
@@ -302,7 +307,12 @@ export default {
     changeSwitch(id, state) {
       console.log(id, state);
     },
-    // 修改单位下拉框查询
+    // 修改分局下拉框查询
+    changeSupDeptId: function(supDeptId) {
+      this.searchForm["supDeptId"] = supDeptId;
+      this.searchList();
+    },
+    // 修改派出所下拉框查询
     changeDeptId: function(deptId) {
       this.searchForm["deptId"] = deptId;
       this.searchList();
@@ -310,6 +320,46 @@ export default {
     // 标题或负责人名称查询
     searchAttendLeave: function() {
       this.searchList();
+    },
+    // 初始化分局
+    initSupDeptIds: function() {
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/searchDepListBySearch",
+        type: "POST",
+        data: {},
+        dataType: "json",
+        success: function(data) {
+          vm.supDeptIds = data.list;
+          defer.resolve();
+        },
+        error: function(err) {
+          defer.reject();
+        }
+      });
+      return defer;
+    },
+    // 初始化派出所
+    initDeptIds: function() {
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/searchDeptsByFenju",
+        type: "POST",
+        data: {
+          parentDeptId: ""
+        },
+        dataType: "json",
+        success: function(data) {
+          vm.deptIds = data.list;
+          defer.resolve();
+        },
+        error: function(err) {
+          defer.reject();
+        }
+      });
+      return defer;
     },
     // 更新题库
     updExam: function(id, state) {
@@ -350,7 +400,6 @@ export default {
       let vm = this;
       vm.setSearchList();
       $.ajax({
-        // url: fjPublic.ajaxUrlDNN + "/searchList",
         url: fjPublic.ajaxUrlDNN + vm.searchListUrl,
         type: "POST",
         data: vm.searchForm,
@@ -358,7 +407,6 @@ export default {
         success: function(data) {
           vm.tableDataList = null;
           vm.tableDataList = data.list;
-          vm.searchListUrl == "/getExamResultList" && (vm.tableDataList = data);
           vm.total = data.total;
           fjPublic.closeLoad();
         },
@@ -403,10 +451,12 @@ export default {
         return "";
       }
       return (
-        dateStr.substr(5, 2) + "/" + dateStr.substr(8, 2)
+        dateStr.substr(0, 4) +
+        "/" +
+        dateStr.substr(4, 2) +
+        "/" +
+        dateStr.substr(6, 2)
         // +
-        // " " +
-        // dateStr.substr(11, 2) +
         // ":" +
         // dateStr.substr(14, 2)
       );

@@ -15,7 +15,7 @@
               method="post"
               enctype="multipart/form-data"
             ></form>
-            <el-button type="primary" @click="openMFSpopMultiple">
+            <el-button v-if="ruleForm.step==0" type="primary" @click="openMFSpopMultiple">
               <span>审核</span>
             </el-button>
             <el-button plain @click="exportRecruitDetail">
@@ -67,7 +67,7 @@
                   <el-col :span="12">
                     <el-form-item label="民族" class="row-img-padding">
                       <el-input
-                        v-model="ruleForm.road"
+                        v-model="ruleForm.nation"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -88,7 +88,7 @@
                     <el-form-item label="婚否" class="row-img-padding">
                       <el-select
                         :disabled="isDisabled"
-                        v-model="ruleForm.plots"
+                        v-model="ruleForm.marriage"
                         :placeholder="isDisabled?'':'请选择'"
                       >
                         <el-option label="未婚" value="1"></el-option>
@@ -110,7 +110,7 @@
                   <el-col :span="12">
                     <el-form-item label="政治面貌" class="row-img-padding">
                       <el-input
-                        v-model="ruleForm.plots"
+                        v-model="ruleForm.politics"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -122,11 +122,11 @@
                     <el-form-item label="是否退役士兵/见义勇为人员">
                       <el-select
                         :disabled="isDisabled"
-                        v-model="ruleForm.plots"
+                        v-model="ruleForm.soldier"
                         :placeholder="isDisabled?'':'请选择'"
                       >
-                        <el-option label="是" value="1"></el-option>
-                        <el-option label="否" value="2"></el-option>
+                        <el-option label="是" value="0"></el-option>
+                        <el-option label="否" value="1"></el-option>
                       </el-select>
                     </el-form-item>
                   </el-col>
@@ -153,7 +153,7 @@
                   <el-col :span="12">
                     <el-form-item label="最高学位">
                       <el-input
-                        v-model="ruleForm.legalName"
+                        v-model="ruleForm.education"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -188,7 +188,10 @@
                   </el-col>
                 </el-row>
                 <div class="info-img">
-                  <img src="static/images/recruit-people.svg" alt="个人照片">
+                  <img
+                    :src="ruleForm.photo?ajaxUrlDNN+'/'+ruleForm.photo:'static/images/recruit-people.svg'"
+                    alt="个人照片"
+                  >
                 </div>
               </div>
             </el-form>

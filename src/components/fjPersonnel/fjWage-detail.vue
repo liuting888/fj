@@ -7,7 +7,7 @@
       <div class="fj-block-head kaohe"></div>
       <div class="fj-block-body">
         <div class="fj-search-inline">
-          <el-row>
+          <!-- <el-row>
             <el-form inline label-width="85px" label-position="left">
               <el-col :lg="8" :xl="7" class="time-item">
                 <el-form-item label="区县分局：">
@@ -80,7 +80,7 @@
                 </el-form-item>
               </el-col>
             </el-form>
-          </el-row>
+          </el-row> -->
         </div>
         <el-table :data="attendLeaveData">
           <el-table-column prop="userAccount" label="发放日期" :key="Math.random()"></el-table-column>
@@ -112,7 +112,7 @@
           <el-table-column prop="userAccount" label="扣发合计" :key="Math.random()"></el-table-column>
           <el-table-column prop="userAccount" label="实发合计" :key="Math.random()"></el-table-column>
           <el-table-column prop="userAccount" label="银行卡号" :key="Math.random()"></el-table-column>
-          <el-table-column label="操作" :key="Math.random()">
+          <!-- <el-table-column label="操作" :key="Math.random()">
             <template slot-scope="scope">
               <span class="ope-txt" v-if="scope.row.leave_state != 0">--</span>
               <span
@@ -126,7 +126,7 @@
                 @click="editDialog(scope.row.leaveId, 2)"
               >编辑</span>
             </template>
-          </el-table-column>
+          </el-table-column> -->
         </el-table>
         <div class="mj-page_wrap">
           <el-pagination
@@ -144,7 +144,7 @@
       </div>
     </div>
     <!-- 编辑弹出框 -->
-    <el-dialog
+    <!-- <el-dialog
       :title="checkDialogTitle"
       :visible.sync="editDialogVisible"
       :append-to-body="true"
@@ -295,7 +295,7 @@
         <el-button type="primary" @click="submitAudit(1)">确认修改</el-button>
         <el-button @click="submitAudit(2)">取 消</el-button>
       </div>
-    </el-dialog>
+    </el-dialog> -->
   </div>
 </template>
 <script>
