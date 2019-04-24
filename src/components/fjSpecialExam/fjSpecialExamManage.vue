@@ -81,7 +81,7 @@
                       :disabled="isDisabled"
                       v-model="ruleForm.data.examTime"
                       type="date"
-                      value-format="yyyy-MM-dd"
+                      value-format="yyyyMMdd"
                       placeholder="请选择"
                     ></el-date-picker>
                   </el-form-item>
@@ -392,7 +392,7 @@ export default {
   mounted() {
     this.setCreated();
     this.getDetailList();
-    this.userInfo.state == 2 && this.searchAttendHistory();
+    this.userInfo.state > 1 && this.searchAttendHistory();
   },
   methods: {
     // 验证规则
@@ -445,7 +445,6 @@ export default {
       this.searchAttendHistory();
     },
     treeAudit(i) {
-      // console.log(this.$refs.tree.getCheckedNodes());
       let list = this.$refs.tree.getCheckedNodes();
       this.ruleForm.data.people = "";
       for (let index = 0; index < list.length; index++) {
@@ -457,7 +456,6 @@ export default {
         }
       }
       this.checkDialogVisible = false;
-      // console.log(this.$refs.tree.getCheckedKeys());
     },
     //删除考题
     delTopic(index) {
@@ -541,17 +539,24 @@ export default {
           message: "请确认题目总数",
           type: "warning"
         });
-      };
-      let url = vm.userInfo.state == 0 ? "/addExamPaper" : "/updExamPaper";
+      }
       if (vm.userInfo.id) {
         vm.ruleForm.data.id = vm.userInfo.id;
+      }
+      let url = "/updExamPaper";
+      if (vm.userInfo.state == 0 || vm.userInfo.state == 3) {
+        url = "/addExamPaper";
+        vm.ruleForm.data.id = "";
+        vm.ruleForm.data.state = "1"; //复用和新建的试卷状态都暂时未待发布(0：发布，-1删除)
+        vm.ruleForm.data.createUserId = $.parseJSON(
+          fjPublic.getLocalData("userInfo")
+        ).userId; //添加人
       }
       vm.ruleForm.data.type = vm.type.join(",");
       let idList = [];
       for (let i = 0; i < vm.ruleForm.list.length; i++) {
         idList.push(vm.ruleForm.list[i].id);
       }
-
       vm.ruleForm.data.examList = idList.join(",");
       $.ajax({
         url: fjPublic.ajaxUrlDNN + url,
@@ -889,7 +894,11 @@ export default {
     }
   }
 }
-
+.el-date-picker__editor-wrap {
+  .el-input {
+    width: auto;
+  }
+}
 @media screen and (min-width: 1920px) {
   /* .fj-content_view.Exam-Manage .el-form .el-form-item__content .el-select {width:60%;} */
 }

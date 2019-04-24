@@ -166,16 +166,16 @@
           <el-table-column prop="title" label="试卷标题" :key="Math.random()"></el-table-column>
           <el-table-column prop="sigtypenTime" label="试卷类型" :key="Math.random()"></el-table-column>
           <el-table-column prop="score" label="总分" :key="Math.random()"></el-table-column>
-          <el-table-column prop="a" label="创建人" :key="Math.random()"></el-table-column>
+          <el-table-column prop="createUserName" label="创建人" :key="Math.random()"></el-table-column>
           <el-table-column prop="instime" label="发布时间" :key="Math.random()"></el-table-column>
           <el-table-column label="状态" width="100px" :key="Math.random()">
             <template slot-scope="scope">
               <span
                 class="circle-status"
-                :class="scope.row.state == 0 ? 'grey' : scope.row.state == 1 ? 'green' : 'red'"
+                :class="scope.row.state == 0 ? 'green' : scope.row.state == 1 ?  'grey': scope.row.state == 2 ?  'grey':'red'"
               >
-                {{parseInt( scope.row.state) === 0 ? '待发布' : parseInt( scope.row.state) === 1 ?'已发布'
-                : '被结束'}}
+                {{parseInt( scope.row.state) === 0 ? '已发布' : parseInt( scope.row.state) === 1 ?'未发布' : parseInt( scope.row.state) === 2 ?'已结束'
+                : '已删除'}}
               </span>
             </template>
           </el-table-column>
@@ -183,22 +183,22 @@
           <el-table-column label="操作" :key="Math.random()">
             <template slot-scope="scope">
               <!-- <span class="ope-txt" v-if="scope.row.state != 0">--</span> -->
-              <span class="ope-txt" v-if="scope.row.state == -1">复用</span>
-              <span class="ope-txt" v-if="scope.row.state != 0" @click="goManage(1,scope.row.id)">查看</span>
+              <span class="ope-txt" v-if="scope.row.state == 2" @click="goManage(3,scope.row.id)">复用</span>
+              <span class="ope-txt" v-if="scope.row.state != 1" @click="goManage(1,scope.row.id)">查看</span>
               <span
                 class="ope-txt"
-                v-if="scope.row.state == 0"
-                @click="checkUpdate(scope.row.exceptionid, 1)"
+                v-if="scope.row.state == 1"
+                @click="setManageState(scope.row.id, 0)"
               >发布</span>
               <span
                 class="ope-txt"
-                v-if="scope.row.state == 0"
+                v-if="scope.row.state == 1"
                 @click="goManage( 2,scope.row.id)"
               >编辑</span>
               <span
                 class="ope-txt"
-                v-if="scope.row.state == 0"
-                @click="openCheckDialog(scope.row.exceptionid, 2)"
+                v-if="scope.row.state >= 0"
+                @click="setManageState(scope.row.id, -1)"
               >删除</span>
             </template>
           </el-table-column>
@@ -300,6 +300,10 @@ export default {
     handleClick(tab) {
       console.log(tab);
       this.activeIndex = tab.index;
+      for (var i in this.searchForm) {
+        this.searchForm[i] = "";
+      }
+      this.searchTime = "";
       this.currentPage = 1;
       this.searchList();
     },
@@ -381,6 +385,26 @@ export default {
         }
       });
     },
+    // 修改试卷状态
+    setManageState: function(id, state) {
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/updExamPaper",
+        type: "POST",
+        data: {
+          id: id,
+          state: state
+        },
+        dataType: "json",
+        success: function(data) {
+          console.log(data);
+        },
+        error: function(err) {
+          vm.searchList();
+        }
+      });
+    },
     // 设置获取列表参数
     setSearchList: function() {
       let vm = this;
@@ -428,7 +452,7 @@ export default {
     },
     /**
      * 考试试卷查看，编辑，新建
-     * @param {*} state 状态0=新增，1=查看，2=编辑
+     * @param {*} state 状态0=新增，1=查看，2=编辑，3=复用(拿旧ID数据重新新建模板)
      */ goManage(state, id) {
       this.$router.push({
         path: "/special-exam-manage",

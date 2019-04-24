@@ -11,130 +11,44 @@
         </el-tabs>
       </div>
       <div class="fj-block-body">
-        <!-- <div class="fj-search-inline">
-          <el-row>
-            <el-form inline label-width="85px" label-position="left">
-              <el-col :lg="8" :xl="7" class="time-item">
-                <el-form-item label="区县分局：">
-                  <el-select
-                    @change="changeSupDeptId"
-                    clearable
-                    filterable
-                    v-model="searchForm.supDeptId"
-                    size="small"
-                  >
-                    <el-option
-                      v-for="item in supDeptIds"
-                      :key="item.deptId"
-                      :label="item.deptName"
-                      :value="item.deptId"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
-
-                <el-form-item label="起始日期：" class="datepicker">
-                  <el-date-picker
-                    v-model="searchForm.searchTime"
-                    type="daterange"
-                    range-separator="至"
-                    start-placeholder="开始日期"
-                    end-placeholder="结束日期"
-                    @change="changeSearchTime"
-                    size="small"
-                  ></el-date-picker>
-                </el-form-item>
-              </el-col>
-              <el-col :lg="6" :xl="5">
-                <el-form-item label="派出所：">
-                  <el-select
-                    @change="changeDeptId"
-                    clearable
-                    filterable
-                    v-model="searchForm.deptId"
-                    size="small"
-                  >
-                    <el-option
-                      v-for="item in deptIds"
-                      :key="item.deptId"
-                      :label="item.deptName"
-                      :value="item.deptId"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="输入查询：">
-                  <el-input
-                    v-model="searchForm.nameOrAccount"
-                    clearable
-                    placeholder="请输入名称或警号"
-                    size="small"
-                    class="search-input"
-                  >
-                    <el-button slot="append" @click="searchAttendLeave">搜索</el-button>
-                  </el-input>
-                  <div class="search-btn">
-                    <el-button type="primary" @click="searchAttendLeave">导入</el-button>
-                    <el-button @click="searchAttendLeave">导出</el-button>
-                  </div>
-                </el-form-item>
-              </el-col>
-              <el-col :lg="6" :xl="6" v-if="activeIndex==1">
-                <el-form-item label="处理结果：">
-                  <el-select
-                    @change="changeStatus"
-                    clearable
-                    v-model="searchForm.status"
-                    size="small"
-                  >
-                    <el-option
-                      v-for="item in statuses"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
-              </el-col>
-            </el-form>
-          </el-row>
-        </div>-->
         <div class="add-list-btn" v-if="activeIndex==0" @click="addWage()">+ 新增工资规则</div>
         <div class="add-list-btn" v-if="activeIndex==1" @click="addContract('',0)">+ 新增合同规则</div>
         <el-table :data="tableDataList" v-if="activeIndex==0">
-          <el-table-column prop="userAccount" label="规则名称" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="适用岗位" :key="Math.random()"></el-table-column>
+          <el-table-column prop="templateName" label="规则名称" :key="Math.random()"></el-table-column>
+          <el-table-column prop="job" label="适用岗位" :key="Math.random()"></el-table-column>
           <el-table-column prop="userAccount" label="适用单位" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="基本工资" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="绩效工资" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="层级工资" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="岗位工资" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="生活补贴" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="信息采集费" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="流量补助费" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="其他" :key="Math.random()"></el-table-column>
+          <el-table-column prop="basePay" label="基本工资" :key="Math.random()"></el-table-column>
+          <el-table-column prop="meritPay" label="绩效工资" :key="Math.random()"></el-table-column>
+          <el-table-column prop="tierPay" label="层级工资" :key="Math.random()"></el-table-column>
+          <el-table-column prop="jonPay" label="岗位工资" :key="Math.random()"></el-table-column>
+          <el-table-column prop="liveSubsidy" label="生活补贴" :key="Math.random()"></el-table-column>
+          <el-table-column prop="infoCollect" label="信息采集费" :key="Math.random()"></el-table-column>
+          <el-table-column prop="trafficSubsidy" label="流量补助费" :key="Math.random()"></el-table-column>
+          <el-table-column prop="other" label="其他" :key="Math.random()"></el-table-column>
           <el-table-column prop="userAccount" label="应发合计" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="养老保险" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="医疗保险" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="失业保险" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="工商保险" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="生育保险" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="大病互助保险" :key="Math.random()"></el-table-column>
+          <el-table-column prop="pension" label="养老保险" :key="Math.random()"></el-table-column>
+          <el-table-column prop="medicare" label="医疗保险" :key="Math.random()"></el-table-column>
+          <el-table-column prop="unemployment" label="失业保险" :key="Math.random()"></el-table-column>
+          <el-table-column prop="injury" label="工伤保险" :key="Math.random()"></el-table-column>
+          <el-table-column prop="maternity" label="生育保险" :key="Math.random()"></el-table-column>
+          <el-table-column prop="illness" label="大病互助保险" :key="Math.random()"></el-table-column>
           <el-table-column label="状态" prop="leave_state" width="120px" :key="Math.random()">
             <template slot-scope="scope">
               <el-switch v-model="scope.row.signType" active-color="#13ce66" inactive-color="#ccc"></el-switch>
               <span>{{scope.row.leave_state == 0?'开启':'关闭'}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="操作" :key="Math.random()">
+          <el-table-column label="操作" width="120px" :key="Math.random()">
             <template slot-scope="scope">
-              <span class="ope-txt" v-if="scope.row.leave_state != 0">--</span>
+              <!-- <span class="ope-txt" v-if="scope.row.leave_state != 0">--</span> -->
               <span
                 class="ope-txt"
-                v-if="scope.row.leave_state == 0"
+                v-if="scope.row.leave_state != 0"
                 @click="openWageDialog(scope.row.leaveId,1)"
               >配置</span>
               <span
                 class="ope-txt"
-                v-if="scope.row.leave_state == 0"
+                v-if="scope.row.leave_state != 0"
                 @click="delWage(scope.row.leaveId)"
               >删除</span>
             </template>
@@ -175,22 +89,22 @@
               >同意</span>-->
               <span
                 class="ope-txt"
-                v-if="scope.row.leave_state == 0"
+                v-if="scope.row.leave_state != 0"
                 @click="addContract(scope.row.leaveId,1)"
               >查看</span>
               <span
                 class="ope-txt"
-                v-if="scope.row.leave_state == 0"
+                v-if="scope.row.leave_state != 0"
                 @click="addContract(scope.row.leaveId,2)"
               >编辑</span>
               <span
                 class="ope-txt"
-                v-if="scope.row.leave_state == 0"
+                v-if="scope.row.leave_state != 0"
                 @click="openContractDialog(scope.row.leaveId,1)"
               >配置</span>
               <span
                 class="ope-txt"
-                v-if="scope.row.leave_state == 0"
+                v-if="scope.row.leave_state != 0"
                 @click="delContract(scope.row.leaveId, 2)"
               >删除</span>
             </template>
@@ -224,58 +138,58 @@
       <div class="form-info">
         <el-form :model="ruleForm">
           <el-form-item label="模板名称">
-            <el-input v-model="ruleForm.road" placeholder="请输入"></el-input>
+            <el-input v-model="ruleForm.templateName" placeholder="请输入"></el-input>
           </el-form-item>
           <el-form-item label="基本工资">
-            <el-input v-model="ruleForm.road" placeholder="请输入"></el-input>
+            <el-input v-model="ruleForm.basePay" placeholder="请输入"></el-input>
           </el-form-item>
           <el-form-item label="绩效工资">
-            <el-input v-model="ruleForm.road" placeholder="请输入"></el-input>
+            <el-input v-model="ruleForm.meritPay" placeholder="请输入"></el-input>
           </el-form-item>
           <el-form-item label="层级工资">
-            <el-input v-model="ruleForm.road" placeholder="请输入"></el-input>
+            <el-input v-model="ruleForm.tierPay" placeholder="请输入"></el-input>
           </el-form-item>
           <el-form-item label="岗位工资">
-            <el-input v-model="ruleForm.road" placeholder="请输入"></el-input>
+            <el-input v-model="ruleForm.jonPay" placeholder="请输入"></el-input>
           </el-form-item>
           <el-form-item label="生活补贴">
-            <el-input v-model="ruleForm.road" placeholder="请输入"></el-input>
+            <el-input v-model="ruleForm.liveSubsidy" placeholder="请输入"></el-input>
           </el-form-item>
           <el-form-item label="信息采集费">
-            <el-input v-model="ruleForm.road" placeholder="请输入"></el-input>
+            <el-input v-model="ruleForm.infoCollect" placeholder="请输入"></el-input>
           </el-form-item>
           <el-form-item label="流量补助费">
-            <el-input v-model="ruleForm.road" placeholder="请输入"></el-input>
+            <el-input v-model="ruleForm.trafficSubsidy" placeholder="请输入"></el-input>
           </el-form-item>
           <el-form-item label="其他">
-            <el-input v-model="ruleForm.road" placeholder="请输入"></el-input>
+            <el-input v-model="ruleForm.other" placeholder="请输入"></el-input>
           </el-form-item>
           <el-form-item label="应发合计">
             <el-input v-model="ruleForm.road" placeholder="请输入"></el-input>
           </el-form-item>
           <el-form-item label="养老保险">
-            <el-input v-model="ruleForm.road" placeholder="请输入"></el-input>
+            <el-input v-model="ruleForm.pension" placeholder="请输入"></el-input>
           </el-form-item>
           <el-form-item label="医疗保险">
-            <el-input v-model="ruleForm.road" placeholder="请输入"></el-input>
+            <el-input v-model="ruleForm.medicare" placeholder="请输入"></el-input>
           </el-form-item>
           <el-form-item label="失业保险">
-            <el-input v-model="ruleForm.road" placeholder="请输入"></el-input>
+            <el-input v-model="ruleForm.unemployment" placeholder="请输入"></el-input>
           </el-form-item>
-          <el-form-item label="工商保险">
-            <el-input v-model="ruleForm.road" placeholder="请输入"></el-input>
+          <el-form-item label="工伤保险">
+            <el-input v-model="ruleForm.injury" placeholder="请输入"></el-input>
           </el-form-item>
           <el-form-item label="生育保险">
-            <el-input v-model="ruleForm.road" placeholder="请输入"></el-input>
+            <el-input v-model="ruleForm.maternity" placeholder="请输入"></el-input>
           </el-form-item>
           <el-form-item label="大病互助保险">
-            <el-input v-model="ruleForm.road" placeholder="请输入"></el-input>
+            <el-input v-model="ruleForm.illness" placeholder="请输入"></el-input>
           </el-form-item>
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitAudit(1)">确认</el-button>
-        <el-button @click="submitAudit(2)">取 消</el-button>
+        <el-button type="primary" @click="submitAudit()">确认</el-button>
+        <el-button @click="addWageVisible=false">取 消</el-button>
       </div>
     </el-dialog>
     <!-- 配置工资规则弹出框 -->
@@ -298,7 +212,7 @@
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitAudit(1)">确认</el-button>
+        <el-button type="primary" @click="submitAudit()">确认</el-button>
         <el-button @click="setWageVisible==false">取 消</el-button>
       </div>
     </el-dialog>
@@ -335,7 +249,7 @@
         </div>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitAudit(1)">确认</el-button>
+        <el-button type="primary" @click="submitAudit()">确认</el-button>
         <el-button @click="setContractVisible==false">取 消</el-button>
       </div>
     </el-dialog>
@@ -352,15 +266,15 @@ export default {
       breadData: [
         { name: "当前位置:", path: "" },
         { name: "人事管理", path: "" },
-        { name: "工资管理", path: "" }
+        { name: "规则管理", path: "" }
       ],
-      nowUser: $.cookie(fjPublic.loginCookieKey),
-      // 分局
-      supDeptIds: null,
-      // 派出所
-      deptIds: null,
+      // nowUser: $.cookie(fjPublic.loginCookieKey),
+      // // 分局
+      // supDeptIds: null,
+      // // 派出所
+      // deptIds: null,
       // 状态
-      activeIndex: "1",
+      activeIndex: "0",
       statuses: [
         {
           value: "0",
@@ -384,7 +298,7 @@ export default {
         supDeptId: "", // 公安局
         status: "" // 状态
       },
-      searchListUrl: "/searchUserLeave", //获取列表数据URL
+      searchListUrl: "/getPayrollTemplateList", //获取列表数据URL
       addWageVisible: false,
       setWageVisible: false,
       setContractVisible: false,
@@ -420,10 +334,10 @@ export default {
     };
   },
   mounted: function() {
-    // 初始化派出所下拉列表
-    this.initDeptIds();
-    // 初始化派出所下拉列表
-    this.initSupDeptIds();
+    // // 初始化派出所下拉列表
+    // this.initDeptIds();
+    // // 初始化派出所下拉列表
+    // this.initSupDeptIds();
     // 初始化请假休假列表
     this.searchList();
 
@@ -448,79 +362,57 @@ export default {
   methods: {
     //获取被选中的标签 tab 实例
     handleClick(tab) {
-      console.log(tab);
       this.activeIndex = tab.index;
-      // for (var i in this.searchForm) {
-      //   this.searchForm[i] = "";
-      // }
-      // this.currentPage = 1;
-      // this.searchSign();
-    },
-    // 初始化分局
-    initSupDeptIds: function() {
-      var defer = $.Deferred();
-      var vm = this;
-      $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/searchDepListBySearch",
-        type: "POST",
-        data: {},
-        dataType: "json",
-        success: function(data) {
-          vm.supDeptIds = data.list;
-          defer.resolve();
-        },
-        error: function(err) {
-          defer.reject();
-        }
-      });
-      return defer;
-    },
-    // 初始化派出所
-    initDeptIds: function() {
-      var defer = $.Deferred();
-      var vm = this;
-      $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/searchDeptsByFenju",
-        type: "POST",
-        data: {
-          parentDeptId: ""
-        },
-        dataType: "json",
-        success: function(data) {
-          vm.deptIds = data.list;
-          defer.resolve();
-        },
-        error: function(err) {
-          defer.reject();
-        }
-      });
-      return defer;
-    },
-    // 修改单位下拉框查询
-    changeSupDeptId: function(supDeptId) {
-      this.searchForm["supDeptId"] = supDeptId;
+      this.activeIndex == 0
+        ? (this.searchListUrl = "/getPayrollTemplateList")
+        : (this.searchListUrl = "/getComplainList");
+      this.currentPage = 1;
       this.searchList();
     },
-    // 修改单位下拉框查询
-    changeDeptId: function(deptId) {
-      this.searchForm["deptId"] = deptId;
-      this.searchList();
-    },
-    // 修改状态下拉框查询
-    changeStatus: function(status) {
-      this.searchForm["status"] = status;
-      this.searchList();
-    },
-    // 标题或负责人名称查询
-    searchAttendLeave: function() {
-      this.searchList();
-    },
+    // // 初始化分局
+    // initSupDeptIds: function() {
+    //   var defer = $.Deferred();
+    //   var vm = this;
+    //   $.ajax({
+    //     url: fjPublic.ajaxUrlDNN + "/searchDepListBySearch",
+    //     type: "POST",
+    //     data: {},
+    //     dataType: "json",
+    //     success: function(data) {
+    //       vm.supDeptIds = data.list;
+    //       defer.resolve();
+    //     },
+    //     error: function(err) {
+    //       defer.reject();
+    //     }
+    //   });
+    //   return defer;
+    // },
+    // // 初始化派出所
+    // initDeptIds: function() {
+    //   var defer = $.Deferred();
+    //   var vm = this;
+    //   $.ajax({
+    //     url: fjPublic.ajaxUrlDNN + "/searchDeptsByFenju",
+    //     type: "POST",
+    //     data: {
+    //       parentDeptId: ""
+    //     },
+    //     dataType: "json",
+    //     success: function(data) {
+    //       vm.deptIds = data.list;
+    //       defer.resolve();
+    //     },
+    //     error: function(err) {
+    //       defer.reject();
+    //     }
+    //   });
+    //   return defer;
+    // },
     // 设置获取列表参数
     setSearchList: function() {
       this.searchForm["page"] = this.currentPage;
       this.searchForm["rows"] = this.pageSize;
-      // 传入当前用户信息
-      this.searchForm["nowUser"] = this.nowUser;
     },
     // 打开工资配置弹框
     openWageDialog: function(id, status) {
@@ -542,6 +434,7 @@ export default {
     },
     // 打开工资编辑弹框
     addWage: function() {
+      this.ruleForm = {};
       this.addWageVisible = true;
     },
     // 删除工资规则
@@ -555,8 +448,26 @@ export default {
       // this.addWageVisible = true;
     },
     // 工资编辑弹框操作
-    submitAudit: function(status) {
-      this.addWageVisible = false;
+    submitAudit: function() {
+      console.log(123);
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/addPayrollTemplate",
+        type: "POST",
+        data: vm.ruleForm,
+        dataType: "json",
+        success: function(data) {
+          // vm.deptIds = data.list;
+          defer.resolve();
+        },
+        error: function(err) {
+          err.responseText == "success" && vm.searchList();
+          defer.reject();
+        }
+      });
+      vm.addWageVisible = false;
+      return defer;
     },
     // 时间格式化
     timeFormatter(row, type) {

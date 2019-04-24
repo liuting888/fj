@@ -106,22 +106,22 @@
         </div>
         <el-table :data="tableDataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="55"></el-table-column>
-          <el-table-column prop="userId" label="合同编号" width="100px" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="userId" label="姓名" width="80px"></el-table-column>
+          <el-table-column prop="id" label="合同编号" width="100px" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="username" label="姓名" width="80px"></el-table-column>
           <el-table-column prop="userAccount" label="警号"></el-table-column>
           <el-table-column
             label="签订日期"
             show-overflow-tooltip
             :formatter="timeFormatter"
-            prop="apply_time"
+            prop="signTime"
           ></el-table-column>
           <el-table-column
             label="到期日期"
             show-overflow-tooltip
             :formatter="timeFormatter"
-            prop="apply_time"
+            prop="expireTime"
           ></el-table-column>
-          <el-table-column label="剩余天数" prop="leave_state" width="120px">
+          <el-table-column label="剩余天数" prop="residueDay" width="120px">
             <template slot-scope="scope">
               <span v-if="scope.row.leave_state == 0">--</span>
               <span v-if="scope.row.leave_state == 1">✓</span>
@@ -129,7 +129,7 @@
             </template>
           </el-table-column>
           <el-table-column prop="userId" label="地区" width="100px" show-overflow-tooltip></el-table-column>
-          <el-table-column label="在职状态" prop="leave_state" width="120px">
+          <el-table-column label="在职状态" prop="state" width="120px">
             <template slot-scope="scope">
               <span
                 class="circle-status"
@@ -140,7 +140,7 @@
               </span>
             </template>
           </el-table-column>
-          <el-table-column prop="userAccount" label="职位"></el-table-column>
+          <el-table-column prop="job" label="职位"></el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
               <span class="ope-txt" v-if="scope.row.leave_state != 0">--</span>

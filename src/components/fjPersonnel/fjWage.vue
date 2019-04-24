@@ -20,7 +20,7 @@
                     @change="changeSupDeptId"
                     clearable
                     filterable
-                    v-model="searchForm.supDeptId"
+                    v-model="searchForm.deptBelongId"
                     size="small"
                   >
                     <el-option
@@ -63,7 +63,7 @@
                 </el-form-item>
                 <el-form-item label="输入查询：">
                   <el-input
-                    v-model="searchForm.nameOrAccount"
+                    v-model="searchForm.keyword"
                     clearable
                     placeholder="请输入名称或警号"
                     size="small"
@@ -83,8 +83,8 @@
                       :on-exceed="handleExceed"
                     >
                       <el-button size="small" type="primary">导入</el-button>
-                      <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
                     </el-upload>
+                    <el-button @click="exportExcl">导出</el-button>
                     <form
                       style="display:none;"
                       name="exportForm"
@@ -92,7 +92,6 @@
                       method="post"
                       enctype="multipart/form-data"
                     ></form>
-                    <el-button @click="exportExcl">导出</el-button>
                   </div>
                 </el-form-item>
               </el-col>
@@ -101,7 +100,7 @@
                   <el-select
                     @change="changeStatus"
                     clearable
-                    v-model="searchForm.status"
+                    v-model="searchForm.state"
                     size="small"
                   >
                     <el-option
@@ -154,24 +153,24 @@
           </el-table-column>
         </el-table>
         <el-table :data="tableDataList" v-if="activeIndex==1">
-          <el-table-column prop="userId" label="姓名" :key="Math.random()"></el-table-column>
+          <el-table-column prop="userName" label="姓名" :key="Math.random()"></el-table-column>
           <el-table-column prop="userAccount" label="警号" :key="Math.random()"></el-table-column>
           <el-table-column
             label="申诉时间"
             show-overflow-tooltip
             :formatter="timeFormatter"
-            prop="apply_time"
+            prop="insTime"
             :key="Math.random()"
           ></el-table-column>
-          <el-table-column prop="userAccount" label="情况说明" :key="Math.random()"></el-table-column>
-          <el-table-column label="状态" prop="leave_state" width="120px" :key="Math.random()">
+          <el-table-column prop="complain" show-overflow-tooltip label="情况说明" :key="Math.random()"></el-table-column>
+          <el-table-column label="状态" prop="state" width="120px" :key="Math.random()">
             <template slot-scope="scope">
               <span
                 class="circle-status"
-                :class="scope.row.leave_state == 0 ? 'grey' : scope.row.leave_state == 1 ? 'green' : 'red'"
+                :class="scope.row.state == 0 ? 'grey' : scope.row.state == 1 ? 'green' : 'red'"
               >
-                {{parseInt( scope.row.leave_state) === 0 ? '待审核' : parseInt( scope.row.leave_state) === 1 ?'已通过'
-                : '被驳回'}}
+                {{parseInt( scope.row.state) === 0 ? '待审核' : parseInt( scope.row.state) === 1 ?'已同意'
+                : '不同意'}}
               </span>
             </template>
           </el-table-column>
@@ -179,13 +178,13 @@
             label="处理意见"
             show-overflow-tooltip
             width="200px"
-            prop="leader_content"
+            prop="response"
             class-name="textLeft"
             :key="Math.random()"
           ></el-table-column>
           <el-table-column label="操作" :key="Math.random()">
             <template slot-scope="scope">
-              <span class="ope-txt" v-if="scope.row.leave_state != 0">--</span>
+              <span class="ope-txt" v-if="scope.row.state != 0">--</span>
               <!-- <span
                 class="ope-txt"
                 v-if="scope.row.leave_state == 0"
@@ -201,7 +200,7 @@
                 v-if="scope.row.leave_state == 0"
                 @click="openCheckDialog(scope.row.leaveId, 2)"
               >不同意</span>-->
-              <span class="ope-txt" @click="editDialog(scope.row)">审核</span>
+              <span class="ope-txt" v-if="scope.row.state == 0" @click="editDialog(scope.row)">审核</span>
             </template>
           </el-table-column>
         </el-table>
@@ -449,11 +448,11 @@ export default {
         },
         {
           value: "1",
-          label: "已通过"
+          label: "已同意"
         },
         {
           value: "2",
-          label: "被驳回"
+          label: "不同意"
         }
       ],
       searchTime: "", // 查询时间
@@ -561,11 +560,15 @@ export default {
     handleClick(tab) {
       console.log(tab);
       this.activeIndex = tab.index;
-      // for (var i in this.searchForm) {
-      //   this.searchForm[i] = "";
-      // }
-      // this.currentPage = 1;
-      // this.searchSign();
+      this.activeIndex == 0
+        ? (this.searchListUrl = "/getPayrollList")
+        : (this.searchListUrl = "/getComplainList");
+      for (var i in this.searchForm) {
+        this.searchForm[i] = "";
+      }
+      this.searchTime = "";
+      this.currentPage = 1;
+      this.searchList();
     },
     // 初始化分局
     initSupDeptIds: function() {
@@ -618,8 +621,8 @@ export default {
       this.searchList();
     },
     // 修改状态下拉框查询
-    changeStatus: function(status) {
-      this.searchForm["status"] = status;
+    changeStatus: function(state) {
+      this.searchForm["state"] = state;
       this.searchList();
     },
     // 标题或负责人名称查询
@@ -628,14 +631,11 @@ export default {
     },
     // 设置获取列表参数
     setSearchList: function() {
-      this.searchForm["page"] = this.currentPage;
-      this.searchForm["rows"] = this.pageSize;
-      // 传入当前用户信息
-      this.searchForm["nowUser"] = this.nowUser;
+      this.searchForm["pageNumber"] = this.currentPage;
+      this.searchForm["pageSize"] = this.pageSize;
     },
     // 打开工资列表详情页
     openDetail: function(id, status) {
-      console.log(123);
       this.$router.push({
         path: "/personnel-wage-detail",
         query: { state: status, id: id }
@@ -643,7 +643,6 @@ export default {
     },
     // 打开工资编辑弹框
     editDialog: function(item) {
-      console.log(item);
       this.ruleForm = item;
       this.editDialogVisible = true;
       this.isDisabled = false;
@@ -735,15 +734,7 @@ export default {
       if (!dateStr) {
         return "";
       }
-      return (
-        dateStr.substr(5, 2) +
-        "/" +
-        dateStr.substr(8, 2) +
-        " " +
-        dateStr.substr(11, 2) +
-        ":" +
-        dateStr.substr(14, 2)
-      );
+      return dateStr.substr(4, 2) + "/" + dateStr.substr(6, 2);
     },
     // 弹窗关闭事件
     closeDialog() {
@@ -764,6 +755,11 @@ export default {
       padding-top: 10px;
     }
   }
+  .upload-demo {
+    float: left;
+    margin-right: 20px;
+    margin-top: -1px;
+  }
   .fj-search-inline {
     // 上下间距
     @media screen and (max-width: 1366px) {
@@ -775,6 +771,9 @@ export default {
       position: absolute;
       top: 0;
       right: -200px;
+      button {
+        height: 32px;
+      }
     }
 
     /deep/ .el-row {

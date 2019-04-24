@@ -37,7 +37,7 @@
                 </el-col>
                 <el-col :span="8">
                   <el-form-item label="考试日期">
-                    <p>{{ruleForm.data.time}}</p>
+                    <p>{{ruleForm.data.time |date}}</p>
                   </el-form-item>
                 </el-col>
                 <el-col :span="8">
@@ -115,38 +115,29 @@ export default {
       isTitleDisabled: true,
       ruleForm: {
         data: {
-          title: "这里是题库的标题",
-          id: "主键id",
-          instime: "新建时间",
-          paperId: "试卷id",
-          rightNumber: "正确数量",
-          score: "得分",
-          time: "考试时间",
-          updtime: "更新时间",
-          useTime: "考试用时",
-          userId: "用户id",
-          userName: "用户信命",
-          wrongNumber: "错误数量"
+          title: "",
+          id: "",
+          instime: "",
+          paperId: "",
+          rightNumber: "",
+          score: "",
+          time: "",
+          updtime: "",
+          useTime: "",
+          userId: "",
+          userName: "",
+          wrongNumber: ""
         },
         list: [
-          {
-            question: "题目1",
-            A: "hahaA",
-            B: "hahaB",
-            C: "hahaC",
-            D: "hahaD",
-            myChoice: "3,2",
-            rightOptions: "1"
-          },
-          {
-            question: "题目2",
-            A: "hahaA2",
-            B: "hahaB2",
-            C: "hahaC2",
-            D: "hahaD2",
-            myChoice: "2",
-            rightOptions: "3,0"
-          }
+          // {
+          //   question: "题目1",
+          //   A: "hahaA",
+          //   B: "hahaB",
+          //   C: "hahaC",
+          //   D: "hahaD",
+          //   myChoice: "3,2",
+          //   rightOptions: "1"
+          // }
         ]
       },
       rules: {}
@@ -174,6 +165,7 @@ export default {
         dataType: "json",
         success: function(data) {
           vm.ruleForm.data = data.data;
+          //处理数据便于展示
           for (let i = 0; i < data.list.length; i++) {
             let tm = {
               id: data.list[i].id,
@@ -238,6 +230,22 @@ export default {
     //     console.log(val, oldval);
     //   }
     // }
+  },
+  filters: {
+    date: function(value) {
+      //考试时间转换
+      return value
+        ? value.substr(0, 4) +
+            "-" +
+            value.substr(4, 2) +
+            "-" +
+            value.substr(6, 2) +
+            " " +
+            value.substr(8, 2) +
+            ":" +
+            value.substr(10, 2)
+        : "";
+    }
   },
   components: {
     fjBreadNav

@@ -409,6 +409,7 @@ export default {
         "（" + this.items[parseInt(this.userInfo.step)].label + "）审核",
         "提示",
         {
+          distinguishCancelAndClose: true,
           confirmButtonText: "通过",
           cancelButtonText: "拒绝",
           type: "warning",
@@ -418,8 +419,9 @@ export default {
         .then(() => {
           this.confirmUpdateRecruit(this.userInfo.id, "1");
         })
-        .catch(() => {
-          this.confirmUpdateRecruit(this.userInfo.id, "2");
+        .catch(action => {
+          action === "cancel" &&
+            this.confirmUpdateRecruit(this.userInfo.id, "2");
         });
     },
     confirmUpdateRecruit: function(id, status) {

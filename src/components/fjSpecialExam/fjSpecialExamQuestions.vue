@@ -128,6 +128,10 @@
                     D:
                     <el-input type="text" :disabled="item.edit" v-model="item.D"></el-input>
                   </li>
+                  <div class="edt-topic-btn" v-if="!item.edit">
+                    <el-button @click="postEdtTopic(index,0)">取消</el-button>
+                    <el-button type="primary" @click="postEdtTopic(index,1)">修改</el-button>
+                  </div>
                   <div class="right-revise" v-if="item.editIcon">
                     <img src="static/images/fj-exam-edt.png" alt="修改" @click="edtTopic(index)">
                     <img src="static/images/fj-exam-up.png" alt="上移" @click="upTopic(index)">
@@ -241,6 +245,15 @@ export default {
     edtTopic(index) {
       this.ruleForm.list[index].edit = false;
       this.ruleForm.list[index].edt = true;
+    },
+    //提交修改考题
+    postEdtTopic(index, state) {
+      console.log(state);
+      this.ruleForm.list[index].edit = true;
+      this.ruleForm.list[index].edt = false;
+      if (state == 1) {
+        console.log("修改");
+      }
     },
     //上移考题
     upTopic(index) {
@@ -559,6 +572,11 @@ export default {
             .el-input {
               width: 480px;
             }
+          }
+          .edt-topic-btn {
+            float: right;
+            margin-top: -50px;
+            margin-right: 80px;
           }
         }
       }

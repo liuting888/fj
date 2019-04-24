@@ -338,14 +338,12 @@ export default {
       var defer = $.Deferred();
       var vm = this;
       $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/searchDeptByRole",
+        url: fjPublic.ajaxUrlDNN + "/searchDepListBySearch",
         type: "POST",
-        data: {
-          nowUser: vm.nowUser
-        },
+        data: {},
         dataType: "json",
         success: function(data) {
-          vm.supDeptIds = data;
+          vm.supDeptIds = data.list;
           defer.resolve();
         },
         error: function(err) {
@@ -516,9 +514,9 @@ export default {
           positionName: "导演"
         }
       ];
-      console.log(JSON.stringify(families));
-      console.log(JSON.stringify(works));
-      console.log(JSON.stringify(educations));
+      // console.log(JSON.stringify(families));
+      // console.log(JSON.stringify(works));
+      // console.log(JSON.stringify(educations));
       $.ajax({
         url: fjPublic.ajaxUrlDNN + "/addRecruit",
         type: "POST",
