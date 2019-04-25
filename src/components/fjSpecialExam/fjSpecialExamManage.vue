@@ -18,12 +18,11 @@
               <el-row>
                 <el-col :span="24">
                   <el-form-item prop="houseNumber" label="题目类型">
-                    <el-checkbox-group v-model="type" v-if="userInfo.state != 1">
+                    <el-checkbox-group v-model="type" :disabled="isDisabled">
                       <el-checkbox label="1">单选</el-checkbox>
                       <el-checkbox label="2">多选</el-checkbox>
                       <el-checkbox label="0">其他</el-checkbox>
                     </el-checkbox-group>
-                    <p v-if="isDisabled">单选，单选</p>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -33,7 +32,7 @@
                     <el-select
                       v-model="ruleForm.data.selectRules"
                       :disabled="isDisabled"
-                      placeholder="请选择（必选）"
+                      :placeholder="isDisabled?'':'请选择（必选）'"
                     >
                       <el-option :value="'1'" label="单选题"></el-option>
                       <el-option :value="'0'" label="单选题"></el-option>
@@ -45,7 +44,7 @@
                     <el-select
                       v-model="ruleForm.data.examType"
                       :disabled="isDisabled"
-                      placeholder="请选择（必选）"
+                      :placeholder="isDisabled?'':'请选择（必选）'"
                     >
                       <el-option :value="'1'" label="单选题"></el-option>
                       <el-option :value="'0'" label="单选题"></el-option>
@@ -59,7 +58,7 @@
                     <el-select
                       v-model="ruleForm.data.amount"
                       :disabled="isDisabled"
-                      placeholder="请选择（必选）"
+                      :placeholder="isDisabled?'':'请选择（必选）'"
                       @change="amountChange"
                     >
                       <el-option :value="10" label="10"></el-option>
@@ -82,7 +81,7 @@
                       v-model="ruleForm.data.examTime"
                       type="date"
                       value-format="yyyyMMdd"
-                      placeholder="请选择"
+                      :placeholder="isDisabled?'':'请选择（必选）'"
                     ></el-date-picker>
                   </el-form-item>
                 </el-col>
@@ -91,7 +90,7 @@
                     <el-select
                       v-model="ruleForm.data.time"
                       :disabled="isDisabled"
-                      placeholder="请选择（必选）"
+                      :placeholder="isDisabled?'':'请选择（必选）'"
                     >
                       <el-option :value="30" label="30"></el-option>
                       <el-option :value="60" label="60"></el-option>
@@ -106,7 +105,7 @@
                     <el-select
                       v-model="ruleForm.data.oneScore"
                       :disabled="isDisabled"
-                      placeholder="请选择（必选）"
+                      :placeholder="isDisabled?'':'请选择（必选）'"
                       @change="communityChange"
                     >
                       <el-option :value="4" label="4"></el-option>
@@ -117,9 +116,17 @@
                 </el-col>
                 <el-col :span="12">
                   <el-form-item class="noBR" label="题序随机">
-                    <el-radio v-model="radio" label="1" v-if="userInfo.state != 1">是</el-radio>
-                    <el-radio v-model="radio" label="2" v-if="userInfo.state != 1">否</el-radio>
-                    <p v-if="isDisabled">是</p>
+                    <el-radio
+                      v-model="ruleForm.data.isRandom"
+                      label="0"
+                      v-if="userInfo.state != 1"
+                    >是</el-radio>
+                    <el-radio
+                      v-model="ruleForm.data.isRandom"
+                      label="1"
+                      v-if="userInfo.state != 1"
+                    >否</el-radio>
+                    <p v-if="isDisabled">{{ruleForm.data.isRandom==0?'是':'否'}}</p>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -127,8 +134,9 @@
                 <el-col :span="24">
                   <el-form-item class="noBR noBB" label="适用人员">
                     <el-input
+                      :placeholder="isDisabled?'':'请选择（必选）'"
                       :disabled="isDisabled"
-                      v-model="ruleForm.data.people"
+                      v-model="treePeople"
                       @focus="checkDialogVisible=true"
                     ></el-input>
                   </el-form-item>
@@ -230,31 +238,29 @@
     </div>
     <!-- 适用人员弹出框 -->
     <el-dialog
-      title="信息采集表"
       :visible.sync="checkDialogVisible"
       :append-to-body="true"
       :close-on-click-modal="false"
       style="position: absolute"
-      width="680px"
+      :width="checkDialogWidth"
       class="check-dialogs"
     >
-      <div>
+      <div v-show="checkDialogShow">
         <el-tree
-          :data="data2"
+          :data="treeData"
           show-checkbox
           node-key="id"
-          :default-expanded-keys="[2, 3]"
-          :default-checked-keys="[5]"
+          :default-checked-keys="ruleForm.data.people.split(',')"
           :props="defaultProps"
           :current-node-key="currentNode"
           @node-click="handleNodeClick"
           ref="tree"
         ></el-tree>
       </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="treeAudit(1)">确 定</el-button>
-        <el-button @click="treeAudit(2)">取 消</el-button>
-      </div>
+      <!-- <div slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="treeAudit(1)">确 定</el-button>
+          <el-button @click="treeAudit(2)">取 消</el-button>
+      </div>-->
     </el-dialog>
   </div>
 </template>
@@ -264,56 +270,7 @@ export default {
   name: "fjSpecial-Exam-Manage",
   data() {
     return {
-      data2: [
-        {
-          id: 1,
-          label: "一级 1",
-          children: [
-            {
-              id: 4,
-              label: "二级 1-1",
-              children: [
-                {
-                  id: 9,
-                  label: "三级 1-1-1"
-                },
-                {
-                  id: 10,
-                  label: "三级 1-1-2"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          id: 2,
-          label: "一级 2",
-          children: [
-            {
-              id: 5,
-              label: "二级 2-1"
-            },
-            {
-              id: 6,
-              label: "二级 2-2"
-            }
-          ]
-        },
-        {
-          id: 3,
-          label: "一级 3",
-          children: [
-            {
-              id: 7,
-              label: "二级 3-1"
-            },
-            {
-              id: 8,
-              label: "二级 3-2"
-            }
-          ]
-        }
-      ],
+      treeData: [],
       defaultProps: {
         children: "children",
         label: "label"
@@ -330,6 +287,9 @@ export default {
       isCreatePaperShow: false,
       isTitleDisabled: true,
       isDisabled: false,
+      checkDialogShow: false, //控制适用人员弹框显示或者隐藏
+      checkDialogWidth: 0,
+      treePeople: "", //适用人员展示
       type: [], //题目类型
       ruleForm: {
         data: {
@@ -361,7 +321,6 @@ export default {
         ]
       },
       title: "这里是试卷的标题",
-      checkList: ["单选"],
       checkedCities: [],
       cities: [],
       citiesId: [],
@@ -393,6 +352,7 @@ export default {
     this.setCreated();
     this.getDetailList();
     this.userInfo.state > 1 && this.searchAttendHistory();
+    this.getTreeData();
   },
   methods: {
     // 验证规则
@@ -447,15 +407,23 @@ export default {
     treeAudit(i) {
       let list = this.$refs.tree.getCheckedNodes();
       this.ruleForm.data.people = "";
+      this.treePeople = "";
       for (let index = 0; index < list.length; index++) {
         const element = list[index];
         if (index < list.length - 1) {
-          this.ruleForm.data.people += element.label + ",";
+          this.ruleForm.data.people += element.id + ",";
+          this.treePeople += element.label + ",";
         } else {
-          this.ruleForm.data.people += element.label;
+          this.ruleForm.data.people += element.id;
+          this.treePeople += element.label;
         }
       }
       this.checkDialogVisible = false;
+      setTimeout(() => {
+        this.checkDialogShow = true;
+        this.checkDialogWidth = "680px";
+      }, 5000);
+      console.log(this.ruleForm.data.people);
     },
     //删除考题
     delTopic(index) {
@@ -471,9 +439,28 @@ export default {
     handleNodeClick(data) {
       console.log(data);
     },
+    //获取适用人员数据
+    getTreeData() {
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/getTreeDeptData",
+        type: "POST",
+        data: {},
+        dataType: "json",
+        success: function(data) {
+          vm.treeData = data;
+          console.log(22);
+          vm.checkDialogVisible = true;
+          setTimeout(() => {
+            vm.treeAudit();
+          }, 0);
+        },
+        error: function(err) {}
+      });
+    },
     // 获取题库详情
     getDetailList: function() {
-      console.log(this.userInfo.id);
       this.ruleForm.data.id = this.userInfo.id;
       if (!this.userInfo.id) {
         return false;
@@ -580,9 +567,6 @@ export default {
       this.userInfo.state == 1
         ? (this.isDisabled = true)
         : (this.isDisabled = false);
-    },
-    routerGo() {
-      window.history.go(-1);
     }
   },
   watch: {
@@ -592,6 +576,14 @@ export default {
         if (val.length > oldval.length) {
           let index = val[val.length - 1].split(".")[0] - 1;
           let data = vm.citiesList[index];
+          for (let i = 0; i < vm.ruleForm.list.length; i++) {
+            if (vm.ruleForm.list[i].id == data.id) {
+              return this.$message({
+                message: "试题已存在",
+                type: "warning"
+              });
+            }
+          }
           let tm = {
             id: data.id,
             question: data.question,
@@ -630,6 +622,15 @@ export default {
         for (let i = 0; i < val.length; i++) {
           val[i].rightOptions.length == 1 && (vm.headInfo.radio += 1);
           val[i].rightOptions.length > 1 && (vm.headInfo.selection += 1);
+        }
+      }
+    },
+    //获取单选题和多选题的数量
+    checkDialogVisible: {
+      handler: function(val) {
+        let vm = this;
+        if (!val) {
+          vm.treeAudit();
         }
       }
     }
@@ -809,6 +810,11 @@ export default {
             position: relative;
             width: 40px;
             padding-left: 0;
+          }
+          .is-disabled {
+            .el-checkbox__label {
+              color: rgba(0, 0, 0, 0.9);
+            }
           }
         }
         .el-radio {

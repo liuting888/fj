@@ -110,13 +110,13 @@
                     @click="goManage(0)"
                     v-if="activeIndex==1"
                   >添加试卷</el-button>
-                  <form
+                  <!-- <form
                     style="display:none;"
                     name="exportForm"
-                    :action="ajaxUrlDNN + '/exportRecruits?nowUser=' + nowUser + '&endTime=' + searchForm.endTime + '&deptId=' + searchForm.deptId + '&startTime=' + searchForm.startTime + '&page=' + currentPage + '&nameOrPhone=' + searchForm.nameOrPhone + '&rows=' + pageSize"
+                    :action="ajaxUrlDNN + '/exportExamResultList?endTime=' + searchForm.endTime + '&deptId=' + searchForm.deptId + '&startTime=' + searchForm.startTime + '&pageNumber=' + currentPage + '&pageSize=' + pageSize"
                     method="post"
                     enctype="multipart/form-data"
-                  ></form>
+                  ></form> -->
                   <el-button
                     type="primary"
                     class="tj-btn"
@@ -130,7 +130,12 @@
         </div>
         <!-- 考试题库 -->
         <el-table v-if="activeIndex==0" :data="tableDataList" style="width: 100%">
-          <el-table-column prop="type" label="题目类型" :key="Math.random()"></el-table-column>
+          <el-table-column prop="type" label="题目类型" :key="Math.random()">
+            <template slot-scope="scope">
+              <span v-if="scope.row.type == 1">单选题</span>
+              <span v-if="scope.row.type == 2">多选题</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="title" label="标题" :key="Math.random()"></el-table-column>
           <el-table-column prop="content" label="考试类型" :key="Math.random()"></el-table-column>
           <el-table-column prop="createUsername" label="创建人" :key="Math.random()"></el-table-column>
@@ -276,7 +281,9 @@ export default {
         nameOrAccount: "", // 警号或负责人名称
         deptId: "", // 派出所
         supDeptId: "", // 公安局
-        status: "" // 状态
+        status: "", // 状态
+        endTime:"",
+        startTime:""
       },
       searchListUrl: "" //获取列表数据URL
     };
@@ -324,6 +331,10 @@ export default {
     // 标题或负责人名称查询
     searchAttendLeave: function() {
       this.searchList();
+    },
+    exportExcl: function() {
+      let vm=this;
+      window.open(fjPublic.ajaxUrlDNN + '/exportExamResultList?endTime=' + vm.searchForm.endTime + '&deptId=' +  vm.searchForm.deptId + '&startTime=' +  vm.searchForm.startTime + '&pageNumber=' +  vm.currentPage + '&pageSize=' +  vm.pageSize);
     },
     // 初始化分局
     initSupDeptIds: function() {

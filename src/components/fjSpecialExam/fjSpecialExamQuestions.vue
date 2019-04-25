@@ -24,8 +24,8 @@
             <div class="search-item hidden-lg-and-down">
               <span class="span-title">考试类型：</span>
               <el-select v-model="ruleForm.data.examPeople">
-                <el-option :value="辅警" label="辅警"></el-option>
-                <el-option :value="民警" label="民警"></el-option>
+                <el-option :value="'1'" label="辅警"></el-option>
+                <el-option :value="'2'" label="民警"></el-option>
               </el-select>
             </div>
             <div @mouseover="istextareaDisabled=false" @mouseout="istextareaDisabled=true">
@@ -159,13 +159,13 @@ export default {
         { name: "专题考试", path: "" }
       ],
       userInfo: {},
-      isEditData: false, //是否触发更新题库
+      // isEditData: false, //是否触发更新题库
       ruleForm: {
         data: {
           id: "",
           title: "这里是题库的标题",
-          type: "单选题",
-          examPeople: "辅警",
+          type: "1",
+          examPeople: "1",
           content: "请简单描述试题库内容"
         },
         list: []
@@ -200,6 +200,15 @@ export default {
     //新增考题
     addTopic() {
       let vm = this;
+      for (const key in vm.addTopicList) {
+        if (
+          key[0]!="e"&&vm.addTopicList[key].toString() == ""
+        ) {
+           return this.$message({
+              message: "请将考题添加完整",
+              type: "warning"
+        })
+      }}
       let list = {};
       let addlist = {
         question: vm.addTopicList.question,
@@ -226,7 +235,7 @@ export default {
       list.rightOptions = vm.addTopicList.rightOptions;
       list.edit = vm.addTopicList.edit;
       list.editIcon = vm.addTopicList.editIcon;
-      this.ruleForm.list.unshift(list);
+      vm.ruleForm.list.unshift(list);
       if (!vm.ruleForm.data.id) {
         vm.addExam().then(res => {
           //这里可以执行下一步操作
@@ -235,10 +244,10 @@ export default {
         });
       } else {
         vm.addExamToWarehouse(addlist);
-        if (vm.isEditData) {
-          vm.updExam();
-          vm.isEditData = false;
-        }
+        // if (vm.isEditData) {
+        //   vm.updExam();
+        //   vm.isEditData = false;
+        // }
       }
     },
     //修改考题
@@ -353,8 +362,13 @@ export default {
     },
     // 更新题库
     updExam: function() {
-      var defer = $.Deferred();
-      var vm = this;
+      let defer = $.Deferred();
+      let vm = this;
+      let arrList = [];
+      for (let i = 0; i < vm.ruleForm.list.length; i++) {
+        vm.ruleForm.list[i].id && arrList.push(vm.ruleForm.list[i].id);
+      }
+      arrList = arrList.join(",");
       $.ajax({
         url: fjPublic.ajaxUrlDNN + "/updExamWarehouse",
         type: "POST",
@@ -363,7 +377,8 @@ export default {
           title: vm.ruleForm.data.title,
           type: vm.ruleForm.data.type,
           content: vm.ruleForm.data.content,
-          examPeople: vm.ruleForm.data.examPeople
+          examPeople: vm.ruleForm.data.examPeople,
+          examList: arrList
         },
         dataType: "json",
         success: function(data) {
@@ -382,7 +397,7 @@ export default {
         data: list,
         dataType: "json",
         success: function(data) {
-          // console.log(data);
+          vm.ruleForm.list[0].id = data.data.id;
         },
         error: function(err) {}
       });
@@ -393,6 +408,10 @@ export default {
       this.userInfo = this.$route.query;
     }
   },
+  beforeRouteLeave: function(to, from, next) {
+    this.updExam(); //离开页面保存修改
+    next();
+  },
   watch: {
     // $route: {
     //   handler(route) {
@@ -400,13 +419,13 @@ export default {
     //     // this.getDetailList();
     //   }
     // }
-    "ruleForm.data": {
-      //监控题库是否修改，修改触发更新接口，在点击提交试题的时候
-      handler(val) {
-        this.isEditData = true;
-      },
-      deep: true
-    }
+    // "ruleForm.data": {
+    //   //监控题库是否修改，修改触发更新接口，在点击提交试题的时候
+    //   handler(val) {
+    //     this.isEditData = true;
+    //   },
+    //   deep: true
+    // }
   },
   components: {
     fjBreadNav
