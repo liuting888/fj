@@ -116,7 +116,7 @@
                     :action="ajaxUrlDNN + '/exportExamResultList?endTime=' + searchForm.endTime + '&deptId=' + searchForm.deptId + '&startTime=' + searchForm.startTime + '&pageNumber=' + currentPage + '&pageSize=' + pageSize"
                     method="post"
                     enctype="multipart/form-data"
-                  ></form> -->
+                  ></form>-->
                   <el-button
                     type="primary"
                     class="tj-btn"
@@ -282,8 +282,8 @@ export default {
         deptId: "", // 派出所
         supDeptId: "", // 公安局
         status: "", // 状态
-        endTime:"",
-        startTime:""
+        endTime: "",
+        startTime: ""
       },
       searchListUrl: "" //获取列表数据URL
     };
@@ -305,7 +305,6 @@ export default {
   methods: {
     //获取被选中的标签 tab 实例
     handleClick(tab) {
-      console.log(tab);
       this.activeIndex = tab.index;
       for (var i in this.searchForm) {
         this.searchForm[i] = "";
@@ -315,9 +314,7 @@ export default {
       this.searchList();
     },
     //获取被选中的标签 tab 实例
-    changeSwitch(id, state) {
-      console.log(id, state);
-    },
+    changeSwitch(id, state) {},
     // 修改分局下拉框查询
     changeSupDeptId: function(supDeptId) {
       this.searchForm["supDeptId"] = supDeptId;
@@ -333,8 +330,20 @@ export default {
       this.searchList();
     },
     exportExcl: function() {
-      let vm=this;
-      window.open(fjPublic.ajaxUrlDNN + '/exportExamResultList?endTime=' + vm.searchForm.endTime + '&deptId=' +  vm.searchForm.deptId + '&startTime=' +  vm.searchForm.startTime + '&pageNumber=' +  vm.currentPage + '&pageSize=' +  vm.pageSize);
+      let vm = this;
+      window.open(
+        fjPublic.ajaxUrlDNN +
+          "/exportExamResultList?endTime=" +
+          vm.searchForm.endTime +
+          "&deptId=" +
+          vm.searchForm.deptId +
+          "&startTime=" +
+          vm.searchForm.startTime +
+          "&pageNumber=" +
+          vm.currentPage +
+          "&pageSize=" +
+          vm.pageSize
+      );
     },
     // 初始化分局
     initSupDeptIds: function() {
@@ -389,7 +398,7 @@ export default {
         },
         dataType: "json",
         success: function(data) {
-          console.log(data);
+          // console.log(data);
         },
         error: function(err) {
           vm.searchList();
@@ -409,7 +418,7 @@ export default {
         },
         dataType: "json",
         success: function(data) {
-          console.log(data);
+          // console.log(data);
         },
         error: function(err) {
           vm.searchList();
@@ -542,9 +551,9 @@ export default {
     }
   }
   .tj-btn {
-    float: right;
-    margin-top: -38px;
-    margin-right: -150px;
+    position: absolute;
+    right: -128px;
+    top: 4px;
     width: 98px;
   }
   .fj-search-inline {

@@ -137,7 +137,7 @@
                       :placeholder="isDisabled?'':'请选择（必选）'"
                       :disabled="isDisabled"
                       v-model="treePeople"
-                      @focus="checkDialogVisible=true"
+                      @focus="(checkDialogVisible=true,checkDialogShow=true)"
                     ></el-input>
                   </el-form-item>
                 </el-col>
@@ -190,7 +190,7 @@
                     class="check-topic"
                     v-for="(item, index) in ruleForm.list"
                     @mouseover="item.editIcon=true"
-                    @mouseout="item.editIcon=false"
+                    @mouseleave="item.editIcon=false"
                     :key="index"
                   >
                     <div class="topic">
@@ -239,13 +239,14 @@
     <!-- 适用人员弹出框 -->
     <el-dialog
       :visible.sync="checkDialogVisible"
-      :append-to-body="true"
+      :append-to-body="false"
       :close-on-click-modal="false"
+      :modal-append-to-body="false"
       style="position: absolute"
-      :width="checkDialogWidth"
+      width="680px"
       class="check-dialogs"
     >
-      <div v-show="checkDialogShow">
+      <div>
         <el-tree
           :data="treeData"
           show-checkbox
@@ -257,11 +258,23 @@
           ref="tree"
         ></el-tree>
       </div>
-      <!-- <div slot="footer" class="dialog-footer">
-          <el-button type="primary" @click="treeAudit(1)">确 定</el-button>
-          <el-button @click="treeAudit(2)">取 消</el-button>
-      </div>-->
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="treeAudit(1)">确 定</el-button>
+        <el-button @click="treeAudit(2)">取 消</el-button>
+      </div>
     </el-dialog>
+    <div v-show="false">
+      <el-tree
+        :data="treeData"
+        show-checkbox
+        node-key="id"
+        :default-checked-keys="ruleForm.data.people.split(',')"
+        :props="defaultProps"
+        :current-node-key="currentNode"
+        @node-click="handleNodeClick"
+        ref="tree"
+      ></el-tree>
+    </div>
   </div>
 </template>
 <script>
@@ -288,7 +301,7 @@ export default {
       isTitleDisabled: true,
       isDisabled: false,
       checkDialogShow: false, //控制适用人员弹框显示或者隐藏
-      checkDialogWidth: 0,
+      flag: false, //控制重复提交
       treePeople: "", //适用人员展示
       type: [], //题目类型
       ruleForm: {
@@ -419,11 +432,7 @@ export default {
         }
       }
       this.checkDialogVisible = false;
-      setTimeout(() => {
-        this.checkDialogShow = true;
-        this.checkDialogWidth = "680px";
-      }, 5000);
-      console.log(this.ruleForm.data.people);
+      // console.log(this.ruleForm.data.people);
     },
     //删除考题
     delTopic(index) {
@@ -450,11 +459,9 @@ export default {
         dataType: "json",
         success: function(data) {
           vm.treeData = data;
-          console.log(22);
-          vm.checkDialogVisible = true;
           setTimeout(() => {
-            vm.treeAudit();
-          }, 0);
+            vm.treeAudit(); //回显适用人员
+          }, 100);
         },
         error: function(err) {}
       });
@@ -521,6 +528,10 @@ export default {
     // 提交或者编辑试卷
     postRuleForm: function() {
       let vm = this;
+      if (vm.flag) {
+        return;
+      }
+      vm.flag = true;
       if (vm.ruleForm.list.length != vm.ruleForm.data.amount) {
         return this.$message({
           message: "请确认题目总数",
@@ -552,6 +563,7 @@ export default {
         dataType: "json",
         success: function(data) {},
         error: function(err) {
+          vm.flag = false;
           if (err.responseText == "success") {
             vm.$router.push({
               path: "/special-exam"

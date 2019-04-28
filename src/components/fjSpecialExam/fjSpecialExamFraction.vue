@@ -112,7 +112,6 @@ export default {
         { name: "专题考试", path: "" }
       ],
       userInfo: {},
-      isTitleDisabled: true,
       ruleForm: {
         data: {
           title: "",
@@ -183,53 +182,9 @@ export default {
         error: function(err) {}
       });
     },
-    // 提交或者编辑数据
-    postRuleForm: function() {
-      let vm = this;
-      let url = vm.userInfo.state == 0 ? "/addInfo" : "/updInfo";
-      if (vm.userInfo.id) {
-        vm.ruleForm.data.id = vm.userInfo.id;
-      }
-      // vm.ruleForm.userId = $.parseJSON(
-      //   fjPublic.getLocalData("userInfo")
-      // ).userId;
-      $.ajax({
-        url: fjPublic.ajaxUrlDNN + url,
-        type: "POST",
-        data: vm.ruleForm,
-        dataType: "json",
-        success: function(data) {},
-        error: function(err) {
-          if (err.responseText == "success") {
-            vm.$router.push({
-              path: "/fjWorkManage-YiBiaoSanShi"
-            });
-          } else {
-          }
-        }
-      });
-    },
     setCreated() {
       this.userInfo = this.$route.query;
-      // this.ruleForm = {};
-      // this.userInfo.state != 0 &&
-      //   (this.ruleForm = $.parseJSON(fjPublic.getLocalData("ybssItem")));
-      // this.$refs["ruleForm"].resetFields();
     },
-    routerGo() {
-      window.history.go(-1);
-    }
-  },
-  watch: {
-    // checkedCities: function(val) {
-    //   console.log(val);
-    //   this.headInfo.choose=this.checkedCities.length;
-    // }
-    // checkedCities: {
-    //   handler: function(val, oldval) {
-    //     console.log(val, oldval);
-    //   }
-    // }
   },
   filters: {
     date: function(value) {

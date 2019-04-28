@@ -82,7 +82,7 @@
                 class="check-topic"
                 v-for="(item, index) in ruleForm.list"
                 @mouseover="item.editIcon=true,item.edt==true&&(item.edit=false)"
-                @mouseout="item.editIcon=false,item.edit=true"
+                @mouseleave="item.editIcon=false,item.edit=true"
                 :key="index"
               >
                 <div class="topic">
@@ -201,14 +201,13 @@ export default {
     addTopic() {
       let vm = this;
       for (const key in vm.addTopicList) {
-        if (
-          key[0]!="e"&&vm.addTopicList[key].toString() == ""
-        ) {
-           return this.$message({
-              message: "请将考题添加完整",
-              type: "warning"
-        })
-      }}
+        if (key[0] != "e" && vm.addTopicList[key].toString() == "") {
+          return this.$message({
+            message: "请将考题添加完整",
+            type: "warning"
+          });
+        }
+      }
       let list = {};
       let addlist = {
         question: vm.addTopicList.question,
@@ -257,12 +256,36 @@ export default {
     },
     //提交修改考题
     postEdtTopic(index, state) {
-      console.log(state);
-      this.ruleForm.list[index].edit = true;
-      this.ruleForm.list[index].edt = false;
+      let vm = this;
       if (state == 1) {
-        console.log("修改");
+        let edtlist = {
+          question: vm.ruleForm.list[index].question,
+          options:
+            vm.ruleForm.list[index].A +
+            "&GXCF&" +
+            vm.ruleForm.list[index].B +
+            "&GXCF&" +
+            vm.ruleForm.list[index].C +
+            "&GXCF&" +
+            vm.ruleForm.list[index].D,
+          rightOptions: vm.ruleForm.list[index].rightOptions
+            .sort((a, b) => {
+              return a - b;
+            })
+            .join("|"),
+          id: vm.ruleForm.list[index].id
+        };
+        $.ajax({
+          url: fjPublic.ajaxUrlDNN + "/updExamInfo",
+          type: "POST",
+          data: edtlist,
+          dataType: "json",
+          success: function(data) {},
+          error: function(err) {}
+        });
       }
+      vm.ruleForm.list[index].edit = true;
+      vm.ruleForm.list[index].edt = false;
     },
     //上移考题
     upTopic(index) {
