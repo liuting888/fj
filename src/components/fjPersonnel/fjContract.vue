@@ -31,7 +31,7 @@
 
                 <el-form-item label="起始日期：" class="datepicker">
                   <el-date-picker
-                    v-model="searchForm.searchTime"
+                    v-model="searchTime"
                     type="daterange"
                     range-separator="至"
                     start-placeholder="开始日期"
@@ -60,9 +60,9 @@
                 </el-form-item>
                 <el-form-item label="输入查询：">
                   <el-input
-                    v-model="searchForm.nameOrAccount"
+                    v-model="searchForm.user"
                     clearable
-                    placeholder="请输入姓名或电话"
+                    placeholder="请输入姓名或警号"
                     size="small"
                     class="search-input"
                   >
@@ -87,7 +87,7 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item>
-                  <form
+                  <!-- <form
                     style="display:none;"
                     name="exportForm"
                     :action="ajaxUrlDNN + '/exportRecruits?nowUser=' + nowUser + '&endTime=' + searchForm.endTime + '&deptId=' + searchForm.deptId + '&startTime=' + searchForm.startTime + '&page=' + currentPage + '&nameOrPhone=' + searchForm.nameOrPhone + '&rows=' + pageSize"
@@ -97,8 +97,8 @@
                   <el-button
                     type="primary"
                     @click="exportExcl"
-                  >{{multipleSelection.length>1?'批量导出':'导出'}}</el-button>
-                  <el-button>批量导入</el-button>
+                  >{{multipleSelection.length>1?'批量导出':'导出'}}</el-button> -->
+                  <!-- <el-button>批量导入</el-button> -->
                 </el-form-item>
               </el-col>
             </el-form>
@@ -108,51 +108,41 @@
           <el-table-column type="selection" width="55"></el-table-column>
           <el-table-column prop="id" label="合同编号" width="100px" show-overflow-tooltip></el-table-column>
           <el-table-column prop="username" label="姓名" width="80px"></el-table-column>
-          <el-table-column prop="userAccount" label="警号"></el-table-column>
+          <el-table-column prop="useraccount" label="警号"></el-table-column>
           <el-table-column
             label="签订日期"
-            show-overflow-tooltip
-            :formatter="timeFormatter"
             prop="signTime"
           ></el-table-column>
           <el-table-column
             label="到期日期"
-            show-overflow-tooltip
-            :formatter="timeFormatter"
             prop="expireTime"
           ></el-table-column>
-          <el-table-column label="剩余天数" prop="residueDay" width="120px">
-            <template slot-scope="scope">
-              <span v-if="scope.row.leave_state == 0">--</span>
-              <span v-if="scope.row.leave_state == 1">✓</span>
-              <span v-if="scope.row.leave_state == 2">✗</span>
-            </template>
+          <el-table-column label="剩余天数" prop="residueDay">
           </el-table-column>
-          <el-table-column prop="userId" label="地区" width="100px" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="place" label="地区" width="100px" show-overflow-tooltip></el-table-column>
           <el-table-column label="在职状态" prop="state" width="120px">
             <template slot-scope="scope">
               <span
                 class="circle-status"
-                :class="scope.row.leave_state == 0 ? 'grey' : scope.row.leave_state == 1 ? 'green' : 'red'"
+                :class="scope.row.state == 0 ? 'green' : scope.row.state == 1 ? 'grey' : 'red'"
               >
-                {{parseInt( scope.row.leave_state) === 0 ? '待审核' : parseInt( scope.row.leave_state) === 1 ?'已通过'
-                : '被驳回'}}
+                {{parseInt( scope.row.state) === 0 ? '在职' : parseInt( scope.row.state) === 1 ?'离职'
+                : '试用'}}
               </span>
             </template>
           </el-table-column>
           <el-table-column prop="job" label="职位"></el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
-              <span class="ope-txt" v-if="scope.row.leave_state != 0">--</span>
               <span
                 class="ope-txt"
-                v-if="scope.row.leave_state == 0"
-                @click="goDetails(scope.row.leaveId,1)"
+                v-if="scope.row.state == 0"
+                @click="goDetails(scope.row.id,1)"
               >详情</span>
               <span
                 class="ope-txt"
-                v-if="scope.row.leave_state == 0"
-                @click="goDetails(scope.row.leaveId, 2)"
+                v-if="scope.row.state != 1"
+                @click="goDetails(scope.row.id, 2)"
               >编辑</span>
             </template>
           </el-table-column>
@@ -196,17 +186,18 @@ export default {
       statuses: [
         {
           value: "0",
-          label: "待审核"
+          label: "在职"
         },
         {
           value: "1",
-          label: "已通过"
+          label: "离职"
         },
         {
           value: "2",
-          label: "被驳回"
+          label: "试用"
         }
       ],
+      searchTime: "",
       // 列表查询参数
       searchForm: {
         // searchTime: "", // 查询时间
@@ -216,22 +207,6 @@ export default {
         // status: "" // 状态
       },
       searchListUrl: "/getContractList", //获取列表数据URL
-      checkDialogTitle: "",
-      checkDialogForm: {
-        id: "",
-        status: "",
-        reason: ""
-      },
-      reasonDisabled: true,
-      formLabelWidth: "120px",
-      // 不批准弹出框校验
-      checkRule: {
-        reason: {
-          required: true,
-          message: "请输入不通过理由",
-          trigger: "blur"
-        }
-      }
     };
   },
   mounted: function() {
@@ -245,29 +220,11 @@ export default {
     return;
   },
   filters: {
-    // 状态处理
-    getLeaveStatus: function(value) {
-      return value == "0"
-        ? "待批"
-        : value == 1
-        ? "已批准"
-        : value == 2
-        ? "未批准"
-        : "";
-    },
     getFormatTime: function(value) {
-      // return value ? fjPublic.dateStrFormat(value) : '';
       return value ? value.substring(0, value.length - 2) : "";
     }
   },
   methods: {
-    //审核
-    review() {
-      this.$message({
-        message: "请保证人员审核进度一致",
-        type: "warning"
-      });
-    },
     // 初始化分局
     initSupDeptIds: function() {
       var defer = $.Deferred();
@@ -338,67 +295,11 @@ export default {
      * 查看，编辑，新建
      * @param {*} state 状态0=新增，1=查看，2=编辑
      */
-    goDetails(state, items) {
-      // let item = items;
-      // !item && (item = { id: "" });
+    goDetails(id, state) {
       this.$router.push({
         path: "/personnel-contract-detail",
-        query: { state: items, id: state }
+        query: { state: state, id: id }
       });
-      //设置缓存，到编辑回显
-      // state != 0 && fjPublic.setLocalData("ybssItem", JSON.stringify(item));
-    },
-    // 确认批准直接询问并发请求
-    // checkUpdate(id, status) {
-    //   this.$confirm("确认批准该条请假(休假)?", "提示", {
-    //     confirmButtonText: "确定",
-    //     cancelButtonText: "取消",
-    //     type: "warning"
-    //   }).then(() => {
-    //     this.checkDialogForm["id"] = id;
-    //     this.checkDialogForm["status"] = status;
-    //     this.updateLeaveStatus(true);
-    //   });
-    // },
-    // 保存请假批准
-    updateLeaveStatus: function(isConfirm) {
-      var defer = $.Deferred();
-      var vm = this;
-      let ajax = () => {
-        $.ajax({
-          url: fjPublic.ajaxUrlDNN + "/dealLeave",
-          type: "POST",
-          data: vm.checkDialogForm,
-          dataType: "json",
-          success: function(data) {
-            if (data.errorCode == 0) {
-              // vm.checkDialogVisible = false;
-              vm.searchList();
-            }
-            vm.$message({
-              type: "success",
-              message: data.errorMsg
-            });
-            defer.resolve();
-          },
-          error: function(err) {
-            defer.reject();
-          }
-        });
-      };
-      // 传入当前用户信息
-      vm.checkDialogForm["nowUser"] = $.cookie(fjPublic.loginCookieKey);
-      // 直接批准
-
-      if (isConfirm) {
-        ajax();
-      } else {
-        this.$refs.checkDialogForm.validate(validate => {
-          if (validate) {
-            ajax();
-          }
-        });
-      }
     },
     // 时间格式化
     timeFormatter(row, type) {
@@ -416,10 +317,6 @@ export default {
         dateStr.substr(14, 2)
       );
     },
-    // 弹窗关闭事件
-    closeDialog() {
-      this.$refs.checkDialogForm.resetFields();
-    }
   },
   components: {
     fjBreadNav

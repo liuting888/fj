@@ -221,7 +221,8 @@ export default new Router({
         }, { //人事管理 ->合同管理->详情
             path: '/personnel-contract-detail',
             name: 'personnel-contract-detail',
-            component: resolve => require(['@/components/fjPersonnel/fjContract-detail'], resolve)
+            component: resolve => require(['@/components/fjPersonnel/fjContract-detail'], resolve),
+            meta: { noKeepAlive: true }
         }, { //人事管理 ->档案管理
             path: '/personnel-archives',
             name: 'personnel-archives',
@@ -229,7 +230,8 @@ export default new Router({
         }, { //人事管理 ->档案管理->详情
             path: '/personnel-archives-detail',
             name: 'personnel-archives-detail',
-            component: resolve => require(['@/components/fjPersonnel/fjArchives-detail'], resolve)
+            component: resolve => require(['@/components/fjPersonnel/fjArchives-detail'], resolve),
+            meta: { noKeepAlive: true }
         }, { //人事管理 ->工资管理
             path: '/personnel-wage',
             name: 'personnel-wage',
@@ -237,7 +239,8 @@ export default new Router({
         }, { //人事管理 ->工资管理->详情
             path: '/personnel-wage-detail',
             name: 'personnel-wage-detail',
-            component: resolve => require(['@/components/fjPersonnel/fjWage-detail'], resolve)
+            component: resolve => require(['@/components/fjPersonnel/fjWage-detail'], resolve),
+            meta: { noKeepAlive: true }
         }, { //人事管理 ->规则设置
             path: '/personnel-rule-setting',
             name: 'personnel-rule-setting',
@@ -245,7 +248,8 @@ export default new Router({
         }, { //人事管理 ->规则设置->详情
             path: '/personnel-rule-setting-detail',
             name: 'personnel-rule-setting-detail',
-            component: resolve => require(['@/components/fjPersonnel/fjRule-setting-detail'], resolve)
+            component: resolve => require(['@/components/fjPersonnel/fjRule-setting-detail'], resolve),
+            meta: { noKeepAlive: true }
         }
 
     ]

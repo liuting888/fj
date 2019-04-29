@@ -17,7 +17,7 @@
                     @change="changeSupDeptId"
                     clearable
                     filterable
-                    v-model="searchForm.supDeptId"
+                    v-model="searchForm.deptBelongId"
                     size="small"
                   >
                     <el-option
@@ -60,7 +60,7 @@
                 </el-form-item>
                 <el-form-item label="输入查询：">
                   <el-input
-                    v-model="searchForm.nameOrAccount"
+                    v-model="searchForm.keyword"
                     clearable
                     placeholder="请输入姓名或电话"
                     size="small"
@@ -73,9 +73,9 @@
               <el-col :lg="6" :xl="5">
                 <el-form-item label="在职状态：">
                   <el-select
-                    @change="changeStatus"
+                    @change="changeState"
                     clearable
-                    v-model="searchForm.status"
+                    v-model="searchForm.state"
                     size="small"
                   >
                     <el-option
@@ -86,7 +86,7 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item>
+                <!-- <el-form-item>
                   <form
                     style="display:none;"
                     name="exportForm"
@@ -98,54 +98,42 @@
                     type="primary"
                     @click="exportExcl"
                   >{{multipleSelection.length>1?'批量导出':'导出'}}</el-button>
-                </el-form-item>
+                </el-form-item> -->
               </el-col>
             </el-form>
           </el-row>
         </div>
         <el-table :data="tableDataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="55"></el-table-column>
-          <el-table-column prop="userId" label="所在区域" width="100px" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="userId" label="姓名" width="80px"></el-table-column>
+          <el-table-column prop="deptName" label="所在区域" width="100px" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="userName" label="姓名" width="80px"></el-table-column>
           <el-table-column prop="userAccount" label="警号"></el-table-column>
-          <el-table-column prop="userAccount" label="职位"></el-table-column>
+          <el-table-column prop="job" label="职位"></el-table-column>
           <el-table-column
             label="入职日期"
             show-overflow-tooltip
-            :formatter="timeFormatter"
-            prop="apply_time"
+            prop="entryTime"
           ></el-table-column>
-          <el-table-column label="工龄（月）" prop="leave_state" width="120px">
-            <template slot-scope="scope">
-              <span v-if="scope.row.leave_state == 0">--</span>
-              <span v-if="scope.row.leave_state == 1">✓</span>
-              <span v-if="scope.row.leave_state == 2">✗</span>
-            </template>
+          <el-table-column label="工龄（月）" prop="month" width="120px">
+            
           </el-table-column>
           <el-table-column label="在职状态" prop="leave_state" width="120px">
             <template slot-scope="scope">
               <span
                 class="circle-status"
-                :class="scope.row.leave_state == 0 ? 'grey' : scope.row.leave_state == 1 ? 'green' : 'red'"
+                :class="scope.row.state == 0 ? 'green' : scope.row.state == 1 ? 'grey' : 'red'"
               >
-                {{parseInt( scope.row.leave_state) === 0 ? '离职' : parseInt( scope.row.leave_state) === 1 ?'在职'
-                : '试用期'}}
+                {{parseInt( scope.row.state) === 0 ? '在职' : parseInt( scope.row.state) === 1 ?'离职'
+                : '试用'}}
               </span>
             </template>
           </el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
-              <span class="ope-txt" v-if="scope.row.leave_state != 0">--</span>
               <span
                 class="ope-txt"
-                v-if="scope.row.leave_state == 0"
-                @click="goDetails(scope.row.leaveId,1)"
+                @click="goDetails(scope.row.id)"
               >详情</span>
-              <span
-                class="ope-txt"
-                v-if="scope.row.leave_state == 0"
-                @click="goDetails(scope.row.leaveId, 2)"
-              >编辑</span>
             </template>
           </el-table-column>
         </el-table>
@@ -188,30 +176,30 @@ export default {
       statuses: [
         {
           value: "0",
-          label: "待审核"
+          label: "在职"
         },
         {
           value: "1",
-          label: "已通过"
+          label: "试用"
         },
         {
           value: "2",
-          label: "被驳回"
+          label: "离职"
         }
       ],
       // 列表查询参数
       searchForm: {
         searchTime: "", // 查询时间
-        nameOrAccount: "", // 警号或负责人名称
+        keyword: "", // 警号或负责人名称
         deptId: "", // 派出所
-        supDeptId: "", // 公安局
-        status: "" // 状态
+        deptBelongId: "", // 公安局
+        state: "" // 状态
       },
-      searchListUrl: "/searchUserLeave", //获取列表数据URL
+      searchListUrl: "/getArchivesList", //获取列表数据URL
       checkDialogTitle: "",
       checkDialogForm: {
         id: "",
-        status: "",
+        state: "",
         reason: ""
       },
       reasonDisabled: true,
@@ -237,29 +225,11 @@ export default {
     return;
   },
   filters: {
-    // 状态处理
-    getLeaveStatus: function(value) {
-      return value == "0"
-        ? "待批"
-        : value == 1
-        ? "已批准"
-        : value == 2
-        ? "未批准"
-        : "";
-    },
     getFormatTime: function(value) {
-      // return value ? fjPublic.dateStrFormat(value) : '';
       return value ? value.substring(0, value.length - 2) : "";
     }
   },
   methods: {
-    //审核
-    review() {
-      this.$message({
-        message: "请保证人员审核进度一致",
-        type: "warning"
-      });
-    },
     // 初始化分局
     initSupDeptIds: function() {
       var defer = $.Deferred();
@@ -302,7 +272,7 @@ export default {
     },
     // 修改单位下拉框查询
     changeSupDeptId: function(supDeptId) {
-      this.searchForm["supDeptId"] = supDeptId;
+      this.searchForm["deptBelongId"] = supDeptId;
       this.searchList();
     },
     // 修改单位下拉框查询
@@ -311,86 +281,34 @@ export default {
       this.searchList();
     },
     // 修改状态下拉框查询
-    changeStatus: function(status) {
-      this.searchForm["status"] = status;
+    changeState: function(state) {
+      this.searchForm["state"] = state;
       this.searchList();
     },
     // 标题或负责人名称查询
     searchAttendLeave: function() {
+      console.log(this.searchForm);
       this.searchList();
     },
     // 设置获取列表参数
     setSearchList: function() {
-      this.searchForm["page"] = this.currentPage;
-      this.searchForm["rows"] = this.pageSize;
+      this.searchForm["pageNumber"] = this.currentPage;
+      this.searchForm["pageSize"] = this.pageSize;
       // 传入当前用户信息
       this.searchForm["nowUser"] = this.nowUser;
+
     },
     /**
      * 查看，编辑，新建
      * @param {*} state 状态0=新增，1=查看，2=编辑
      */
-    goDetails(state, items) {
-      // let item = items;
-      // !item && (item = { id: "" });
+    goDetails(id) {
       this.$router.push({
         path: "/personnel-archives-detail",
-        query: { state: items, id: state }
+        query: { 'id': id }
       });
       //设置缓存，到编辑回显
       // state != 0 && fjPublic.setLocalData("ybssItem", JSON.stringify(item));
-    },
-    // 确认批准直接询问并发请求
-    // checkUpdate(id, status) {
-    //   this.$confirm("确认批准该条请假(休假)?", "提示", {
-    //     confirmButtonText: "确定",
-    //     cancelButtonText: "取消",
-    //     type: "warning"
-    //   }).then(() => {
-    //     this.checkDialogForm["id"] = id;
-    //     this.checkDialogForm["status"] = status;
-    //     this.updateLeaveStatus(true);
-    //   });
-    // },
-    // 保存请假批准
-    updateLeaveStatus: function(isConfirm) {
-      var defer = $.Deferred();
-      var vm = this;
-      let ajax = () => {
-        $.ajax({
-          url: fjPublic.ajaxUrlDNN + "/dealLeave",
-          type: "POST",
-          data: vm.checkDialogForm,
-          dataType: "json",
-          success: function(data) {
-            if (data.errorCode == 0) {
-              // vm.checkDialogVisible = false;
-              vm.searchList();
-            }
-            vm.$message({
-              type: "success",
-              message: data.errorMsg
-            });
-            defer.resolve();
-          },
-          error: function(err) {
-            defer.reject();
-          }
-        });
-      };
-      // 传入当前用户信息
-      vm.checkDialogForm["nowUser"] = $.cookie(fjPublic.loginCookieKey);
-      // 直接批准
-
-      if (isConfirm) {
-        ajax();
-      } else {
-        this.$refs.checkDialogForm.validate(validate => {
-          if (validate) {
-            ajax();
-          }
-        });
-      }
     },
     // 时间格式化
     timeFormatter(row, type) {

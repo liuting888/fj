@@ -75,23 +75,12 @@
                     <el-upload
                       class="upload-demo"
                       :action="ajaxUrlDNN + '/importPayrollExcel'"
-                      :on-preview="handlePreview"
-                      :on-remove="handleRemove"
-                      :before-remove="beforeRemove"
-                      multiple
-                      :limit="1"
-                      :on-exceed="handleExceed"
+                      multiple="false"
+                      show-file-list="false"
                     >
                       <el-button size="small" type="primary">导入</el-button>
                     </el-upload>
                     <el-button @click="exportExcl">导出</el-button>
-                    <form
-                      style="display:none;"
-                      name="exportForm"
-                      :action="ajaxUrlDNN + '/exportPayrollExcel?nowUser=' + nowUser + '&endTime=' + searchForm.endTime + '&deptId=' + searchForm.deptId + '&startTime=' + searchForm.startTime + '&page=' + currentPage + '&nameOrPhone=' + searchForm.nameOrPhone + '&rows=' + pageSize"
-                      method="post"
-                      enctype="multipart/form-data"
-                    ></form>
                   </div>
                 </el-form-item>
               </el-col>
@@ -116,13 +105,19 @@
           </el-row>
         </div>
         <el-table :data="tableDataList" v-if="activeIndex==0">
-          <el-table-column prop="time" label="发放日期" :key="Math.random()"></el-table-column>
+          <el-table-column
+            prop="time"
+            label="发放日期"
+            :formatter="timeFormatter"
+            width="100"
+            :key="Math.random()"
+          ></el-table-column>
           <el-table-column prop="deptBelongName" label="单位" :key="Math.random()"></el-table-column>
           <el-table-column prop="deptName" label="辅警站" :key="Math.random()"></el-table-column>
           <el-table-column prop="userName" label="姓名" width="80px" :key="Math.random()"></el-table-column>
           <el-table-column
             label="入职时间"
-            show-overflow-tooltip
+            width="100"
             :formatter="timeFormatter"
             prop="apply_time"
             :key="Math.random()"
@@ -148,7 +143,7 @@
           <el-table-column label="操作" :key="Math.random()">
             <template slot-scope="scope">
               <!-- <span class="ope-txt" v-if="scope.row.leave_state != 0">--</span> -->
-              <span class="ope-txt" @click="openDetail(scope.row.leaveId,1)">详情</span>
+              <span class="ope-txt" @click="openDetail(scope.row.userId,1)">详情</span>
             </template>
           </el-table-column>
         </el-table>
@@ -157,7 +152,7 @@
           <el-table-column prop="userAccount" label="警号" :key="Math.random()"></el-table-column>
           <el-table-column
             label="申诉时间"
-            show-overflow-tooltip
+            width="100"
             :formatter="timeFormatter"
             prop="insTime"
             :key="Math.random()"
@@ -174,14 +169,7 @@
               </span>
             </template>
           </el-table-column>
-          <el-table-column
-            label="处理意见"
-            show-overflow-tooltip
-            width="200px"
-            prop="response"
-            class-name="textLeft"
-            :key="Math.random()"
-          ></el-table-column>
+          <el-table-column label="处理意见" show-overflow-tooltip prop="response" :key="Math.random()"></el-table-column>
           <el-table-column label="操作" :key="Math.random()">
             <template slot-scope="scope">
               <span class="ope-txt" v-if="scope.row.state != 0">--</span>
@@ -435,6 +423,7 @@ export default {
         { name: "工资管理", path: "" }
       ],
       nowUser: $.cookie(fjPublic.loginCookieKey),
+      ajaxUrlDNN: fjPublic.ajaxUrlDNN,
       // 分局
       supDeptIds: null,
       // 派出所
@@ -458,10 +447,12 @@ export default {
       searchTime: "", // 查询时间
       // 列表查询参数
       searchForm: {
-        nameOrAccount: "", // 警号或负责人名称
+        keyword: "", // 警号或负责人名称
         deptId: "", // 派出所
         supDeptId: "", // 公安局
-        status: "" // 状态
+        status: "", // 状态
+        endTime: "",
+        startTime: ""
       },
       searchListUrl: "/getPayrollList", //获取列表数据URL
       // 审核弹出框数据
@@ -497,7 +488,6 @@ export default {
         reason: ""
       },
       reasonDisabled: true,
-      formLabelWidth: "120px",
       // 不批准弹出框校验
       checkRule: {
         reason: {
@@ -540,25 +530,27 @@ export default {
     }
   },
   methods: {
-    handleRemove(file, fileList) {
-      console.log(file, fileList);
-    },
-    handlePreview(file) {
-      console.log(file);
-    },
-    handleExceed(files, fileList) {
-      this.$message.warning(
-        `当前限制选择 3 个文件，本次选择了 ${
-          files.length
-        } 个文件，共选择了 ${files.length + fileList.length} 个文件`
+    //导出工资列表
+    exportExcl() {
+      // console.log(fjPublic.ajaxUrlDNN + '/exportPayrollExcel?endTime=' + this.searchForm.endTime + '&userId=' + $.parseJSON(fjPublic.getLocalData('userInfo')).userId + '&startTime=' + this.searchForm.startTime + '&pageNumber=' + this.currentPage  + '&pageSize=' + this.pageSize);
+      window.open(
+        fjPublic.ajaxUrlDNN +
+          "/exportPayrollExcel?endTime=" +
+          this.searchForm.endTime +
+          "&userId=" +
+          $.parseJSON(fjPublic.getLocalData("userInfo")).userId +
+          "&startTime=" +
+          this.searchForm.startTime +
+          "&pageNumber=" +
+          this.currentPage +
+          "&pageSize=" +
+          this.pageSize +
+          "&keyword=" +
+          this.searchForm.keyword
       );
-    },
-    beforeRemove(file, fileList) {
-      return this.$confirm(`确定移除 ${file.name}？`);
     },
     //获取被选中的标签 tab 实例
     handleClick(tab) {
-      console.log(tab);
       this.activeIndex = tab.index;
       this.activeIndex == 0
         ? (this.searchListUrl = "/getPayrollList")
@@ -643,9 +635,30 @@ export default {
     },
     // 打开工资编辑弹框
     editDialog: function(item) {
-      this.ruleForm = item;
-      this.editDialogVisible = true;
-      this.isDisabled = false;
+      var defer = $.Deferred();
+      console.log(item);
+      var vm = this;
+      // vm.ruleForm = item;
+      vm.editDialogVisible = true;
+      vm.isDisabled = false;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/getPayrollByComplainId",
+        type: "POST",
+        data: { complainId: item.id },
+        dataType: "json",
+        success: function(data) {
+          if (data.errorCode == 0) {
+            // data.data
+            vm.ruleForm = data.data;
+          } else {
+          }
+          defer.resolve();
+        },
+        error: function(err) {
+          defer.reject();
+        }
+      });
+      return defer;
     },
     // 工资编辑弹框确认操作
     submitAudit: function(status) {
@@ -734,7 +747,13 @@ export default {
       if (!dateStr) {
         return "";
       }
-      return dateStr.substr(4, 2) + "/" + dateStr.substr(6, 2);
+      return (
+        dateStr.substr(0, 4) +
+        "/" +
+        dateStr.substr(4, 2) +
+        "/" +
+        dateStr.substr(6, 2)
+      );
     },
     // 弹窗关闭事件
     closeDialog() {
@@ -759,6 +778,9 @@ export default {
     float: left;
     margin-right: 20px;
     margin-top: -1px;
+  }
+  .el-upload-list {
+    display: none;
   }
   .fj-search-inline {
     // 上下间距

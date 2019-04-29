@@ -334,11 +334,7 @@ export default {
     };
   },
   mounted: function() {
-    // // 初始化派出所下拉列表
-    // this.initDeptIds();
-    // // 初始化派出所下拉列表
-    // this.initSupDeptIds();
-    // 初始化请假休假列表
+    // 初始化列表
     this.searchList();
 
     return;
@@ -355,7 +351,6 @@ export default {
         : "";
     },
     getFormatTime: function(value) {
-      // return value ? fjPublic.dateStrFormat(value) : '';
       return value ? value.substring(0, value.length - 2) : "";
     }
   },
@@ -369,46 +364,6 @@ export default {
       this.currentPage = 1;
       this.searchList();
     },
-    // // 初始化分局
-    // initSupDeptIds: function() {
-    //   var defer = $.Deferred();
-    //   var vm = this;
-    //   $.ajax({
-    //     url: fjPublic.ajaxUrlDNN + "/searchDepListBySearch",
-    //     type: "POST",
-    //     data: {},
-    //     dataType: "json",
-    //     success: function(data) {
-    //       vm.supDeptIds = data.list;
-    //       defer.resolve();
-    //     },
-    //     error: function(err) {
-    //       defer.reject();
-    //     }
-    //   });
-    //   return defer;
-    // },
-    // // 初始化派出所
-    // initDeptIds: function() {
-    //   var defer = $.Deferred();
-    //   var vm = this;
-    //   $.ajax({
-    //     url: fjPublic.ajaxUrlDNN + "/searchDeptsByFenju",
-    //     type: "POST",
-    //     data: {
-    //       parentDeptId: ""
-    //     },
-    //     dataType: "json",
-    //     success: function(data) {
-    //       vm.deptIds = data.list;
-    //       defer.resolve();
-    //     },
-    //     error: function(err) {
-    //       defer.reject();
-    //     }
-    //   });
-    //   return defer;
-    // },
     // 设置获取列表参数
     setSearchList: function() {
       this.searchForm["page"] = this.currentPage;
@@ -416,17 +371,14 @@ export default {
     },
     // 打开工资配置弹框
     openWageDialog: function(id, status) {
-      console.log(id);
       this.setWageVisible = true;
     },
     // 打开合同配置弹框
     openContractDialog: function(id, status) {
-      console.log(id);
       this.setContractVisible = true;
     },
     // 打开合同详情页
     addContract: function(id, status) {
-      console.log(123);
       this.$router.push({
         path: "/personnel-rule-setting-detail",
         query: { state: status, id: id }
@@ -449,7 +401,6 @@ export default {
     },
     // 工资编辑弹框操作
     submitAudit: function() {
-      console.log(123);
       var defer = $.Deferred();
       var vm = this;
       $.ajax({

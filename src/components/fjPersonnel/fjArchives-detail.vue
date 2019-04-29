@@ -8,16 +8,16 @@
         <div class="fj-block-head kaohe">
           <el-tabs v-model="activeIndex" @tab-click="handleClick">
             <el-tab-pane label="档案信息" name="0"></el-tab-pane>
-            <el-tab-pane label="工资信息" name="1"></el-tab-pane>
-            <el-tab-pane label="合同信息" name="2"></el-tab-pane>
+            <el-tab-pane label="合同信息" name="1"></el-tab-pane>
+            <el-tab-pane label="工资信息" name="2"></el-tab-pane>
           </el-tabs>
           <!-- <div class="archives-footer-btn" v-if="userInfo.state==0||userInfo.state==2"> -->
           <div class="archives-footer-btn">
-            <el-button
+            <!-- <el-button
               type="primary"
               @click="submitForm(1)"
               v-if="userInfo.state==0&&activeIndex==0"
-            >保存</el-button>
+            >保存</el-button>-->
             <!-- <form
               style="display:none;"
               name="exportForm"
@@ -25,9 +25,9 @@
               method="post"
               enctype="multipart/form-data"
             ></form>-->
-            <el-button @click="exportExcl">
+            <!-- <el-button @click="exportExcl">
               <span>导出</span>
-            </el-button>
+            </el-button>-->
           </div>
         </div>
         <div class="fj-block-body">
@@ -35,43 +35,31 @@
           <div class="archives-form-area" v-if="activeIndex==0">
             <!-- 岗位信息 -->
             <p class="form-title">岗位信息</p>
-            <el-form :model="ruleForm">
+            <el-form :model="recruitInfo">
               <div class="form-info">
                 <el-row>
                   <el-col :span="12">
                     <el-form-item label="姓名">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
+                      <el-input v-model="jobInfo.userName" :disabled="isDisabled"></el-input>
                     </el-form-item>
                   </el-col>
                   <el-col :span="12" class="row-img-padding">
                     <el-form-item label="岗位级别">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
+                      <el-input v-model="jobInfo.userRole" :disabled="isDisabled"></el-input>
                     </el-form-item>
                   </el-col>
                 </el-row>
                 <el-row>
                   <el-col :span="12">
                     <el-form-item label="警号">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
+                      <el-input v-model="jobInfo.userAccount" :disabled="isDisabled"></el-input>
                     </el-form-item>
                   </el-col>
                   <el-col :span="12">
                     <el-form-item label="入职日期" class="row-img-padding">
                       <el-date-picker
                         :disabled="isDisabled"
-                        v-model="ruleForm.randomTime"
+                        v-model="archivesInfo.entryTime"
                         type="date"
                         value-format="yyyy-MM-dd"
                         :placeholder="isDisabled?'':'请选择'"
@@ -82,18 +70,14 @@
                 <el-row>
                   <el-col :span="12">
                     <el-form-item label="直接上级">
-                      <el-input
-                        v-model="ruleForm.houseNumber"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
+                      <el-input v-model="jobInfo.superiorUserName" :disabled="isDisabled"></el-input>
                     </el-form-item>
                   </el-col>
                   <el-col :span="12">
                     <el-form-item label="转正日期" class="row-img-padding">
                       <el-date-picker
                         :disabled="isDisabled"
-                        v-model="ruleForm.randomTime"
+                        v-model="jobInfo.officialTime"
                         type="date"
                         value-format="yyyy-MM-dd"
                         :placeholder="isDisabled?'':'请选择'"
@@ -106,7 +90,7 @@
                     <el-form-item label="所属派出所" class="row-img-padding">
                       <el-select
                         :disabled="isDisabled"
-                        v-model="ruleForm.police"
+                        v-model="recruitInfo.deptId"
                         :placeholder="isDisabled?'':'请选择'"
                       >
                         <el-option
@@ -126,14 +110,14 @@
             </el-form>
             <!-- 基本信息 -->
             <p class="form-title">基本信息</p>
-            <el-form :model="ruleForm">
+            <el-form :model="recruitInfo">
               <div class="form-info">
                 <el-row>
                   <el-col :span="12">
                     <el-form-item label="出生年月">
                       <el-date-picker
                         :disabled="isDisabled"
-                        v-model="ruleForm.randomTime"
+                        v-model="recruitInfo.birth"
                         type="date"
                         value-format="yyyy-MM-dd"
                         :placeholder="isDisabled?'':'请选择'"
@@ -144,7 +128,7 @@
                     <el-form-item label="性别">
                       <el-select
                         :disabled="isDisabled"
-                        v-model="ruleForm.sex"
+                        v-model="recruitInfo.sex"
                         :placeholder="isDisabled?'':'请选择'"
                       >
                         <el-option label="男" value="1"></el-option>
@@ -156,38 +140,26 @@
                 <el-row>
                   <el-col :span="12">
                     <el-form-item label="籍贯">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
+                      <el-input v-model="recruitInfo.birthPlace" :disabled="isDisabled"></el-input>
                     </el-form-item>
                   </el-col>
                   <el-col :span="12">
                     <el-form-item label="民族">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
+                      <el-input v-model="recruitInfo.nation" :disabled="isDisabled"></el-input>
                     </el-form-item>
                   </el-col>
                 </el-row>
                 <el-row>
                   <el-col :span="12">
                     <el-form-item label="本人电话">
-                      <el-input
-                        v-model="ruleForm.houseNumber"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
+                      <el-input v-model="recruitInfo.phone" :disabled="isDisabled"></el-input>
                     </el-form-item>
                   </el-col>
                   <el-col :span="12">
                     <el-form-item label="婚否">
                       <el-select
                         :disabled="isDisabled"
-                        v-model="ruleForm.plots"
+                        v-model="recruitInfo.marriage"
                         :placeholder="isDisabled?'':'请选择'"
                       >
                         <el-option label="未婚" value="1"></el-option>
@@ -201,81 +173,53 @@
                     <el-form-item label="是否退役士兵/见义勇为人员">
                       <el-select
                         :disabled="isDisabled"
-                        v-model="ruleForm.plots"
+                        v-model="recruitInfo.soldier"
                         :placeholder="isDisabled?'':'请选择'"
                       >
-                        <el-option label="是" value="1"></el-option>
-                        <el-option label="否" value="2"></el-option>
+                        <el-option label="是" value="0"></el-option>
+                        <el-option label="否" value="1"></el-option>
                       </el-select>
                     </el-form-item>
                   </el-col>
                   <el-col :span="12">
                     <el-form-item label="政治面貌">
-                      <el-input
-                        v-model="ruleForm.plots"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
+                      <el-input v-model="recruitInfo.politics" :disabled="isDisabled"></el-input>
                     </el-form-item>
                   </el-col>
                 </el-row>
                 <el-row>
                   <el-col :span="12">
                     <el-form-item label="紧急联系人">
-                      <el-input
-                        v-model="ruleForm.entityName"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
+                      <el-input v-model="recruitInfo.ePerson" :disabled="isDisabled"></el-input>
                     </el-form-item>
                   </el-col>
                   <el-col :span="12">
                     <el-form-item label="身高">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
+                      <el-input v-model="recruitInfo.hw" :disabled="isDisabled"></el-input>
                     </el-form-item>
                   </el-col>
                 </el-row>
                 <el-row>
                   <el-col :span="12">
                     <el-form-item label="紧急联系人电话">
-                      <el-input
-                        v-model="ruleForm.houseName"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
+                      <el-input v-model="recruitInfo.ePersonPhone" :disabled="isDisabled"></el-input>
                     </el-form-item>
                   </el-col>
                   <el-col :span="12">
                     <el-form-item label="最高学历">
-                      <el-input
-                        v-model="ruleForm.legalName"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
+                      <el-input v-model="recruitInfo.education" :disabled="isDisabled"></el-input>
                     </el-form-item>
                   </el-col>
                 </el-row>
                 <el-row>
                   <el-col :span="12">
                     <el-form-item label="现居地址">
-                      <el-input
-                        v-model="ruleForm.idCard"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
+                      <el-input v-model="recruitInfo.address" :disabled="isDisabled"></el-input>
                     </el-form-item>
                   </el-col>
                   <el-col :span="12">
                     <el-form-item class="noBR noBB" label="身份证号码">
-                      <el-input
-                        v-model="ruleForm.phone"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
+                      <el-input v-model="recruitInfo.idNum" :disabled="isDisabled"></el-input>
                     </el-form-item>
                   </el-col>
                 </el-row>
@@ -288,23 +232,13 @@
                 <el-col :span="12" class="noBR form-table-col">
                   <div class="left">
                     <div class="title title-left titles">起止年月</div>
-                    <div class="title title-left">
+                    <div
+                      class="title title-left"
+                      v-for="(item, index) in recruitInfo.educations"
+                      :key="index"
+                    >
                       <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-left">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-left title-bottom">
-                      <el-input
-                        v-model="ruleForm.road"
+                        v-model="item.eduDate"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -312,23 +246,9 @@
                   </div>
                   <div class="right">
                     <div class="title titles">学校名称</div>
-                    <div class="title">
+                    <div class="title" v-for="(item, index) in recruitInfo.educations" :key="index">
                       <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-bottom">
-                      <el-input
-                        v-model="ruleForm.road"
+                        v-model="item.schoolName"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -338,23 +258,9 @@
                 <el-col :span="12" class="form-table-col">
                   <div class="left">
                     <div class="title titles">专业</div>
-                    <div class="title">
+                    <div class="title" v-for="(item, index) in recruitInfo.educations" :key="index">
                       <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-bottom">
-                      <el-input
-                        v-model="ruleForm.road"
+                        v-model="item.majorName"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -362,23 +268,9 @@
                   </div>
                   <div class="right">
                     <div class="title titles">所获学历、学位证书</div>
-                    <div class="title">
+                    <div class="title" v-for="(item, index) in recruitInfo.educations" :key="index">
                       <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-bottom">
-                      <el-input
-                        v-model="ruleForm.road"
+                        v-model="item.degrees"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -394,23 +286,13 @@
                 <el-col :span="12" class="noBR form-table-col">
                   <div class="left">
                     <div class="title title-left titles">起止年月</div>
-                    <div class="title title-left">
+                    <div
+                      class="title title-left"
+                      v-for="(item, index) in recruitInfo.works"
+                      :key="index"
+                    >
                       <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-left">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-left title-bottom">
-                      <el-input
-                        v-model="ruleForm.road"
+                        v-model="item.worDate"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -418,23 +300,9 @@
                   </div>
                   <div class="right">
                     <div class="title titles">单位名称</div>
-                    <div class="title">
+                    <div class="title" v-for="(item, index) in recruitInfo.works" :key="index">
                       <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-bottom">
-                      <el-input
-                        v-model="ruleForm.road"
+                        v-model="item.companyName"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -444,23 +312,9 @@
                 <el-col :span="12" class="form-table-col">
                   <div class="left-over">
                     <div class="title titles">职位</div>
-                    <div class="title">
+                    <div class="title" v-for="(item, index) in recruitInfo.works" :key="index">
                       <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-bottom">
-                      <el-input
-                        v-model="ruleForm.road"
+                        v-model="item.positionName"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -475,24 +329,14 @@
               <el-row>
                 <el-col :span="12" class="noBR form-table-col">
                   <div class="left">
-                    <div class="title title-left titles">家庭成员</div>
-                    <div class="title title-left">
+                    <div class="title title-left titles">关系</div>
+                    <div
+                      class="title title-left"
+                      v-for="(item, index) in recruitInfo.families"
+                      :key="index"
+                    >
                       <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-left">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-left title-bottom">
-                      <el-input
-                        v-model="ruleForm.road"
+                        v-model="item.relation"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -500,23 +344,9 @@
                   </div>
                   <div class="right">
                     <div class="title titles">姓名</div>
-                    <div class="title">
+                    <div class="title" v-for="(item, index) in recruitInfo.families" :key="index">
                       <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-bottom">
-                      <el-input
-                        v-model="ruleForm.road"
+                        v-model="item.name"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -526,23 +356,9 @@
                 <el-col :span="12" class="form-table-col">
                   <div class="left-over">
                     <div class="title titles">工作单位（职业）</div>
-                    <div class="title">
+                    <div class="title" v-for="(item, index) in recruitInfo.families" :key="index">
                       <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title">
-                      <el-input
-                        v-model="ruleForm.road"
-                        :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
-                    </div>
-                    <div class="title title-bottom">
-                      <el-input
-                        v-model="ruleForm.road"
+                        v-model="item.positionName"
                         :disabled="isDisabled"
                         :placeholder="isDisabled?'':'请输入'"
                       ></el-input>
@@ -554,17 +370,7 @@
           </div>
           <!-- 合同信息 -->
           <div class="archives-contract" v-if="activeIndex==1">
-            <iframe
-              src="http://storage.xuetangx.com/public_assets/xuetangx/PDF/PlayerAPI_v1.0.6.pdf"
-              width="100%"
-              height="100%"
-            >
-              This browser does not support PDFs. Please download the PDF to view it:
-              <a
-                href="/test2.pdf"
-                rel="external nofollow"
-              >Download PDF</a>
-            </iframe>
+            <iframe :src="iframeSrc" width="100%" height="100%">当前浏览器暂时不支持查看PDF，请更新浏览器.</iframe>
           </div>
           <!-- 工资信息 -->
           <div class="archives-wage" v-if="activeIndex==2">
@@ -574,7 +380,7 @@
                   <el-col :lg="8" :xl="7" class="time-item">
                     <el-form-item label="起始日期：" class="datepicker">
                       <el-date-picker
-                        v-model="searchForm.searchTime"
+                        v-model="searchTime"
                         type="daterange"
                         range-separator="至"
                         start-placeholder="开始日期"
@@ -587,9 +393,9 @@
                   <el-col :lg="6" :xl="5">
                     <el-form-item label="输入查询：">
                       <el-input
-                        v-model="searchForm.nameOrAccount"
+                        v-model="searchForm.keyword"
                         clearable
-                        placeholder="请输入姓名或电话"
+                        placeholder="请输入姓名或警号"
                         size="small"
                         class="search-input"
                       >
@@ -601,24 +407,35 @@
               </el-row>
             </div>
             <el-table :data="attendLeaveData">
-              <el-table-column prop="userId" label="发放日期" width="100px" show-overflow-tooltip></el-table-column>
-              <el-table-column prop="userId" label="基本工资" width="80px"></el-table-column>
-              <el-table-column prop="userAccount" label="绩效工资"></el-table-column>
-              <el-table-column prop="userAccount" label="层级工资"></el-table-column>
-              <el-table-column prop="userAccount" label="岗位工资"></el-table-column>
-              <el-table-column prop="userAccount" label="生活补贴"></el-table-column>
-              <el-table-column prop="userAccount" label="信息采集费"></el-table-column>
-              <el-table-column prop="userAccount" label="流量补助费"></el-table-column>
-              <el-table-column prop="userAccount" label="其他"></el-table-column>
-              <el-table-column prop="userAccount" label="应发合计"></el-table-column>
-              <el-table-column prop="userAccount" label="养老保险"></el-table-column>
-              <el-table-column prop="userAccount" label="医疗保险"></el-table-column>
-              <el-table-column prop="userAccount" label="失业保险"></el-table-column>
-              <el-table-column prop="userAccount" label="工商保险"></el-table-column>
-              <el-table-column prop="userAccount" label="生育保险"></el-table-column>
-              <el-table-column prop="userAccount" label="大病互助险"></el-table-column>
-              <el-table-column prop="userAccount" label="扣发合计"></el-table-column>
-              <el-table-column prop="userAccount" label="实发合计"></el-table-column>
+              <el-table-column prop="time" label="发放日期" :formatter="timeFormatter" width="100"></el-table-column>
+              <el-table-column prop="deptBelongName" label="单位"></el-table-column>
+              <el-table-column prop="deptName" label="辅警站"></el-table-column>
+              <el-table-column prop="userName" label="姓名" width="80px"></el-table-column>
+              <el-table-column
+                label="入职时间"
+                width="100"
+                show-overflow-tooltip
+                :formatter="timeFormatter"
+                prop="apply_time"
+              ></el-table-column>
+              <el-table-column prop="basePay" label="基本工资"></el-table-column>
+              <el-table-column prop="meritPay" label="绩效工资"></el-table-column>
+              <el-table-column prop="tierPay" label="层级工资"></el-table-column>
+              <el-table-column prop="jonPay" label="岗位工资"></el-table-column>
+              <el-table-column prop="liveSubsidy" label="生活补贴"></el-table-column>
+              <el-table-column prop="infoCollect" label="信息采集费"></el-table-column>
+              <el-table-column prop="trafficSubsidy" label="流量补助费"></el-table-column>
+              <el-table-column prop="other" label="其他"></el-table-column>
+              <el-table-column prop="theorySum" label="应发合计"></el-table-column>
+              <el-table-column prop="pension" label="养老保险"></el-table-column>
+              <el-table-column prop="medicare" label="医疗保险"></el-table-column>
+              <el-table-column prop="unemployment" label="失业保险"></el-table-column>
+              <el-table-column prop="injury" label="工伤保险"></el-table-column>
+              <el-table-column prop="maternity" label="生育保险"></el-table-column>
+              <el-table-column prop="illness" label="大病互助保险"></el-table-column>
+              <el-table-column prop="deduct" label="扣发合计"></el-table-column>
+              <el-table-column prop="sum" label="实发合计"></el-table-column>
+              <el-table-column prop="userAccount" label="银行卡号"></el-table-column>
             </el-table>
             <div class="mj-page_wrap">
               <el-pagination
@@ -651,6 +468,14 @@ export default {
         { name: "档案管理", path: "/personnel-archives" },
         { name: "详情", path: "" }
       ],
+      archivesInfo: {},
+      iframeSrc: "",
+      recruitInfo: {
+        works: [{}, {}, {}],
+        families: [{}, {}, {}],
+        educations: [{}, {}, {}]
+      },
+      jobInfo: {},
       activeIndex: "0",
       activeList: [],
       userInfo: {},
@@ -692,13 +517,10 @@ export default {
       currentPage: 1,
       pageSize: 10,
       total: 0, //是否
+      searchTime: "",
       // 列表查询参数
       searchForm: {
-        searchTime: "", // 查询时间
-        nameOrAccount: "", // 警号或负责人名称
-        deptId: "", // 派出所
-        supDeptId: "", // 公安局
-        status: "" // 状态
+        keyword: "" // 警号或负责人名称
       },
       rules: []
     };
@@ -707,10 +529,13 @@ export default {
   //   this.setCreated();
   // },
   mounted() {
+    //获取派出所信息
     this.getTeamList();
     // this.getDownDepts();
     this.setCreated();
-    this.searchUserLeave();
+    // this.searchUserLeave();
+    //获取档案详情
+    this.getArchivesInfo();
   },
   methods: {
     currentPageChange: function(pageNum) {
@@ -734,43 +559,14 @@ export default {
       this.pageSize = pageSize;
       this.searchUserLeave();
     },
-    submitForm(state) {
-      console.log(state);
-      window.history.go(-1);
-    },
-    exportExcl: function() {
-      // 导出
-      document.forms["exportForm"].submit();
-    },
-    // 获取采集列表
-    searchUserLeave: function() {
-      var defer = $.Deferred();
-      var vm = this;
-      // 参数
-      this.searchForm["page"] = this.currentPage;
-      this.searchForm["rows"] = this.pageSize;
-      // 传入当前用户信息
-      this.searchForm["nowUser"] = this.nowUser;
-      $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/searchUserLeave",
-        type: "POST",
-        data: vm.searchForm,
-        dataType: "json",
-        success: function(data) {
-          vm.attendLeaveData = null;
-          vm.attendLeaveData = data.list;
-          vm.total = data.total;
-          _.each(vm.attendLeaveData, function(item, i) {
-            vm.$set(item, "rank", i + 1);
-          });
-          defer.resolve();
-        },
-        error: function(err) {
-          defer.reject();
-        }
-      });
-      return defer;
-    },
+    // submitForm(state) {
+    //   console.log(state);
+    //   window.history.go(-1);
+    // },
+    // exportExcl: function() {
+    //   // 导出
+    //   document.forms["exportForm"].submit();
+    // },
     // 修改查询时间
     changeSearchTime: function(searchTime) {
       if (searchTime) {
@@ -796,11 +592,77 @@ export default {
         data: {},
         dataType: "json",
         success: function(data) {
-          console.log(data);
           vm.policeList = data.list;
         },
         error: function(err) {}
       });
+    },
+    // 获取档案详情
+    getArchivesInfo: function() {
+      this.archivesInfoId = this.$route.query.id;
+      var vm = this;
+      // 参数
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/getArchivesInfo",
+        type: "POST",
+        data: { id: this.archivesInfoId },
+        dataType: "json",
+        success: function(data) {
+          console.log(data);
+          if (data.errorCode == 0) {
+            vm.jobInfo = data.data.job;
+            vm.iframeSrc =
+              fjPublic.ajaxUrlDNN + "/contract/" + data.data.contractFileName;
+            vm.recruitInfo = data.data.recruitInfo;
+            vm.addArrObj("educations", 3);
+            vm.addArrObj("families", 3);
+            vm.addArrObj("works", 3);
+            vm.searchUserLeave();
+          } else {
+          }
+        },
+        error: function(err) {}
+      });
+    },
+    // 获取工资列表
+    searchUserLeave: function() {
+      var defer = $.Deferred();
+      var vm = this;
+      // 参数
+      this.searchForm["pageNumber"] = this.currentPage;
+      this.searchForm["pageSize"] = this.pageSize;
+      this.searchForm["userId"] = vm.jobInfo.userId;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/getPayrollList",
+        type: "POST",
+        data: vm.searchForm,
+        dataType: "json",
+        success: function(data) {
+          vm.attendLeaveData = null;
+          vm.attendLeaveData = data.list;
+          vm.total = data.total;
+          defer.resolve();
+        },
+        error: function(err) {
+          defer.reject();
+        }
+      });
+      return defer;
+    },
+    /**
+     * @description: 给数组添加对象元素
+     * @param {type} arr 数组名称
+     * @param {type} index 添加数量
+     * @return:
+     */
+    addArrObj: function(arr, index) {
+      var vm = this;
+      vm.recruitInfo[arr].length = index;
+      for (let i = 0; i < index; i++) {
+        if (!vm.recruitInfo[arr][i]) {
+          vm.recruitInfo[arr][i] = {};
+        }
+      }
     },
     //获取被选中的标签 tab 实例
     handleClick(tab) {
@@ -812,59 +674,23 @@ export default {
       // this.currentPage = 1;
       // this.searchSign();
     },
-    // 获取所属地分局
-    getDownDepts: function(state) {
-      var vm = this;
-      // 参数
-      $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/getDownDepts",
-        type: "POST",
-        data: {
-          deptid: $.parseJSON(fjPublic.getLocalData("userInfo")).deptId
-        },
-        dataType: "json",
-        success: function(data) {
-          console.log(data);
-          vm.subofficeList = data;
-        },
-        error: function(err) {}
-      });
-    },
-    // 提交或者编辑数据
-    postRuleForm: function() {
-      let vm = this;
-      let url = vm.userInfo.state == 0 ? "/addInfo" : "/updInfo";
-      if (vm.userInfo.id) {
-        vm.ruleForm.id = vm.userInfo.id;
-      }
-      vm.ruleForm.tableName = vm.activeList[vm.userInfo.index].tableName;
-      vm.ruleForm.userId = $.parseJSON(
-        fjPublic.getLocalData("userInfo")
-      ).userId;
-      $.ajax({
-        url: fjPublic.ajaxUrlDNN + url,
-        type: "POST",
-        data: vm.ruleForm,
-        dataType: "json",
-        success: function(data) {},
-        error: function(err) {
-          if (err.responseText == "success") {
-            vm.$router.push({
-              path: "/fjWorkManage-YiBiaoSanShi"
-            });
-          } else {
-          }
-        }
-      });
-    },
     setCreated() {
       this.userInfo = this.$route.query;
-      this.userInfo.state == 1
-        ? (this.isDisabled = true)
-        : (this.isDisabled = false);
-      // this.userInfo.state != 0 &&
-      //   (this.ruleForm = $.parseJSON(fjPublic.getLocalData("archivesItem")));
-      // this.$refs["ruleForm"].resetFields();
+      this.isDisabled = true;
+    },
+    // 时间格式化
+    timeFormatter(row, type) {
+      let dateStr = row[type.property];
+      if (!dateStr) {
+        return "";
+      }
+      return (
+        dateStr.substr(0, 4) +
+        "/" +
+        dateStr.substr(4, 2) +
+        "/" +
+        dateStr.substr(6, 2)
+      );
     }
   },
   watch: {
@@ -916,24 +742,15 @@ export default {
           width: 100%;
           .el-input {
             padding-left: 0;
-            // width: 200px;
+
             input {
               height: 42px !important;
             }
           }
-        }
-        .el-input--prefix {
-          .el-input__inner {
-            padding-left: 15px;
-            width: 200px;
-          }
-          .el-input__prefix {
-            left: -5px;
-          }
-        }
-        .is-disabled {
-          span {
-            display: none;
+          .is-disabled {
+            span {
+              display: none;
+            }
           }
         }
       }
@@ -955,27 +772,7 @@ export default {
       }
     }
   }
-  .fj-block-head {
-    height: 50px;
-    border-bottom: 0px;
-    .el-tabs__header {
-      padding-top: 10px;
-    }
-    .archives-footer-btn {
-      position: absolute;
-      top: 10px;
-      right: 0;
-    }
-  }
-
   .archives-form-area {
-    .form-title {
-      padding: 20px 0 5px 20px;
-      font-size: 14px;
-      font-weight: 500;
-      color: rgba(0, 0, 0, 0.9);
-      opacity: 1;
-    }
     .form-info {
       position: relative;
       .info-img {
@@ -993,14 +790,27 @@ export default {
         }
       }
     }
+    .el-input.is-disabled .el-input__inner {
+      color: rgba(0, 0, 0, 0.9);
+    }
+    .form-title {
+      padding: 20px 0 5px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.9);
+      opacity: 1;
+    }
     .form-table {
       height: 222px;
+
       .form-table-col {
-        // border: 1px solid #e8e8e8;
         div {
           display: inline-block;
           height: 44px;
           line-height: 44px;
+          div:nth-child(4) {
+            border-bottom: 1px solid #e8e8e8;
+          }
         }
         .left {
           width: 200px;
@@ -1020,6 +830,7 @@ export default {
           border-right: 1px solid #e8e8e8;
           .el-input {
             width: 100%;
+            padding-left: 5px;
             .el-input__inner {
               border: none;
             }
@@ -1035,9 +846,6 @@ export default {
           text-align: left;
           font-weight: 400;
         }
-        .title-bottom {
-          border-bottom: 1px solid #e8e8e8;
-        }
         .title-left {
           border-left: 1px solid #e8e8e8;
         }
@@ -1050,6 +858,19 @@ export default {
       }
     }
   }
+  .fj-block-head {
+    height: 50px;
+    border-bottom: 0px;
+    .el-tabs__header {
+      padding-top: 10px;
+    }
+    .archives-footer-btn {
+      position: absolute;
+      top: 10px;
+      right: 0;
+    }
+  }
+
   .archives-contract {
     height: 800px;
     padding: 20px;

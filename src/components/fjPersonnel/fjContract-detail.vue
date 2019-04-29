@@ -10,29 +10,23 @@
           <!-- <div class="contract-footer-btn" v-if="userInfo.state==0||userInfo.state==2"> -->
           <div class="contract-head-btn">
             <el-button type="primary" @click="review()">签订</el-button>
-            <!-- <form
-              style="display:none;"
-              name="exportForm"
-              :action="ajaxUrlDNN + '/exportRecruits?nowUser=' + nowUser + '&endTime=' + searchForm.endTime + '&deptId=' + searchForm.deptId + '&startTime=' + searchForm.startTime + '&page=' + currentPage + '&nameOrPhone=' + searchForm.nameOrPhone + '&rows=' + pageSize"
-              method="post"
-              enctype="multipart/form-data"
-            ></form> -->
-            <el-button @click="exportExcl">
+            <el-button @click="downComtract">
               <span>导出</span>
             </el-button>
           </div>
         </div>
         <div class="fj-block-body">
-          <iframe
+          <!-- <iframe
             src="http://storage.xuetangx.com/public_assets/xuetangx/PDF/PlayerAPI_v1.0.6.pdf"
             width="100%"
             height="100%"
+          > -->
+          <iframe
+            :src="iframeSrc"
+            width="100%"
+            height="100%"
           >
-            This browser does not support PDFs. Please download the PDF to view it:
-            <a
-              href="/test2.pdf"
-              rel="external nofollow"
-            >Download PDF</a>
+            当前浏览器暂时不支持查看PDF，请更新浏览器. 
           </iframe>
         </div>
       </div>
@@ -79,6 +73,7 @@ export default {
       ruleForm: {
         name: ""
       },
+      iframeSrc:"",
       // 审核弹出框数据
       checkDialogVisible: false,
       checkDialogVisibleModal: false,
@@ -99,20 +94,14 @@ export default {
       rules: []
     };
   },
-  // created() {
-  //   this.setCreated();
-  // },
   mounted() {
     this.setCreated();
+    this.getComtract();
   },
   methods: {
-    submitForm(state) {
-      console.log(state);
-      window.history.go(-1);
-    },
     exportExcl: function() {
       // 导出
-      document.forms["exportForm"].submit();
+      // document.forms["exportForm"].submit();
     },
     //签订
     review() {
@@ -121,6 +110,31 @@ export default {
         type: "warning"
       });
       this.checkDialogVisible = true;
+    },
+    //获取合同路径
+    getComtract() {
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/getContractPdf",
+        type: "POST",
+        data: {
+          id: vm.userInfo.id
+        },
+        dataType: "json",
+        success: function(data) {
+          vm.iframeSrc=fjPublic.ajaxUrlDNN+"/"+data.data;
+          defer.resolve();
+        },
+        error: function(err) {
+          defer.reject();
+        }
+      });
+      return defer;
+    },
+    //导出合同
+    downComtract() {
+      window.open(fjPublic.ajaxUrlDNN + "/getContractWord?id=" + this.userInfo.id);
     },
     // 提交或者编辑数据
     postRuleForm: function() {

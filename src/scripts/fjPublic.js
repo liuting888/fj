@@ -1,7 +1,9 @@
 (function() {
     var commonData = {
-        ajaxUrlDNN: 'http://172.16.10.27:8082/Auxpolice1.0', //本地
+        // ajaxUrlDNN: 'http://172.16.10.27:8082/Auxpolice1.0', //本地
+        // ajaxUrlDNN: 'http://172.16.10.162:8080/Auxpolice1.0', //本地
         // ajaxUrlDNN: 'http://172.16.10.59:8280/Auxpolice1.0', //本地
+        ajaxUrlDNN: 'http://172.16.10.59:8080/Auxpolice1.0', //本地
         // ajaxUrlDNN: getRealPath(), //请求地址 -> DNN
         loginCookieKey: '', //登录成功后的cookie名 'AUXPOLICE10' 
         userRoles: { //用户角色字段

@@ -25,13 +25,7 @@
               src="http://storage.xuetangx.com/public_assets/xuetangx/PDF/PlayerAPI_v1.0.6.pdf"
               width="80%"
               height="700px"
-            >
-              This browser does not support PDFs. Please download the PDF to view it:
-              <a
-                href="/test2.pdf"
-                rel="external nofollow"
-              >Download PDF</a>
-            </iframe>
+            >当前浏览器暂时不支持查看PDF，请更新浏览器.</iframe>
           </div>
           <div class="rule-block-btn">
             <el-button type="primary" @click="review()" v-if="url">导入</el-button>
@@ -44,7 +38,7 @@
               :action="ajaxUrlDNN + '/exportRecruits?nowUser=' + nowUser + '&endTime=' + searchForm.endTime + '&deptId=' + searchForm.deptId + '&startTime=' + searchForm.startTime + '&page=' + currentPage + '&nameOrPhone=' + searchForm.nameOrPhone + '&rows=' + pageSize"
               method="post"
               enctype="multipart/form-data"
-            ></form> -->
+            ></form>-->
             <el-button @click="exportExcl" v-if="!url">导出</el-button>
           </div>
         </div>
@@ -126,17 +120,10 @@ export default {
       rules: []
     };
   },
-  // created() {
-  //   this.setCreated();
-  // },
   mounted() {
     this.setCreated();
   },
   methods: {
-    submitForm(state) {
-      console.log(state);
-      window.history.go(-1);
-    },
     exportExcl: function() {
       // 导出
       document.forms["exportForm"].submit();
@@ -184,9 +171,6 @@ export default {
     },
     setCreated() {
       this.userInfo = this.$route.query;
-      // this.userInfo.state != 0 &&
-      //   (this.ruleForm = $.parseJSON(fjPublic.getLocalData("ruleItem")));
-      // this.$refs["ruleForm"].resetFields();
     }
   },
   watch: {

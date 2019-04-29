@@ -66,11 +66,18 @@
                   </el-col>
                   <el-col :span="12">
                     <el-form-item label="民族" class="row-img-padding">
-                      <el-input
-                        v-model="ruleForm.nation"
+                      <el-select
                         :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
+                        v-model="ruleForm.nation"
+                        :placeholder="isDisabled?'':'请选择'"
+                      >
+                        <el-option
+                          v-for="item in nationList"
+                          :key="item.id"
+                          :label="item.value"
+                          :value="item.id"
+                        ></el-option>
+                      </el-select>
                     </el-form-item>
                   </el-col>
                 </el-row>
@@ -91,8 +98,12 @@
                         v-model="ruleForm.marriage"
                         :placeholder="isDisabled?'':'请选择'"
                       >
-                        <el-option label="未婚" value="1"></el-option>
-                        <el-option label="已婚" value="2"></el-option>
+                        <el-option
+                          v-for="item in marryList"
+                          :key="item.id"
+                          :label="item.value"
+                          :value="item.id"
+                        ></el-option>
                       </el-select>
                     </el-form-item>
                   </el-col>
@@ -109,11 +120,18 @@
                   </el-col>
                   <el-col :span="12">
                     <el-form-item label="政治面貌" class="row-img-padding">
-                      <el-input
-                        v-model="ruleForm.politics"
+                      <el-select
                         :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
+                        v-model="ruleForm.politics"
+                        :placeholder="isDisabled?'':'请选择'"
+                      >
+                        <el-option
+                          v-for="item in politicList"
+                          :key="item.id"
+                          :label="item.value"
+                          :value="item.id"
+                        ></el-option>
+                      </el-select>
                     </el-form-item>
                   </el-col>
                 </el-row>
@@ -152,11 +170,18 @@
                   </el-col>
                   <el-col :span="12">
                     <el-form-item label="最高学位">
-                      <el-input
-                        v-model="ruleForm.education"
+                      <el-select
                         :disabled="isDisabled"
-                        :placeholder="isDisabled?'':'请输入'"
-                      ></el-input>
+                        v-model="ruleForm.education"
+                        :placeholder="isDisabled?'':'请选择'"
+                      >
+                        <el-option
+                          v-for="item in educationList"
+                          :key="item.id"
+                          :label="item.value"
+                          :value="item.id"
+                        ></el-option>
+                      </el-select>
                     </el-form-item>
                   </el-col>
                 </el-row>
@@ -189,7 +214,7 @@
                 </el-row>
                 <div class="info-img">
                   <img
-                    :src="ruleForm.photo?ajaxUrlDNN+'/'+ruleForm.photo:'static/images/recruit-people.svg'"
+                    :src="ruleForm.photo?ajaxUrlDNN+'/getRecruitPhoto?photo='+ruleForm.photo:'static/images/recruit-people.svg'"
                     alt="个人照片"
                   >
                 </div>
@@ -379,6 +404,10 @@ export default {
         families: [{}, {}, {}],
         educations: [{}, {}, {}]
       },
+      educationList: [], //学历
+      marryList: [], //婚姻
+      nationList: [], //民族
+      politicList: [], //政治面貌
       randomCityList: [], //抽查地点
       subofficeList: [], //房屋所属分局
       policeList: [], //房屋所属派出所
@@ -401,6 +430,7 @@ export default {
   mounted() {
     this.setCreated();
     this.getRecruitDetail();
+    this.getSelectFromDict();
   },
   methods: {
     openMFSpopMultiple: function() {
@@ -447,6 +477,29 @@ export default {
               message: data.errorMsg
             });
           }
+          defer.resolve();
+        },
+        error: function(err) {
+          defer.reject();
+        }
+      });
+      return defer;
+    },
+    //获取字典
+    getSelectFromDict: function() {
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/getRecruitDetailDict",
+        type: "POST",
+        data: {},
+        dataType: "json",
+        success: function(data) {
+          // console.log(data);
+          vm.educationList = data.education; //学历
+          vm.marryList = data.marry; //婚姻
+          vm.nationList = data.nation; //民族
+          vm.politicList = data.politic; //政治面貌
           defer.resolve();
         },
         error: function(err) {
