@@ -100,9 +100,15 @@
                     <!-- <i class="el-icon-upload2"></i> -->
                     <span>导出</span>
                   </el-button>
-                  <el-button plain @click="addRecruit">
-                    <span>添加</span>
-                  </el-button>
+                  <el-tooltip effect="light">
+                    <el-button>招聘二维码</el-button>
+                    <div slot="content">
+                      <img style="width: 250px;height: 250px;" :src="ajaxUrlDNN + '/readRecruitQTCode'"/>
+                    </div>
+                  </el-tooltip>
+                  <!--<el-button plain @click="addRecruit">-->
+                    <!--<span>添加</span>-->
+                  <!--</el-button>-->
                 </el-form-item>
               </el-col>
             </el-form>
@@ -263,6 +269,11 @@ export default {
     // 初始化采集列表
     this.searchList();
     return;
+  },
+  beforeRouteEnter:function(to,from,next){ //路由
+    next(function(vm){
+      vm.searchList();
+    });
   },
   filters: {
     getFormatInsTime: function(value) {

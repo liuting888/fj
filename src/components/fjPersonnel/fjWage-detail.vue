@@ -9,23 +9,16 @@
         <div class="fj-search-inline"></div>
         <el-table :data="attendLeaveData">
           <el-table-column prop="time" label="发放日期" :formatter="timeFormatter" width="100"></el-table-column>
-          <el-table-column prop="deptBelongName" label="单位"></el-table-column>
-          <el-table-column prop="deptName" label="辅警站"></el-table-column>
-          <el-table-column prop="userName" label="姓名" width="80px"></el-table-column>
-          <el-table-column
-            label="入职时间"
-            width="100"
-            show-overflow-tooltip
-            :formatter="timeFormatter"
-            prop="apply_time"
-          ></el-table-column>
+          <el-table-column prop="deptBelongName" label="单位"  width="120"></el-table-column>
+          <el-table-column prop="deptName" label="辅警站" width="120"></el-table-column>
+          <el-table-column prop="userName" label="姓名" width="80"></el-table-column>
           <el-table-column prop="basePay" label="基本工资"></el-table-column>
           <el-table-column prop="meritPay" label="绩效工资"></el-table-column>
           <el-table-column prop="tierPay" label="层级工资"></el-table-column>
           <el-table-column prop="jonPay" label="岗位工资"></el-table-column>
           <el-table-column prop="liveSubsidy" label="生活补贴"></el-table-column>
-          <el-table-column prop="infoCollect" label="信息采集费"></el-table-column>
-          <el-table-column prop="trafficSubsidy" label="流量补助费"></el-table-column>
+          <el-table-column prop="infoCollect" label="信息采集费" width="100"></el-table-column>
+          <el-table-column prop="trafficSubsidy" label="流量补助费" width="100"></el-table-column>
           <el-table-column prop="other" label="其他"></el-table-column>
           <el-table-column prop="theorySum" label="应发合计"></el-table-column>
           <el-table-column prop="pension" label="养老保险"></el-table-column>
@@ -33,10 +26,10 @@
           <el-table-column prop="unemployment" label="失业保险"></el-table-column>
           <el-table-column prop="injury" label="工伤保险"></el-table-column>
           <el-table-column prop="maternity" label="生育保险"></el-table-column>
-          <el-table-column prop="illness" label="大病互助保险"></el-table-column>
+          <el-table-column prop="illness" label="大病互助保险" width="120"></el-table-column>
           <el-table-column prop="deduct" label="扣发合计"></el-table-column>
           <el-table-column prop="sum" label="实发合计"></el-table-column>
-          <el-table-column prop="userAccount" label="银行卡号"></el-table-column>
+          <el-table-column prop="bankCard" label="银行卡号" width="180"></el-table-column>
         </el-table>
         <div class="mj-page_wrap">
           <el-pagination
@@ -99,18 +92,7 @@ export default {
     return;
   },
   filters: {
-    // 状态处理
-    getLeaveStatus: function(value) {
-      return value == "0"
-        ? "待批"
-        : value == 1
-        ? "已批准"
-        : value == 2
-        ? "未批准"
-        : "";
-    },
     getFormatTime: function(value) {
-      // return value ? fjPublic.dateStrFormat(value) : '';
       return value ? value.substring(0, value.length - 2) : "";
     }
   },
@@ -135,10 +117,6 @@ export default {
       this.currentPage = 1;
       this.pageSize = pageSize;
       this.searchUserLeave();
-    },
-    exportExcl: function() {
-      // 导出
-      document.forms["exportForm"].submit();
     },
     // 获取列表
     searchUserLeave: function() {
@@ -237,52 +215,6 @@ export default {
           }
         }
       }
-    }
-  }
-}
-.check-dialogs {
-  .form-info {
-    margin: 10px 0;
-    .el-form {
-      .el-form-item {
-        border: 1px solid #e8e8e8;
-        border-bottom: none;
-        margin-bottom: 0;
-
-        .el-form-item__label {
-          width: 250px;
-          text-align: left;
-          padding-left: 20px;
-          border-right: 1px solid #e8e8e8;
-        }
-        .el-input {
-          width: 300px;
-          input {
-            border: none;
-          }
-        }
-      }
-      .el-form-item:nth-of-type(even) {
-        background: #f0faff;
-        input {
-          background: #f0faff;
-        }
-      }
-      .el-form-item:last-child {
-        border-bottom: 1px solid #e8e8e8;
-      }
-      .is-disabled {
-        input {
-          cursor: auto;
-        }
-      }
-    }
-  }
-  .footer-info {
-    span {
-      display: inline-block;
-      width: 240px;
-      padding-left: 20px;
     }
   }
 }

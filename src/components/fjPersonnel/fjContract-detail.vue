@@ -9,7 +9,7 @@
           <p class="title">合同</p>
           <!-- <div class="contract-footer-btn" v-if="userInfo.state==0||userInfo.state==2"> -->
           <div class="contract-head-btn">
-            <el-button type="primary" @click="review()">签订</el-button>
+            <el-button type="primary" v-if="userInfo.state==2" @click="checkDialogVisible = true">签订</el-button>
             <el-button @click="downComtract">
               <span>导出</span>
             </el-button>
@@ -20,14 +20,8 @@
             src="http://storage.xuetangx.com/public_assets/xuetangx/PDF/PlayerAPI_v1.0.6.pdf"
             width="100%"
             height="100%"
-          > -->
-          <iframe
-            :src="iframeSrc"
-            width="100%"
-            height="100%"
-          >
-            当前浏览器暂时不支持查看PDF，请更新浏览器. 
-          </iframe>
+          >-->
+          <iframe :src="iframeSrc" width="100%" height="100%">当前浏览器暂时不支持查看PDF，请更新浏览器.</iframe>
         </div>
       </div>
     </div>
@@ -51,7 +45,7 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="checkDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="updateLeaveStatus(false)">确 定</el-button>
+        <el-button type="primary" @click="review">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -73,11 +67,11 @@ export default {
       ruleForm: {
         name: ""
       },
-      iframeSrc:"",
+      iframeSrc: "",
       // 审核弹出框数据
       checkDialogVisible: false,
       checkDialogVisibleModal: false,
-      radio: "1",
+      radio: "2",
       randomCityList: [], //抽查地点
       subofficeList: [], //房屋所属分局
       policeList: [], //房屋所属派出所
@@ -99,17 +93,39 @@ export default {
     this.getComtract();
   },
   methods: {
-    exportExcl: function() {
-      // 导出
-      // document.forms["exportForm"].submit();
-    },
     //签订
     review() {
-      this.$message({
-        message: "请保证人员审核进度一致",
-        type: "warning"
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/signContract",
+        type: "POST",
+        data: {
+          id: vm.userInfo.id,
+          year: vm.radio
+        },
+        dataType: "json",
+        success: function(data) {
+          if (data.errorCode == 0) {
+            vm.$message({
+              type: "success",
+              message: data.errorMsg
+            });
+            vm.userInfo.state = 1;
+          } else {
+            vm.$message({
+              type: "error",
+              message: data.errorMsg
+            });
+          }
+          defer.resolve();
+        },
+        error: function(err) {
+          defer.reject();
+        }
       });
-      this.checkDialogVisible = true;
+      vm.checkDialogVisible = false;
+      return defer;
     },
     //获取合同路径
     getComtract() {
@@ -123,7 +139,7 @@ export default {
         },
         dataType: "json",
         success: function(data) {
-          vm.iframeSrc=fjPublic.ajaxUrlDNN+"/"+data.data;
+          vm.iframeSrc = fjPublic.ajaxUrlDNN + "/" + data.data;
           defer.resolve();
         },
         error: function(err) {
@@ -134,48 +150,20 @@ export default {
     },
     //导出合同
     downComtract() {
-      window.open(fjPublic.ajaxUrlDNN + "/getContractWord?id=" + this.userInfo.id);
-    },
-    // 提交或者编辑数据
-    postRuleForm: function() {
-      let vm = this;
-      let url = vm.userInfo.state == 0 ? "/addInfo" : "/updInfo";
-      if (vm.userInfo.id) {
-        vm.ruleForm.id = vm.userInfo.id;
-      }
-      vm.ruleForm.tableName = vm.activeList[vm.userInfo.index].tableName;
-      vm.ruleForm.userId = $.parseJSON(
-        fjPublic.getLocalData("userInfo")
-      ).userId;
-      $.ajax({
-        url: fjPublic.ajaxUrlDNN + url,
-        type: "POST",
-        data: vm.ruleForm,
-        dataType: "json",
-        success: function(data) {},
-        error: function(err) {
-          if (err.responseText == "success") {
-            vm.$router.push({
-              path: "/fjWorkManage-YiBiaoSanShi"
-            });
-          } else {
-          }
-        }
-      });
+      window.open(
+        fjPublic.ajaxUrlDNN + "/getContractWord?id=" + this.userInfo.id
+      );
     },
     setCreated() {
       this.userInfo = this.$route.query;
-      // this.userInfo.state != 0 &&
-      //   (this.ruleForm = $.parseJSON(fjPublic.getLocalData("contractItem")));
-      // this.$refs["ruleForm"].resetFields();
     }
   },
   watch: {
-    $route: {
-      handler(route) {
-        this.setCreated();
-      }
-    }
+    // $route: {
+    //   handler(route) {
+    //     this.setCreated();
+    //   }
+    // }
   },
   components: {
     fjBreadNav

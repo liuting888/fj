@@ -14,42 +14,54 @@
         <div class="add-list-btn" v-if="activeIndex==0" @click="addWage()">+ 新增工资规则</div>
         <div class="add-list-btn" v-if="activeIndex==1" @click="addContract('',0)">+ 新增合同规则</div>
         <el-table :data="tableDataList" v-if="activeIndex==0">
-          <el-table-column prop="templateName" label="规则名称" :key="Math.random()"></el-table-column>
-          <el-table-column prop="job" label="适用岗位" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="适用单位" :key="Math.random()"></el-table-column>
+          <el-table-column
+            prop="templateName"
+            label="规则名称"
+            show-overflow-tooltip
+            width="120"
+            :key="Math.random()"
+          ></el-table-column>
+          <el-table-column prop="job" label="适用岗位" width="100" :key="Math.random()"></el-table-column>
+          <el-table-column prop="deptName" label="适用单位" width="120" :key="Math.random()"></el-table-column>
           <el-table-column prop="basePay" label="基本工资" :key="Math.random()"></el-table-column>
           <el-table-column prop="meritPay" label="绩效工资" :key="Math.random()"></el-table-column>
           <el-table-column prop="tierPay" label="层级工资" :key="Math.random()"></el-table-column>
           <el-table-column prop="jonPay" label="岗位工资" :key="Math.random()"></el-table-column>
           <el-table-column prop="liveSubsidy" label="生活补贴" :key="Math.random()"></el-table-column>
-          <el-table-column prop="infoCollect" label="信息采集费" :key="Math.random()"></el-table-column>
-          <el-table-column prop="trafficSubsidy" label="流量补助费" :key="Math.random()"></el-table-column>
+          <el-table-column prop="infoCollect" label="信息采集费" width="100" :key="Math.random()"></el-table-column>
+          <el-table-column prop="trafficSubsidy" label="流量补助费" width="100" :key="Math.random()"></el-table-column>
           <el-table-column prop="other" label="其他" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="应发合计" :key="Math.random()"></el-table-column>
           <el-table-column prop="pension" label="养老保险" :key="Math.random()"></el-table-column>
           <el-table-column prop="medicare" label="医疗保险" :key="Math.random()"></el-table-column>
           <el-table-column prop="unemployment" label="失业保险" :key="Math.random()"></el-table-column>
           <el-table-column prop="injury" label="工伤保险" :key="Math.random()"></el-table-column>
           <el-table-column prop="maternity" label="生育保险" :key="Math.random()"></el-table-column>
-          <el-table-column prop="illness" label="大病互助保险" :key="Math.random()"></el-table-column>
-          <el-table-column label="状态" prop="leave_state" width="120px" :key="Math.random()">
+          <el-table-column prop="illness" label="大病互助保险" width="120" :key="Math.random()"></el-table-column>
+          <el-table-column label="状态" prop="state" width="120" :key="Math.random()">
             <template slot-scope="scope">
-              <el-switch v-model="scope.row.signType" active-color="#13ce66" inactive-color="#ccc"></el-switch>
-              <span>{{scope.row.leave_state == 0?'开启':'关闭'}}</span>
+              <el-switch
+                v-model="scope.row.state"
+                active-color="#13ce66"
+                inactive-color="#ccc"
+                active-value="0"
+                inactive-value="1"
+                @change="delWage(scope.row.id,scope.row.state)"
+              ></el-switch>
+              <span>{{scope.row.state == 0?'启用':'废弃'}}</span>
             </template>
           </el-table-column>
           <el-table-column label="操作" width="120px" :key="Math.random()">
             <template slot-scope="scope">
-              <!-- <span class="ope-txt" v-if="scope.row.leave_state != 0">--</span> -->
-              <span
+              <span class="ope-txt" v-if="scope.row.state == -1">--</span>
+              <!-- <span
                 class="ope-txt"
                 v-if="scope.row.leave_state != 0"
                 @click="openWageDialog(scope.row.leaveId,1)"
-              >配置</span>
+              >配置</span>-->
               <span
                 class="ope-txt"
-                v-if="scope.row.leave_state != 0"
-                @click="delWage(scope.row.leaveId)"
+                v-if="scope.row.state != -1"
+                @click="delWage(scope.row.id,-1)"
               >删除</span>
             </template>
           </el-table-column>
@@ -84,11 +96,6 @@
               <span class="ope-txt" v-if="scope.row.leave_state != 0">--</span>
               <!-- <span
                 class="ope-txt"
-                v-if="scope.row.leave_state == 0"
-                @click="checkUpdate(scope.row.leaveId,1)"
-              >同意</span>-->
-              <span
-                class="ope-txt"
                 v-if="scope.row.leave_state != 0"
                 @click="addContract(scope.row.leaveId,1)"
               >查看</span>
@@ -106,7 +113,7 @@
                 class="ope-txt"
                 v-if="scope.row.leave_state != 0"
                 @click="delContract(scope.row.leaveId, 2)"
-              >删除</span>
+              >删除</span>-->
             </template>
           </el-table-column>
         </el-table>
@@ -389,13 +396,32 @@ export default {
       this.ruleForm = {};
       this.addWageVisible = true;
     },
-    // 删除工资规则
-    delWage: function(id) {
-      console.log(id);
-      // this.addWageVisible = true;
+    // 修改工资状态
+    delWage: function(id, state) {
+      console.log(id, state);
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/updPayrollTemplate",
+        type: "POST",
+        data: {
+          id: id,
+          state: state
+        },
+        dataType: "json",
+        success: function(data) {
+          console.log(data);
+          vm.searchList();
+          defer.resolve();
+        },
+        error: function(err) {
+          defer.reject();
+        }
+      });
+      return defer;
     },
     // 删除合同规则
-    delContract: function(id) {
+    delContract: function(id, state) {
       console.log(id);
       // this.addWageVisible = true;
     },

@@ -86,7 +86,7 @@
                 :key="index"
               >
                 <div class="topic">
-                  {{index+1}}.
+                  {{ruleForm.list.length-index}}.
                   <el-input type="text" :disabled="item.edit" v-model="item.question"></el-input>
                 </div>
                 <ul>

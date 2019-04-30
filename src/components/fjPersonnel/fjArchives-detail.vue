@@ -104,7 +104,10 @@
                   </el-col>
                 </el-row>
                 <div class="info-img">
-                  <img src="static/images/recruit-people.svg" alt="个人照片">
+                  <img
+                    :src="recruitInfo.photo?ajaxUrlDNN+'/getRecruitPhoto?photo='+recruitInfo.photo:'static/images/recruit-people.svg'"
+                    alt="个人照片"
+                  >
                 </div>
               </div>
             </el-form>
@@ -408,23 +411,16 @@
             </div>
             <el-table :data="attendLeaveData">
               <el-table-column prop="time" label="发放日期" :formatter="timeFormatter" width="100"></el-table-column>
-              <el-table-column prop="deptBelongName" label="单位"></el-table-column>
-              <el-table-column prop="deptName" label="辅警站"></el-table-column>
-              <el-table-column prop="userName" label="姓名" width="80px"></el-table-column>
-              <el-table-column
-                label="入职时间"
-                width="100"
-                show-overflow-tooltip
-                :formatter="timeFormatter"
-                prop="apply_time"
-              ></el-table-column>
+              <el-table-column prop="deptBelongName" label="单位" width="120"></el-table-column>
+              <el-table-column prop="deptName" label="辅警站" width="120"></el-table-column>
+              <el-table-column prop="userName" label="姓名" width="80"></el-table-column>
               <el-table-column prop="basePay" label="基本工资"></el-table-column>
               <el-table-column prop="meritPay" label="绩效工资"></el-table-column>
               <el-table-column prop="tierPay" label="层级工资"></el-table-column>
               <el-table-column prop="jonPay" label="岗位工资"></el-table-column>
               <el-table-column prop="liveSubsidy" label="生活补贴"></el-table-column>
-              <el-table-column prop="infoCollect" label="信息采集费"></el-table-column>
-              <el-table-column prop="trafficSubsidy" label="流量补助费"></el-table-column>
+              <el-table-column prop="infoCollect" label="信息采集费" width="100"></el-table-column>
+              <el-table-column prop="trafficSubsidy" label="流量补助费" width="100"></el-table-column>
               <el-table-column prop="other" label="其他"></el-table-column>
               <el-table-column prop="theorySum" label="应发合计"></el-table-column>
               <el-table-column prop="pension" label="养老保险"></el-table-column>
@@ -432,10 +428,10 @@
               <el-table-column prop="unemployment" label="失业保险"></el-table-column>
               <el-table-column prop="injury" label="工伤保险"></el-table-column>
               <el-table-column prop="maternity" label="生育保险"></el-table-column>
-              <el-table-column prop="illness" label="大病互助保险"></el-table-column>
+              <el-table-column prop="illness" label="大病互助保险" width="120"></el-table-column>
               <el-table-column prop="deduct" label="扣发合计"></el-table-column>
               <el-table-column prop="sum" label="实发合计"></el-table-column>
-              <el-table-column prop="userAccount" label="银行卡号"></el-table-column>
+              <el-table-column prop="bankCard" label="银行卡号" width="180"></el-table-column>
             </el-table>
             <div class="mj-page_wrap">
               <el-pagination
@@ -469,6 +465,7 @@ export default {
         { name: "详情", path: "" }
       ],
       archivesInfo: {},
+      ajaxUrlDNN: fjPublic.ajaxUrlDNN,
       iframeSrc: "",
       recruitInfo: {
         works: [{}, {}, {}],
@@ -525,13 +522,9 @@ export default {
       rules: []
     };
   },
-  // created() {
-  //   this.setCreated();
-  // },
   mounted() {
     //获取派出所信息
     this.getTeamList();
-    // this.getDownDepts();
     this.setCreated();
     // this.searchUserLeave();
     //获取档案详情
@@ -608,7 +601,6 @@ export default {
         data: { id: this.archivesInfoId },
         dataType: "json",
         success: function(data) {
-          console.log(data);
           if (data.errorCode == 0) {
             vm.jobInfo = data.data.job;
             vm.iframeSrc =
@@ -666,13 +658,7 @@ export default {
     },
     //获取被选中的标签 tab 实例
     handleClick(tab) {
-      console.log(tab);
       this.activeIndex = tab.index;
-      // for (var i in this.searchForm) {
-      //   this.searchForm[i] = "";
-      // }
-      // this.currentPage = 1;
-      // this.searchSign();
     },
     setCreated() {
       this.userInfo = this.$route.query;
@@ -694,11 +680,11 @@ export default {
     }
   },
   watch: {
-    $route: {
-      handler(route) {
-        this.setCreated();
-      }
-    }
+    // $route: {
+    //   handler(route) {
+    //     this.setCreated();
+    //   }
+    // }
   },
   components: {
     fjBreadNav
@@ -769,6 +755,15 @@ export default {
         .el-form-item__content {
           padding-right: 150px;
         }
+      }
+      .el-input--prefix{
+        .el-input__inner{
+          padding-left: 15px;
+        }
+      }
+      .el-input.is-disabled .el-input__prefix {
+        // cursor: auto;
+        display: none;
       }
     }
   }

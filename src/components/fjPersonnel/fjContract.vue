@@ -136,12 +136,12 @@
             <template slot-scope="scope">
               <span
                 class="ope-txt"
-                v-if="scope.row.state == 0"
+                v-if="scope.row.signTime"
                 @click="goDetails(scope.row.id,1)"
               >详情</span>
               <span
                 class="ope-txt"
-                v-if="scope.row.state != 1"
+                v-if="!scope.row.signTime"
                 @click="goDetails(scope.row.id, 2)"
               >编辑</span>
             </template>

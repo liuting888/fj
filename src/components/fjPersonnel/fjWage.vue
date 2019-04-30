@@ -73,14 +73,15 @@
                   </el-input>
                   <div class="search-btn">
                     <el-upload
+                      v-if="activeIndex==0"
                       class="upload-demo"
                       :action="ajaxUrlDNN + '/importPayrollExcel'"
-                      multiple="false"
-                      show-file-list="false"
+                      :multiple="false"
+                      :show-file-list="false"
                     >
                       <el-button size="small" type="primary">导入</el-button>
                     </el-upload>
-                    <el-button @click="exportExcl">导出</el-button>
+                    <el-button v-if="activeIndex==0" @click="exportExcl">导出</el-button>
                   </div>
                 </el-form-item>
               </el-col>
@@ -112,14 +113,14 @@
             width="100"
             :key="Math.random()"
           ></el-table-column>
-          <el-table-column prop="deptBelongName" label="单位" :key="Math.random()"></el-table-column>
-          <el-table-column prop="deptName" label="辅警站" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userName" label="姓名" width="80px" :key="Math.random()"></el-table-column>
+          <el-table-column prop="deptBelongName" label="单位" width="120" :key="Math.random()"></el-table-column>
+          <el-table-column prop="deptName" label="辅警站" width="120" :key="Math.random()"></el-table-column>
+          <el-table-column prop="userName" label="姓名" width="80" :key="Math.random()"></el-table-column>
           <el-table-column
             label="入职时间"
             width="100"
             :formatter="timeFormatter"
-            prop="apply_time"
+            prop="entryTime"
             :key="Math.random()"
           ></el-table-column>
           <el-table-column prop="basePay" label="基本工资" :key="Math.random()"></el-table-column>
@@ -127,8 +128,8 @@
           <el-table-column prop="tierPay" label="层级工资" :key="Math.random()"></el-table-column>
           <el-table-column prop="jonPay" label="岗位工资" :key="Math.random()"></el-table-column>
           <el-table-column prop="liveSubsidy" label="生活补贴" :key="Math.random()"></el-table-column>
-          <el-table-column prop="infoCollect" label="信息采集费" :key="Math.random()"></el-table-column>
-          <el-table-column prop="trafficSubsidy" label="流量补助费" :key="Math.random()"></el-table-column>
+          <el-table-column prop="infoCollect" label="信息采集费" width="100" :key="Math.random()"></el-table-column>
+          <el-table-column prop="trafficSubsidy" label="流量补助费" width="100" :key="Math.random()"></el-table-column>
           <el-table-column prop="other" label="其他" :key="Math.random()"></el-table-column>
           <el-table-column prop="theorySum" label="应发合计" :key="Math.random()"></el-table-column>
           <el-table-column prop="pension" label="养老保险" :key="Math.random()"></el-table-column>
@@ -136,13 +137,12 @@
           <el-table-column prop="unemployment" label="失业保险" :key="Math.random()"></el-table-column>
           <el-table-column prop="injury" label="工伤保险" :key="Math.random()"></el-table-column>
           <el-table-column prop="maternity" label="生育保险" :key="Math.random()"></el-table-column>
-          <el-table-column prop="illness" label="大病互助保险" :key="Math.random()"></el-table-column>
+          <el-table-column prop="illness" label="大病互助保险" width="120" :key="Math.random()" ></el-table-column>
           <el-table-column prop="deduct" label="扣发合计" :key="Math.random()"></el-table-column>
           <el-table-column prop="sum" label="实发合计" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="银行卡号" :key="Math.random()"></el-table-column>
+          <el-table-column prop="bankCard" label="银行卡号" width="180" :key="Math.random()" ></el-table-column>
           <el-table-column label="操作" :key="Math.random()">
             <template slot-scope="scope">
-              <!-- <span class="ope-txt" v-if="scope.row.leave_state != 0">--</span> -->
               <span class="ope-txt" @click="openDetail(scope.row.userId,1)">详情</span>
             </template>
           </el-table-column>
@@ -172,23 +172,8 @@
           <el-table-column label="处理意见" show-overflow-tooltip prop="response" :key="Math.random()"></el-table-column>
           <el-table-column label="操作" :key="Math.random()">
             <template slot-scope="scope">
-              <span class="ope-txt" v-if="scope.row.state != 0">--</span>
-              <!-- <span
-                class="ope-txt"
-                v-if="scope.row.leave_state == 0"
-                @click="checkUpdate(scope.row.leaveId,1)"
-              >同意</span>-->
-              <!-- <span
-                class="ope-txt"
-                v-if="scope.row.leave_state == 0"
-                @click="openCheckDialog(scope.row.leaveId,1)"
-              >同意</span>
-              <span
-                class="ope-txt"
-                v-if="scope.row.leave_state == 0"
-                @click="openCheckDialog(scope.row.leaveId, 2)"
-              >不同意</span>-->
-              <span class="ope-txt" v-if="scope.row.state == 0" @click="editDialog(scope.row)">审核</span>
+              <span class="ope-txt" v-if="scope.row.state != 0" @click="editDialog(scope.row,1)">查看</span>
+              <span class="ope-txt" v-if="scope.row.state == 0" @click="editDialog(scope.row,2)">审核</span>
             </template>
           </el-table-column>
         </el-table>
@@ -251,12 +236,11 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="checkDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="updateLeaveStatus(false)">确 定</el-button>
+        <el-button type="primary" @click="submitAudit(2)">确 定</el-button>
       </div>
     </el-dialog>
     <!-- 编辑弹出框 -->
     <el-dialog
-      :title="checkDialogTitle"
       :visible.sync="editDialogVisible"
       :append-to-body="true"
       :close-on-click-modal="false"
@@ -265,133 +249,129 @@
       class="check-dialogs"
     >
       <div>
-        <h3>谁-什么时间 工资明细</h3>
-        <p>工资申诉：什么理由</p>
+        <h3>{{ruleForm.userName}}--{{ruleForm.complainTime|getComplainTime}}工资明细</h3>
+        <p>申诉内容：{{ruleForm.complain}}</p>
         <div class="form-info">
           <el-form :model="ruleForm">
             <el-form-item label="入职时间">
-              <el-input
-                v-model="ruleForm.road"
-                :disabled="isDisabled"
-                :placeholder="isDisabled?'':'请输入'"
-              ></el-input>
+              <el-input v-model="ruleForm.entryTime" disabled="disabled"></el-input>
             </el-form-item>
             <el-form-item label="基本工资">
               <el-input
                 v-model="ruleForm.basePay"
-                :disabled="isDisabled"
+                :disabled="!isDisabled"
                 :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="绩效工资">
               <el-input
                 v-model="ruleForm.meritPay"
-                :disabled="isDisabled"
+                :disabled="!isDisabled"
                 :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="层级工资">
               <el-input
                 v-model="ruleForm.tierPay"
-                :disabled="isDisabled"
+                :disabled="!isDisabled"
                 :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="岗位工资">
               <el-input
                 v-model="ruleForm.jonPay"
-                :disabled="isDisabled"
+                :disabled="!isDisabled"
                 :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="生活补贴">
               <el-input
                 v-model="ruleForm.liveSubsidy"
-                :disabled="isDisabled"
+                :disabled="!isDisabled"
                 :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="信息采集费">
               <el-input
                 v-model="ruleForm.infoCollect"
-                :disabled="isDisabled"
+                :disabled="!isDisabled"
                 :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="流量补助费">
               <el-input
                 v-model="ruleForm.trafficSubsidy"
-                :disabled="isDisabled"
+                :disabled="!isDisabled"
                 :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="其他">
               <el-input
                 v-model="ruleForm.other"
-                :disabled="isDisabled"
+                :disabled="!isDisabled"
                 :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="应发合计">
               <el-input
                 v-model="ruleForm.theorySum"
-                :disabled="isDisabled"
+                :disabled="!isDisabled"
                 :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="养老保险">
               <el-input
                 v-model="ruleForm.pension"
-                :disabled="isDisabled"
+                :disabled="!isDisabled"
                 :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="医疗保险">
               <el-input
                 v-model="ruleForm.medicare"
-                :disabled="isDisabled"
+                :disabled="!isDisabled"
                 :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="失业保险">
               <el-input
                 v-model="ruleForm.unemployment"
-                :disabled="isDisabled"
+                :disabled="!isDisabled"
                 :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="工伤保险">
               <el-input
                 v-model="ruleForm.injury"
-                :disabled="isDisabled"
+                :disabled="!isDisabled"
                 :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="生育保险">
               <el-input
                 v-model="ruleForm.maternity"
-                :disabled="isDisabled"
+                :disabled="!isDisabled"
                 :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="大病互助保险">
               <el-input
                 v-model="ruleForm.illness"
-                :disabled="isDisabled"
+                :disabled="!isDisabled"
                 :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="扣发合计">
               <el-input
                 v-model="ruleForm.deduct"
-                :disabled="isDisabled"
+                :disabled="!isDisabled"
                 :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
             <el-form-item label="实发合计">
               <el-input
                 v-model="ruleForm.sum"
-                :disabled="isDisabled"
+                :disabled="!isDisabled"
                 :placeholder="isDisabled?'':'请输入'"
               ></el-input>
             </el-form-item>
@@ -402,9 +382,9 @@
         <span>审批人: {{ruleForm.checkName}}</span>
         <span>审批时间: {{ruleForm.checkTime}}</span>
       </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitAudit()">同 意</el-button>
-        <el-button @click="openCheckDialog(ruleForm.id, 2)">不 同 意</el-button>
+      <div slot="footer" class="dialog-footer" v-if="isDisabled">
+        <el-button type="primary" @click="submitAudit(1)">同 意</el-button>
+        <el-button @click="openCheckDialog(2)">不 同 意</el-button>
       </div>
     </el-dialog>
   </div>
@@ -462,26 +442,9 @@ export default {
       isDisabled: false, //判断审核弹框是否编辑
       checkDialogTitle: "",
       //审核人参数
-      // checkInfoForm: {
-      //   userName: "", //提交辅警姓名
-      //   checkName: "", // 审核民警姓名
-      //   insTime: "" // 提交时间
-      // },
-      //审核人参数
-      userInfo: {
-        status: ""
-      },
-      //审核人参数
       ruleForm: {
         status: ""
       },
-      // 审核参数
-      // checkForm: {
-      //   tableName: "", //表格类型
-      //   checkId: "", // 审核民警id
-      //   ids: "", // 信息采集表id
-      //   state: "" // 状态（1：审核通过，2：作废）
-      // },
       checkDialogForm: {
         id: "",
         status: "",
@@ -512,22 +475,6 @@ export default {
     this.searchList();
 
     return;
-  },
-  filters: {
-    // 状态处理
-    getLeaveStatus: function(value) {
-      return value == "0"
-        ? "待批"
-        : value == 1
-        ? "已批准"
-        : value == 2
-        ? "未批准"
-        : "";
-    },
-    getFormatTime: function(value) {
-      // return value ? fjPublic.dateStrFormat(value) : '';
-      return value ? value.substring(0, value.length - 2) : "";
-    }
   },
   methods: {
     //导出工资列表
@@ -617,7 +564,7 @@ export default {
       this.searchForm["state"] = state;
       this.searchList();
     },
-    // 标题或负责人名称查询
+    // 名称或警号查询
     searchAttendLeave: function() {
       this.searchList();
     },
@@ -634,13 +581,12 @@ export default {
       });
     },
     // 打开工资编辑弹框
-    editDialog: function(item) {
+    editDialog: function(item, state) {
       var defer = $.Deferred();
-      console.log(item);
       var vm = this;
-      // vm.ruleForm = item;
+      vm.checkDialogForm.id = item.id;
       vm.editDialogVisible = true;
-      vm.isDisabled = false;
+      vm.isDisabled = state == 1 ? false : true;
       $.ajax({
         url: fjPublic.ajaxUrlDNN + "/getPayrollByComplainId",
         type: "POST",
@@ -648,7 +594,6 @@ export default {
         dataType: "json",
         success: function(data) {
           if (data.errorCode == 0) {
-            // data.data
             vm.ruleForm = data.data;
           } else {
           }
@@ -661,85 +606,52 @@ export default {
       return defer;
     },
     // 工资编辑弹框确认操作
-    submitAudit: function(status) {
+    submitAudit: function(state) {
       var defer = $.Deferred();
       var vm = this;
       $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/updPayroll",
+        url: fjPublic.ajaxUrlDNN + "/processComplain",
         type: "POST",
-        data: vm.ruleForm,
+        data: {
+          id: vm.checkDialogForm.id,
+          response: vm.checkDialogForm.reason,
+          checkId: $.parseJSON(fjPublic.getLocalData("userInfo")).userId,
+          state: state, //状态，1同意，2不同意
+          list: state == 1 ? JSON.stringify(vm.ruleForm) : "" //工资条信息
+        },
         dataType: "json",
         success: function(data) {
-          this.editDialogVisible = false;
+          if (data.errorCode == 0) {
+            vm.$message({
+              type: "success",
+              message: data.errorMsg
+            });
+            vm.editDialogVisible = false;
+            vm.checkDialogVisible = false;
+            vm.searchList();
+          } else {
+            vm.$message({
+              type: "error",
+              message: data.errorMsg
+            });
+          }
           defer.resolve();
         },
         error: function(err) {
-          this.editDialogVisible = false;
+          vm.editDialogVisible = false;
+          vm.checkDialogVisible = false;
           defer.reject();
         }
       });
       return defer;
     },
     // 打开审核弹出框
-    openCheckDialog: function(id, status) {
+    openCheckDialog: function(status) {
       this.editDialogVisible = false;
-      this.checkDialogForm["id"] = id;
       this.checkDialogForm["status"] = status;
       this.checkDialogTitle = status == 1 ? "同意？" : "不同意？";
       this.reasonDisabled = status == 1 ? true : false;
       this.checkDialogVisible = true;
-    },
-    // 确认批准直接询问并发请求
-    checkUpdate(id, status) {
-      this.$confirm("确认批准该条工资申诉?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      }).then(() => {
-        this.checkDialogForm["id"] = id;
-        this.checkDialogForm["status"] = status;
-        this.updateLeaveStatus(true);
-      });
-    },
-    // 保存请假批准
-    updateLeaveStatus: function(isConfirm) {
-      var defer = $.Deferred();
-      var vm = this;
-      let ajax = () => {
-        $.ajax({
-          url: fjPublic.ajaxUrlDNN + "/dealLeave",
-          type: "POST",
-          data: vm.checkDialogForm,
-          dataType: "json",
-          success: function(data) {
-            if (data.errorCode == 0) {
-              vm.checkDialogVisible = false;
-              vm.searchList();
-            }
-            vm.$message({
-              type: "success",
-              message: data.errorMsg
-            });
-            defer.resolve();
-          },
-          error: function(err) {
-            defer.reject();
-          }
-        });
-      };
-      // 传入当前用户信息
-      vm.checkDialogForm["nowUser"] = $.cookie(fjPublic.loginCookieKey);
-      // 直接批准
-
-      if (isConfirm) {
-        ajax();
-      } else {
-        this.$refs.checkDialogForm.validate(validate => {
-          if (validate) {
-            ajax();
-          }
-        });
-      }
     },
     // 时间格式化
     timeFormatter(row, type) {
@@ -758,6 +670,39 @@ export default {
     // 弹窗关闭事件
     closeDialog() {
       this.$refs.checkDialogForm.resetFields();
+    }
+  },
+  filters: {
+    getComplainTime: function(value) {
+      if (!value) {
+        return "";
+      }
+      return value.substr(0, 4) + "年" + value.substr(4, 2) + "月";
+    }
+  },
+  watch: {
+    ruleForm: {
+      handler: function(val, oldval) {
+        let list = this.ruleForm;
+        list.theorySum =
+          parseFloat(list.basePay) +
+          parseFloat(list.meritPay) +
+          parseFloat(list.tierPay) +
+          parseFloat(list.jonPay) +
+          parseFloat(list.liveSubsidy) +
+          parseFloat(list.infoCollect) +
+          parseFloat(list.trafficSubsidy) +
+          parseFloat(list.other);
+        list.deduct =
+          parseFloat(list.pension) +
+          parseFloat(list.medicare) +
+          parseFloat(list.unemployment) +
+          parseFloat(list.injury) +
+          parseFloat(list.maternity) +
+          parseFloat(list.illness);
+        list.sum = parseFloat(list.theorySum) - parseFloat(list.deduct);
+      },
+      deep: true
     }
   },
   components: {
@@ -907,6 +852,8 @@ export default {
       .is-disabled {
         input {
           cursor: auto;
+          background-color: #fff;
+          color: #606266;
         }
       }
     }
