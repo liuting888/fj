@@ -7,7 +7,7 @@
       <div class="fj-block content">
         <div class="fj-block-head kaohe">
           <p class="title" @mouseover="isTitleDisabled=false" @mouseout="isTitleDisabled=true">
-            <el-input :disabled="isTitleDisabled" type="text" v-model="ruleForm.data.title"></el-input>
+            <!-- <el-input :disabled="isTitleDisabled" type="text" v-model="ruleForm.data.title"></el-input> -->
             <el-button type="primary" @click="createPaper()" v-if="userInfo.state == 0">生成试卷</el-button>
           </p>
         </div>
@@ -17,7 +17,18 @@
             <el-form :model="ruleForm" ref="ruleForm" :rules="rules">
               <el-row>
                 <el-col :span="24">
-                  <el-form-item prop="houseNumber" label="题目类型">
+                  <el-form-item label="试卷标题">
+                    <el-input
+                      v-model="ruleForm.data.title"
+                      :disabled="isDisabled"
+                      :placeholder="isDisabled?'':'请输入试卷标题'"
+                    ></el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col :span="12">
+                  <el-form-item label="题目类型">
                     <el-checkbox-group v-model="type" :disabled="isDisabled">
                       <el-checkbox label="1">单选</el-checkbox>
                       <el-checkbox label="2">多选</el-checkbox>
@@ -25,26 +36,12 @@
                     </el-checkbox-group>
                   </el-form-item>
                 </el-col>
-              </el-row>
-              <el-row>
                 <el-col :span="12">
-                  <el-form-item prop="city" label="选题规则">
-                    <el-select
-                      v-model="ruleForm.data.selectRules"
-                      :disabled="isDisabled"
-                      :placeholder="isDisabled?'':'请选择（必选）'"
-                    >
-                      <el-option :value="'1'" label="单选题"></el-option>
-                      <el-option :value="'0'" label="单选题"></el-option>
-                    </el-select>
-                  </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                  <el-form-item class="noBR" prop="street" label="考试类型">
+                  <el-form-item class="noBR" label="考试类型">
                     <el-select
                       v-model="ruleForm.data.examType"
                       :disabled="isDisabled"
-                      :placeholder="isDisabled?'':'请选择（必选）'"
+                      :placeholder="isDisabled?'':'请选择'"
                     >
                       <el-option :value="'1'" label="单选题"></el-option>
                       <el-option :value="'0'" label="单选题"></el-option>
@@ -54,55 +51,25 @@
               </el-row>
               <el-row>
                 <el-col :span="12">
-                  <el-form-item prop="community" label="题目数量">
-                    <el-select
-                      v-model="ruleForm.data.amount"
-                      :disabled="isDisabled"
-                      :placeholder="isDisabled?'':'请选择（必选）'"
-                      @change="amountChange"
-                    >
-                      <el-option :value="10" label="10"></el-option>
-                      <el-option :value="20" label="20"></el-option>
-                      <el-option :value="25" label="25"></el-option>
-                    </el-select>
-                  </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                  <el-form-item class="noBR" prop="road" label="试卷分数">
-                    <el-input v-model="ruleForm.data.score" disabled placeholder="100分"></el-input>
-                  </el-form-item>
-                </el-col>
-              </el-row>
-              <el-row>
-                <el-col :span="12">
-                  <el-form-item prop="houseNumber" label="考试日期">
+                  <el-form-item label="考试日期">
                     <el-date-picker
                       :disabled="isDisabled"
                       v-model="ruleForm.data.examTime"
                       type="date"
                       value-format="yyyyMMdd"
-                      :placeholder="isDisabled?'':'请选择（必选）'"
+                      :placeholder="isDisabled?'':'请选择'"
                     ></el-date-picker>
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                  <el-form-item class="noBR" prop="plots" label="考试时长">
-                    <el-select
-                      v-model="ruleForm.data.time"
+                  <el-form-item label="题目分数">
+                    <el-input
+                      v-model="ruleForm.data.oneScore"
                       :disabled="isDisabled"
-                      :placeholder="isDisabled?'':'请选择（必选）'"
-                    >
-                      <el-option :value="30" label="30"></el-option>
-                      <el-option :value="60" label="60"></el-option>
-                      <el-option :value="90" label="90"></el-option>
-                    </el-select>
-                  </el-form-item>
-                </el-col>
-              </el-row>
-              <el-row>
-                <el-col :span="12">
-                  <el-form-item prop="entityName" label="题目分数">
-                    <el-select
+                      :placeholder="isDisabled?'':'请输入'"
+                      @blur="communityChange"
+                    ></el-input>
+                    <!-- <el-select
                       v-model="ruleForm.data.oneScore"
                       :disabled="isDisabled"
                       :placeholder="isDisabled?'':'请选择（必选）'"
@@ -111,22 +78,45 @@
                       <el-option :value="4" label="4"></el-option>
                       <el-option :value="5" label="5"></el-option>
                       <el-option :value="10" label="10"></el-option>
-                    </el-select>
+                    </el-select>-->
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col :span="12">
+                  <el-form-item label="题目数量">
+                    <el-input
+                      v-model="ruleForm.data.amount"
+                      :disabled="isDisabled"
+                      :placeholder="isDisabled?'':'请输入'"
+                      @blur="amountChange"
+                    ></el-input>
+                    <!-- <el-select
+                      v-model="ruleForm.data.amount"
+                      :disabled="isDisabled"
+                      :placeholder="isDisabled?'':'请选择（必选）'"
+                      @change="amountChange"
+                    >
+                      <el-option :value="10" label="10"></el-option>
+                      <el-option :value="20" label="20"></el-option>
+                      <el-option :value="25" label="25"></el-option>
+                    </el-select>-->
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                  <el-form-item class="noBR" label="题序随机">
-                    <el-radio
-                      v-model="ruleForm.data.isRandom"
-                      label="0"
-                      v-if="userInfo.state != 1"
-                    >是</el-radio>
-                    <el-radio
-                      v-model="ruleForm.data.isRandom"
-                      label="1"
-                      v-if="userInfo.state != 1"
-                    >否</el-radio>
-                    <p v-if="isDisabled">{{ruleForm.data.isRandom==0?'是':'否'}}</p>
+                  <el-form-item class="noBR" label="试卷分数">
+                    <el-input v-model="ruleForm.data.score" disabled></el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col :span="24">
+                  <el-form-item class="noBR" label="试卷内容">
+                    <el-input
+                      :placeholder="isDisabled?'':'请简单描述试卷内容'"
+                      :disabled="isDisabled"
+                      v-model="ruleForm.data.content"
+                    ></el-input>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -134,7 +124,7 @@
                 <el-col :span="24">
                   <el-form-item class="noBR noBB" label="适用人员">
                     <el-input
-                      :placeholder="isDisabled?'':'请选择（必选）'"
+                      :placeholder="isDisabled?'':'请选择'"
                       :disabled="isDisabled"
                       v-model="treePeople"
                       @focus="(checkDialogVisible=true,checkDialogShow=true)"
@@ -307,17 +297,17 @@ export default {
       ruleForm: {
         data: {
           id: "",
-          title: "这里是题库的标题",
+          title: "",
           type: [],
-          score: "100",
-          time: "60",
+          score: "",
+          time: "",
           oneScore: "",
           people: "",
           // state:状态，0启用，1停用，-1删除，默认1
           examList: "",
           selectRules: "1",
           place: "考试地点",
-          content: "内容",
+          content: "",
           examType: "1",
           examTime: ""
         },
@@ -333,7 +323,6 @@ export default {
           // }
         ]
       },
-      title: "这里是试卷的标题",
       checkedCities: [],
       cities: [],
       citiesId: [],
@@ -345,16 +334,6 @@ export default {
         choose: "0"
       },
       radio: "1",
-      whether: [
-        {
-          value: "是",
-          label: "是"
-        },
-        {
-          value: "否",
-          label: "否"
-        }
-      ], //是否
       rules: {}
     };
   },
@@ -384,38 +363,46 @@ export default {
     },
     //题目数量变化对于改变题目分数
     amountChange(val) {
-      switch (val) {
-        case 10:
-          this.ruleForm.data.oneScore = 10;
-          break;
-        case 20:
-          this.ruleForm.data.oneScore = 5;
-          break;
-        default:
-          this.ruleForm.data.oneScore = 4;
-          break;
+      let vm = this;
+      if (parseInt(vm.ruleForm.data.amount)) {
+        parseInt(vm.ruleForm.data.oneScore) &&
+          (vm.ruleForm.data.score =
+            parseInt(vm.ruleForm.data.oneScore) *
+            parseInt(vm.ruleForm.data.amount));
+      } else {
+        vm.$message({
+          message: "请确认题目数量是否输入正确",
+          type: "warning"
+        });
       }
     },
     //题目分数变化对于改变题目数量
     communityChange(val) {
-      switch (val) {
-        case 10:
-          this.ruleForm.data.amount = 10;
-          break;
-        case 5:
-          this.ruleForm.data.amount = 20;
-          break;
-        default:
-          this.ruleForm.data.amount = 25;
-          break;
+      let vm = this;
+      if (parseInt(vm.ruleForm.data.oneScore)) {
+        parseInt(vm.ruleForm.data.amount) &&
+          (vm.ruleForm.data.score =
+            parseInt(vm.ruleForm.data.oneScore) *
+            parseInt(vm.ruleForm.data.amount));
+      } else {
+        vm.$message({
+          message: "请确认题目分数是否输入正确",
+          type: "warning"
+        });
       }
     },
     //生成试卷
     createPaper() {
+      if(!this.ruleForm.data.score||!this.type.length>0){
+        return this.$message({
+          message: "请完整填写试卷信息",
+          type: "warning"
+        });
+      }
       this.isCreatePaperShow = true;
       this.ruleForm.list = [];
       this.checkedCities = [];
-      this.searchAttendHistory();
+      this.searchAttendHistory(true);
     },
     treeAudit(i) {
       let list = this.$refs.tree.getCheckedNodes();
@@ -501,8 +488,22 @@ export default {
         error: function(err) {}
       });
     },
+    // 生成试卷根据题目数量自动生成题目
+    setAmountlist: function() {
+      let vm = this;
+      // vm.checkedCities.push("1.问题一");
+      let originalArray = JSON.parse(JSON.stringify(vm.cities)); //原数组
+      originalArray.sort(function() {
+        return 0.5 - Math.random();
+      });
+      for (let i = 0; i < vm.ruleForm.data.amount; i++) {
+        setTimeout(() => {
+          vm.$set(vm.checkedCities, i, originalArray[i]);
+        }, 1000);
+      }
+    },
     // 获取题库列表数据
-    searchAttendHistory: function() {
+    searchAttendHistory: function(add) {
       var defer = $.Deferred();
       var vm = this;
       $.ajax({
@@ -520,6 +521,11 @@ export default {
           for (let i = 0; i < data.length; i++) {
             vm.cities.push(i + 1 + "." + data[i].question);
             vm.citiesId.push(data[i].id);
+          }
+          if (add) {
+            setTimeout(() => {
+              vm.setAmountlist();
+            }, 0);
           }
         },
         error: function(err) {}
@@ -585,7 +591,8 @@ export default {
     checkedCities: {
       handler: function(val, oldval) {
         let vm = this;
-        if (val.length > oldval.length) {
+        // console.log(val, oldval);
+        if (val.length >= oldval.length) {
           let index = val[val.length - 1].split(".")[0] - 1;
           let data = vm.citiesList[index];
           for (let i = 0; i < vm.ruleForm.list.length; i++) {
@@ -637,7 +644,7 @@ export default {
         }
       }
     },
-    //获取单选题和多选题的数量
+    //适用人员
     checkDialogVisible: {
       handler: function(val) {
         let vm = this;
@@ -915,6 +922,33 @@ export default {
 .el-date-picker__editor-wrap {
   .el-input {
     width: auto;
+  }
+}
+.el-tree {
+  .el-tree-node__content {
+    height: 40px;
+    line-height: 40px;
+    .el-tree-node__label {
+      font-size: 16px;
+    }
+  }
+  .el-tree-node__children {
+    .el-tree-node__content {
+      height: 36px;
+      line-height: 36px;
+      .el-tree-node__label {
+        font-size: 14px;
+      }
+    }
+    .el-tree-node__children {
+      .el-tree-node__content {
+        height: 32px;
+        line-height: 32px;
+        .el-tree-node__label {
+          font-size: 14px;
+        }
+      }
+    }
   }
 }
 @media screen and (min-width: 1920px) {

@@ -10,27 +10,43 @@
           @mouseover="isTitleDisabled=false"
           @mouseout="isTitleDisabled=true"
         >
-          <el-input :disabled="isTitleDisabled" type="text" v-model="ruleForm.data.title">{{e}}</el-input>
+          <el-input
+            :disabled="isTitleDisabled&&userInfo.state!=0"
+            placeholder="请输入题库标题"
+            type="text"
+            v-model="ruleForm.data.title"
+          >{{e}}</el-input>
         </div>
         <div class="fj-block-body">
           <div class="body-header">
             <div class="search-item">
               <span class="span-title">题库类型：</span>
-              <el-select v-model="ruleForm.data.type" clearable>
-                <el-option :value="'1'" label="单选题"></el-option>
-                <el-option :value="'2'" label="多选题"></el-option>
+              <el-select v-model="ruleForm.data.type" :disabled="userInfo.state!=0" clearable>
+                <!-- <el-option :value="'1'" label="单选题"></el-option>
+                <el-option :value="'2'" label="多选题"></el-option>-->
+                <el-option
+                  v-for="item in typeList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
               </el-select>
             </div>
             <div class="search-item hidden-lg-and-down">
-              <span class="span-title">考试类型：</span>
+              <span class="span-title">题目类型：</span>
               <el-select v-model="ruleForm.data.examPeople">
-                <el-option :value="'1'" label="辅警"></el-option>
-                <el-option :value="'2'" label="民警"></el-option>
+                <el-option
+                  v-for="item in examPeopleList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
               </el-select>
             </div>
             <div @mouseover="istextareaDisabled=false" @mouseout="istextareaDisabled=true">
               <el-input
-                :disabled="istextareaDisabled"
+                :disabled="istextareaDisabled&&userInfo.state!=0"
+                placeholder="请简单描述试题库内容"
                 type="textarea"
                 :autosize="{ minRows: 2, maxRows: 4}"
                 v-model="ruleForm.data.content"
@@ -159,14 +175,16 @@ export default {
         { name: "专题考试", path: "" }
       ],
       userInfo: {},
+      typeList: [],
+      examPeopleList: [],
       // isEditData: false, //是否触发更新题库
       ruleForm: {
         data: {
           id: "",
-          title: "这里是题库的标题",
+          title: "",
           type: "1",
           examPeople: "1",
-          content: "请简单描述试题库内容"
+          content: ""
         },
         list: []
       },
@@ -195,8 +213,36 @@ export default {
   mounted() {
     this.setCreated();
     this.getDetailList();
+    this.getDictListByType("SJ_TMLX", "typeList"); //题目类型
+    this.getDictListByType("TZLX", "examPeopleList"); //考试类型
   },
   methods: {
+    /**
+     * @description: 获取化题库字典
+     * @param {type} type 字典类型
+     * @param {list} list 数据List
+     * @return:
+     */
+    getDictListByType: function(type, list) {
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/getDictListByType",
+        type: "POST",
+        data: {
+          type: type
+        },
+        dataType: "json",
+        success: function(data) {
+          vm.list = data.list;
+          defer.resolve();
+        },
+        error: function(err) {
+          defer.reject();
+        }
+      });
+      return defer;
+    },
     //新增考题
     addTopic() {
       let vm = this;
@@ -505,6 +551,17 @@ export default {
       }
       .search-item {
         display: inline-block;
+        .is-disabled {
+          .el-input__inner {
+            background-color: #fff;
+            border: none;
+            cursor: auto;
+            color: rgba(0, 0, 0, 0.65);
+          }
+          .el-input__suffix {
+            display: none;
+          }
+        }
       }
       .search-item:first-child {
         margin-right: 100px;

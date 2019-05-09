@@ -8,20 +8,39 @@
         <el-tabs v-model="activeIndex" @tab-click="handleClick">
           <el-tab-pane label="考试题库" name="0"></el-tab-pane>
           <el-tab-pane label="试卷管理" name="1"></el-tab-pane>
-          <el-tab-pane label="考试得分" name="2"></el-tab-pane>
+          <el-tab-pane label="考试发布" name="2"></el-tab-pane>
+          <el-tab-pane label="考试得分" name="3"></el-tab-pane>
         </el-tabs>
       </div>
       <div class="fj-block-body">
         <div class="fj-search-inline">
           <el-row>
             <el-form inline label-width="85px" label-position="left">
-              <el-col :lg="6" :xl="5">
-                <el-form-item label="考试类型：" v-if="activeIndex==0">
+              <el-col :lg="6" :xl="5" v-if="activeIndex==0">
+                <el-form-item label="题库类型：">
                   <el-select
                     @change="changeDeptId"
                     clearable
                     filterable
                     v-model="searchForm.deptId"
+                    size="small"
+                  >
+                    <el-option
+                      v-for="item in subjectList"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :lg="6" :xl="5" v-if="activeIndex==2">
+                <el-form-item label="状态：">
+                  <el-select
+                    @change="changeDeptId"
+                    clearable
+                    filterable
+                    v-model="searchForm.state"
                     size="small"
                   >
                     <el-option
@@ -33,25 +52,7 @@
                   </el-select>
                 </el-form-item>
               </el-col>
-              <el-col :lg="6" :xl="5" v-if="activeIndex==1">
-                <el-form-item label="试卷类型：">
-                  <el-select
-                    @change="changeDeptId"
-                    clearable
-                    filterable
-                    v-model="searchForm.deptId"
-                    size="small"
-                  >
-                    <el-option
-                      v-for="item in missionStates"
-                      :key="item.deptId"
-                      :label="item.deptName"
-                      :value="item.deptId"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
-              </el-col>
-              <el-col :lg="6" :xl="5" v-if="activeIndex==2">
+              <el-col :lg="6" :xl="5" v-if="activeIndex==3">
                 <el-form-item label="区县分局：">
                   <el-select
                     @change="changeSupDeptId"
@@ -69,7 +70,7 @@
                   </el-select>
                 </el-form-item>
               </el-col>
-              <el-col :lg="6" :xl="5" v-if="activeIndex==2">
+              <el-col :lg="6" :xl="5" v-if="activeIndex==3">
                 <el-form-item label="派出所：">
                   <el-select
                     @change="changeDeptId"
@@ -103,26 +104,41 @@
                     class="tj-btn"
                     @click="goQuestions(0)"
                     v-if="activeIndex==0"
-                  >创建题库</el-button>
-                  <el-button
-                    type="primary"
-                    class="tj-btn"
-                    @click="goManage(0)"
-                    v-if="activeIndex==1"
-                  >添加试卷</el-button>
-                  <!-- <form
-                    style="display:none;"
-                    name="exportForm"
-                    :action="ajaxUrlDNN + '/exportExamResultList?endTime=' + searchForm.endTime + '&deptId=' + searchForm.deptId + '&startTime=' + searchForm.startTime + '&pageNumber=' + currentPage + '&pageSize=' + pageSize"
-                    method="post"
-                    enctype="multipart/form-data"
-                  ></form>-->
+                  >新增题库</el-button>
                   <el-button
                     type="primary"
                     class="tj-btn"
                     @click="exportExcl"
-                    v-if="activeIndex==2"
+                    v-if="activeIndex==3"
                   >导出</el-button>
+                </el-form-item>
+              </el-col>
+              <el-col :lg="6" :xl="6" v-if="activeIndex==1">
+                <el-form-item label="输入查询：">
+                  <el-input
+                    v-model="searchForm.user"
+                    clearable
+                    placeholder="请输入试卷标题"
+                    size="small"
+                    class="search-input"
+                  >
+                    <el-button slot="append" @click="searchAttendLeave">搜索</el-button>
+                  </el-input>
+                  <el-button type="primary" class="tj-btn" @click="goManage(0)">新增试卷</el-button>
+                </el-form-item>
+              </el-col>
+              <el-col :lg="6" :xl="6" v-if="activeIndex==2">
+                <el-form-item label="输入查询：">
+                  <el-input
+                    v-model="searchForm.user"
+                    clearable
+                    placeholder="请输入考试标题"
+                    size="small"
+                    class="search-input"
+                  >
+                    <el-button slot="append" @click="searchAttendLeave">搜索</el-button>
+                  </el-input>
+                  <el-button type="primary" class="tj-btn" @click="releaseExamina">新增考试</el-button>
                 </el-form-item>
               </el-col>
             </el-form>
@@ -130,14 +146,14 @@
         </div>
         <!-- 考试题库 -->
         <el-table v-if="activeIndex==0" :data="tableDataList" style="width: 100%">
-          <el-table-column prop="type" label="题目类型" :key="Math.random()">
-            <template slot-scope="scope">
+          <el-table-column prop="type" label="题库类型" :key="Math.random()">
+            <!-- <template slot-scope="scope">
               <span v-if="scope.row.type == 1">单选题</span>
               <span v-if="scope.row.type == 2">多选题</span>
-            </template>
+            </template>-->
           </el-table-column>
           <el-table-column prop="title" label="标题" :key="Math.random()"></el-table-column>
-          <el-table-column prop="content" label="考试类型" :key="Math.random()"></el-table-column>
+          <!-- <el-table-column prop="content" label="考试类型" :key="Math.random()"></el-table-column> -->
           <el-table-column prop="createUsername" label="创建人" :key="Math.random()"></el-table-column>
           <el-table-column
             prop="instime"
@@ -168,8 +184,13 @@
         </el-table>
         <!-- 试卷管理 -->
         <el-table v-if="activeIndex==1" :data="tableDataList" style="width: 100%">
-          <el-table-column prop="title" label="试卷标题" :key="Math.random()"></el-table-column>
-          <el-table-column prop="sigtypenTime" label="试卷类型" :key="Math.random()"></el-table-column>
+          <el-table-column prop="title" label="试卷标题" show-overflow-tooltip :key="Math.random()"></el-table-column>
+          <el-table-column
+            prop="sigtypenTime"
+            label="试卷内容"
+            show-overflow-tooltip
+            :key="Math.random()"
+          ></el-table-column>
           <el-table-column prop="score" label="总分" :key="Math.random()"></el-table-column>
           <el-table-column prop="createUserName" label="创建人" :key="Math.random()"></el-table-column>
           <el-table-column prop="instime" label="发布时间" :key="Math.random()"></el-table-column>
@@ -208,9 +229,54 @@
             </template>
           </el-table-column>
         </el-table>
+        <!-- 考试发布 -->
+        <el-table v-if="activeIndex==2" :data="tableDataList" style="width: 100%">
+          <el-table-column prop="title" label="考试标题" show-overflow-tooltip :key="Math.random()"></el-table-column>
+          <el-table-column
+            prop="sigtypenTime"
+            label="试卷标题"
+            show-overflow-tooltip
+            :key="Math.random()"
+          ></el-table-column>
+          <el-table-column prop="score" label="考试人员" show-overflow-tooltip :key="Math.random()"></el-table-column>
+          <el-table-column prop="instime" label="发布时间" :key="Math.random()"></el-table-column>
+          <el-table-column label="状态" width="100px" :key="Math.random()">
+            <template slot-scope="scope">
+              <span
+                class="circle-status"
+                :class="scope.row.state == 0 ? 'green' : scope.row.state == 1 ?  'grey': scope.row.state == 2 ?  'grey':'red'"
+              >
+                {{parseInt( scope.row.state) === 0 ? '已发布' : parseInt( scope.row.state) === 1 ?'未发布' : parseInt( scope.row.state) === 2 ?'已结束'
+                : '已删除'}}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" :key="Math.random()">
+            <template slot-scope="scope">
+              <!-- <span class="ope-txt" v-if="scope.row.state != 0">--</span> -->
+              <!-- <span class="ope-txt" v-if="scope.row.state == 2" @click="goManage(3,scope.row.id)">复用</span> -->
+              <span class="ope-txt" v-if="scope.row.state != 1" @click="goManage(1,scope.row.id)">详情</span>
+              <span
+                class="ope-txt"
+                v-if="scope.row.state == 1"
+                @click="setManageState(scope.row.id, 0)"
+              >发布</span>
+              <span
+                class="ope-txt"
+                v-if="scope.row.state == 1"
+                @click="goManage( 2,scope.row.id)"
+              >编辑</span>
+              <span
+                class="ope-txt"
+                v-if="scope.row.state >= 0"
+                @click="setManageState(scope.row.id, -1)"
+              >删除</span>
+            </template>
+          </el-table-column>
+        </el-table>
         <!-- 考试得分 -->
         <el-table
-          v-if="activeIndex==2"
+          v-if="activeIndex==3"
           :data="tableDataList"
           style="width: 100%"
           @selection-change="handleSelectionChange"
@@ -245,6 +311,79 @@
         </div>
       </div>
     </div>
+    <!-- 审核弹出框 -->
+    <el-dialog
+      title="考试发布信息"
+      :visible.sync="checkDialogVisible"
+      :modal-append-to-body="checkDialogVisibleModal"
+      style="position: absolute"
+      width="450px"
+      @close="closeDialog"
+      :close-on-click-modal="false"
+      top="25vh"
+      class="check-dialog"
+    >
+      <div>
+        <div class="form-info">
+          <el-form :model="ruleForm">
+            <el-form-item label="考试标题：">
+              <el-input
+                v-model="ruleForm.basePay"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
+              ></el-input>
+            </el-form-item>
+            <el-form-item label="考试日期：">
+              <el-date-picker
+                :disabled="isDisabled"
+                v-model="ruleForm.examTime"
+                type="date"
+                value-format="yyyyMMdd"
+                :placeholder="isDisabled?'':'请选择'"
+              ></el-date-picker>
+            </el-form-item>
+            <el-form-item label="考试试卷：">
+              <el-select
+                clearable
+                filterable
+                v-model="ruleForm.basePay"
+                size="small"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
+              >
+                <el-option
+                  v-for="item in missionStates"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="考试人员：">
+              <el-select
+                clearable
+                filterable
+                v-model="ruleForm.basePay"
+                size="small"
+                :disabled="isDisabled"
+                :placeholder="isDisabled?'':'请输入'"
+              >
+                <el-option
+                  v-for="item in missionStates"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+          </el-form>
+        </div>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="checkDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="review">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -262,8 +401,14 @@ export default {
       ],
       nowUser: $.cookie(fjPublic.loginCookieKey),
       activeIndex: "0",
+      checkDialogVisible: false,
+      checkDialogVisibleModal: false,
+      isDisabled: false,
+      ruleForm: {},
       deptIds: null, //派出所下拉框数据
       supDeptIds: null, //分局下拉框数据
+      // 状态下拉框
+      subjectList: [],
       // 状态下拉框
       missionStates: [
         {
@@ -290,10 +435,11 @@ export default {
   },
   mounted() {
     fjPublic.closeLoad();
-    // 初始化任务列表
+    // 初始化列表
     this.searchList();
     this.initSupDeptIds();
     this.initDeptIds();
+    this.getDictListByType();
     return;
   },
   beforeRouteEnter(to, from, next) {
@@ -329,6 +475,7 @@ export default {
     searchAttendLeave: function() {
       this.searchList();
     },
+
     exportExcl: function() {
       let vm = this;
       window.open(
@@ -345,6 +492,44 @@ export default {
           vm.pageSize
       );
     },
+    // 新增发布考试
+    releaseExamina: function() {
+      this.checkDialogVisible = true;
+    },
+    //签订
+    review() {
+      // var defer = $.Deferred();
+      // var vm = this;
+      // $.ajax({
+      //   url: fjPublic.ajaxUrlDNN + "/signContract",
+      //   type: "POST",
+      //   data: {
+      //     id: vm.userInfo.id,
+      //     year: vm.radio
+      //   },
+      //   dataType: "json",
+      //   success: function(data) {
+      //     if (data.errorCode == 0) {
+      //       vm.$message({
+      //         type: "success",
+      //         message: data.errorMsg
+      //       });
+      //       vm.userInfo.state = 1;
+      //     } else {
+      //       vm.$message({
+      //         type: "error",
+      //         message: data.errorMsg
+      //       });
+      //     }
+      //     defer.resolve();
+      //   },
+      //   error: function(err) {
+      //     defer.reject();
+      //   }
+      // });
+      // vm.checkDialogVisible = false;
+      // return defer;
+    },
     // 初始化分局
     initSupDeptIds: function() {
       var defer = $.Deferred();
@@ -356,6 +541,27 @@ export default {
         dataType: "json",
         success: function(data) {
           vm.supDeptIds = data.list;
+          defer.resolve();
+        },
+        error: function(err) {
+          defer.reject();
+        }
+      });
+      return defer;
+    },
+        // 初始化题库类型
+    getDictListByType: function() {
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/getDictListByType",
+        type: "POST",
+        data: {
+          type: "SJ_TMLX"
+        },
+        dataType: "json",
+        success: function(data) {
+          vm.subjectList = data.list;
           defer.resolve();
         },
         error: function(err) {
@@ -432,6 +638,8 @@ export default {
         vm.activeIndex == 0
           ? "/getExamWarehouseList"
           : vm.activeIndex == 1
+          ? "/getExamPaperList"
+          : vm.activeIndex == 2
           ? "/getExamPaperList"
           : "/getExamResultList";
       // 参数
@@ -594,6 +802,35 @@ export default {
         }
       }
     }
+  }
+}
+.form-info {
+  padding-left: 40px;
+  .el-form-item {
+    .el-input {
+      width: 240px;
+    }
+    .is-disabled {
+      .el-input__inner {
+        cursor: auto;
+        background-color: #fff;
+        color: #606266;
+        border: none;
+      }
+      .el-select__caret {
+        display: none;
+      }
+    }
+  }
+}
+.fj-block-head {
+  .el-tabs__item {
+    height: 50px;
+    line-height: 46px;
+    font-size: 16px;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.85);
+    letter-spacing: 1px;
   }
 }
 </style>
