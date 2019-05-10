@@ -301,13 +301,13 @@
       // 初始化百度地图
       initMap(lat, len) {
         this.$nextTick(() => {
-          this.qqMap = new qq.maps.Map(document.getElementById('fcv-history-map'),{
+          this.qqMap = new AMap.Map('fcv-history-map',{
             // 地图的中心地理坐标。
-            center: new qq.maps.LatLng(lat, len),
+            center: new AMap.LngLat(len, lat),
             zoom: 15
           });
-          new qq.maps.Marker({
-            position:  new qq.maps.LatLng(lat, len),
+          new AMap.Marker({
+            position:  new AMap.LngLat(len, lat),
             map: this.qqMap
           })
         })

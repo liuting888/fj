@@ -99,7 +99,7 @@
           <el-table-column prop="deptname" label="所属单位" show-overflow-tooltip></el-table-column>
           <el-table-column prop="areaid" label="网格区域" show-overflow-tooltip v-if="false"></el-table-column>
           <el-table-column prop="instime" label="提交时间" show-overflow-tooltip :formatter="instimeFormat"></el-table-column>
-          
+
           <el-table-column prop="leadid" label="审核人"></el-table-column>
           <el-table-column label="审核时间" show-overflow-tooltip prop="leadtime" :formatter="dateStrFormat">
           </el-table-column>
@@ -117,7 +117,7 @@
                 class="ope-txt"
                 @click="openAddOrDetailDialog(scope.row.keyno, scope.row.infotype, scope.row.leadresult)"
               >{{parseInt( scope.row.leadresult) === 0 ? '审批' : '详情'}}</span>
-              
+
               <!--<span class="ope-txt" v-if="scope.row.leadresult == 0" @click="openCheckDialog(scope.row.keyno, 1)">通过</span>-->
               <!--<span class="ope-txt" v-if="scope.row.leadresult == 0" @click="openCheckDialog(scope.row.keyno, 2)">不通过</span>-->
             </template>
@@ -150,7 +150,7 @@
       style="position: absolute"
       class="infoDialog"
       :lock-scroll = 'true'
-    > 
+    >
       <el-row slot="title" class="dialog-title">
         <el-col :offset="1" :span="23">
             <span >{{dialogTitle}}</span>
@@ -191,7 +191,7 @@
               </el-form-item>
             </el-col>
             <el-col :span="1"></el-col>
-            
+
           </el-row>
           <el-row>
             <el-col :offset="1" :span="22">
@@ -220,7 +220,7 @@
             </el-col>
             <el-col :span="1"></el-col>
           </el-row>
-          
+
           <el-row>
             <el-col :offset="1" :span="22">
               <el-form-item label="执勤记录："  prop="work_log">
@@ -248,7 +248,7 @@
                 <!-- <el-input autocomplete="off"  :rows="3" disabled v-model="dialogForm1.insTime"></el-input> -->
               </el-form-item>
             </el-col>
-              
+
             <el-col :span="7" :offset="1" >
               <el-form-item label="提交人：" prop="userId"  label-width="68px">
                 {{dialogForm1.userId}}
@@ -405,7 +405,7 @@
             </el-col>
             <el-col :span="1"></el-col>
           </el-row>
-         
+
           <el-row>
             <el-col :offset="1" :span="22">
               <el-form-item label="户口所在地："  prop="domicile">
@@ -473,7 +473,7 @@
                 {{dialogForm3.leadId}}
               </el-form-item>
             </el-col>
-           
+
           </el-row>
         </el-form>
       </template>
@@ -519,7 +519,7 @@
             <el-col :span="1"></el-col>
           </el-row>
           <el-row class="info">
-            
+
             <el-col :offset="1" :span="7">
               <el-form-item label="提交时间：" prop="insTime" label-width="82px">
                 {{dialogForm4.insTime}}
@@ -550,7 +550,7 @@
                 {{dialogForm5.case_name}}
               </el-form-item>
             </el-col>
-            <el-col :span="1"></el-col> 
+            <el-col :span="1"></el-col>
           </el-row>
           <el-row>
             <el-col :offset="1" :span="11">
@@ -573,7 +573,7 @@
               <el-form-item label="当事人B基本信息" style="font-weight:bold;"></el-form-item>
             </el-col>
              <el-col :span="1"></el-col>
-            
+
           </el-row>
           <el-row>
             <el-col :offset="1" :span="11">
@@ -832,7 +832,7 @@
             <el-col :span="1"></el-col>
           </el-row>
            <el-row class="info">
-            
+
             <el-col :offset="1" :span="7">
               <el-form-item label="提交时间：" prop="insTime" label-width="82px">
                 {{dialogForm6.insTime}}
@@ -876,7 +876,7 @@
             </el-col>
           </el-row>
           <el-row>
-            
+
             <el-col  :offset="1" :span="22">
               <el-form-item label="实体地址"  prop="real_address">
                 <el-input autocomplete="off" disabled v-model="dialogForm7.real_address"></el-input>
@@ -1126,7 +1126,7 @@
             <el-col  :offset="1" :span="22">
               <el-form-item
                 label="法人（负责人）证件号码"
-                
+
                 prop="unit_person_card"
               >
                 <el-input autocomplete="off" disabled v-model="dialogForm8.unit_person_card"></el-input>
@@ -1233,7 +1233,7 @@
             <el-col  :offset="1" :span="22">
               <el-form-item
                 label="法人（负责人）电话"
-                
+
                 prop="unit_person_phone"
               >
                 <el-input autocomplete="off" disabled v-model="dialogForm8.unit_person_phone"></el-input>
@@ -1261,7 +1261,7 @@
             <el-col  :offset="1" :span="22">
               <el-form-item
                 label="重点单位要害部位分类"
-                
+
                 prop="unit_vitalpart_imp"
               >
                 <el-input autocomplete="off" disabled v-model="dialogForm8.unit_vitalpart_imp"></el-input>
@@ -1298,9 +1298,9 @@
                 <!-- <el-input autocomplete="off" disabled v-model="dialogForm8.userId"></el-input> -->
               </el-form-item>
             </el-col>
-           
+
             <el-col :span="6">
-              <el-form-item label="审核人" prop="leadId" label-width="80px"> 
+              <el-form-item label="审核人" prop="leadId" label-width="80px">
                 {{dialogForm8.leadId}}
                 <!-- <el-input:xs="8" :sm="12" :md="16"  autocomplete="off" disabled v-model="dialogForm8.leadId"></el-input> -->
               </el-form-item>
@@ -1404,13 +1404,13 @@
                 {{dialogForm9.leadId}}
               </el-form-item>
             </el-col>
-           
+
           </el-row>
         </el-form>
       </template>
       <!-- 交通安全协管登记表 -->
       <template v-if="infoType == '1015'">
-        <el-form :rules="rule"  :model="dialogForm10" ref="dialogForm10"  inline label-position="left"> 
+        <el-form :rules="rule"  :model="dialogForm10" ref="dialogForm10"  inline label-position="left">
           <el-row>
             <el-col :offset="1" :span="22">
               <el-form-item label="时间："  prop="time">
@@ -1474,6 +1474,9 @@
       <div v-if="infoStatus == 0" slot="footer" class="dialog-footer">
         <el-button type="primary" @click="updateInfoStatus(1)">通 过</el-button>
         <el-button  @click="reject">驳 回</el-button>
+      </div>
+      <div v-if="infoStatus != 0" slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="deleteInfoOrder()">删除</el-button>
       </div>
     </el-dialog>
     <!-- 审核弹出框 -->
@@ -1609,7 +1612,7 @@ export default {
           top: 10,
           width: 883,
           name: 'dialogForm6'
-        }, 
+        },
         1012: {
           top: 2,
           width: 883,
@@ -1619,7 +1622,7 @@ export default {
           top: 10,
           width: 883,
           name: 'dialogForm8'
-        }, 
+        },
         1014: {
           top: 19,
           width: 883,
@@ -1892,6 +1895,39 @@ export default {
     }
   },
   methods: {
+    // 删除台账
+    deleteInfoOrder: function() {
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/deleteInfoOrder",
+        type: "POST",
+        data: {
+          id: vm.infoId
+        },
+        dataType: "json",
+        success: function(data) {
+          vm.dialogVisible = false;
+          if(data.errorCode == 0) {
+            vm.$message({
+              type: "success",
+              message: data.errorMsg
+            });
+            vm.infoCollect();
+          }else {
+            vm.$message({
+              type: "error",
+              message: data.errorMsg
+            });
+          }
+          defer.resolve();
+        },
+        error: function(err) {
+          defer.reject();
+        }
+      });
+      return defer;
+    },
     currentPageChange: function(pageNum) {
       // 点击某个分页按钮
       this.currentPage = pageNum;
@@ -2030,7 +2066,7 @@ export default {
     openAddOrDetailDialog: function(keyno, infoType, leadresult) {
       this.infoId = keyno;
       this.infoStatus = leadresult;
-     
+
       // 采集类型
       this.infoType = infoType;
       // 详情
@@ -2068,7 +2104,7 @@ export default {
               vm.dialogForm1["patrol_area"] = data.info.patrol_area;
               vm.dialogForm1["work_content"] = data.info.work_content;
               vm.dialogForm1["work_log"] = data.info.work_log;
-             
+
               vm.dialogTitle = "巡逻情况登记表";
               // 安全检查情况登记表
             } else if (vm.infoType == "1005") {
@@ -2273,7 +2309,7 @@ export default {
       } else {
         this.$message.error('数据不存在')
       }
-      
+
     },
     // 驳回
     reject: function() {
@@ -2329,7 +2365,7 @@ export default {
       if (!dateStr) {
           return ''
       }
-      return dateStr.substr(4, 2) + '/' + dateStr.substr(6, 2) 
+      return dateStr.substr(4, 2) + '/' + dateStr.substr(6, 2)
       + ' ' + dateStr.substr(8, 2) + ':' + dateStr.substr(10, 2)
     },
     instimeFormat(row) {
@@ -2337,8 +2373,8 @@ export default {
       if (!dateStr) {
           return ''
       }
-      return dateStr.substr(5, 2) + '/' + dateStr.substr(8, 2) 
-      + ' ' + dateStr.substr(11, 2) + ':' + dateStr.substr(14, 2) 
+      return dateStr.substr(5, 2) + '/' + dateStr.substr(8, 2)
+      + ' ' + dateStr.substr(11, 2) + ':' + dateStr.substr(14, 2)
     },
     // 弹窗关闭事件
     closeDialog() {
@@ -2409,7 +2445,7 @@ export default {
                 margin-top: 0;
               }
             }
-          } 
+          }
         }
       }
     }
@@ -2467,7 +2503,7 @@ export default {
       }
     }
   }
-  
+
   /deep/ .el-input.is-disabled{
       .el-input__inner  {
         color: rgba(0,0,0,.15)

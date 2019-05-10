@@ -240,6 +240,9 @@
         <el-button type="primary" @click="updateWorkLogStatus(1)">通 过</el-button>
         <el-button  @click="reject">驳 回</el-button>
       </div>
+      <div v-if="dialogForm.status != 0" slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="deleteInfoWorkLog()">删除</el-button>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -361,6 +364,39 @@ export default {
     }
   },
   methods: {
+    // 删除日志
+    deleteInfoWorkLog: function() {
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/deleteInfoWorkLog",
+        type: "POST",
+        data: {
+          id: vm.dialogForm.keyNo
+        },
+        dataType: "json",
+        success: function(data) {
+          vm.dialogVisible = false;
+          if(data.errorCode == 0) {
+            vm.$message({
+              type: "success",
+              message: data.errorMsg
+            });
+            vm.infoWorkLog();
+          }else {
+            vm.$message({
+              type: "error",
+              message: data.errorMsg
+            });
+          }
+          defer.resolve();
+        },
+        error: function(err) {
+          defer.reject();
+        }
+      });
+      return defer;
+    },
     currentPageChange: function(pageNum) {
       // 点击某个分页按钮
       this.currentPage = pageNum;

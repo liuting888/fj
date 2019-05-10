@@ -638,6 +638,49 @@ export default {
     //根据用户角色处理导航栏数据
     this.userInfo = $.parseJSON(fjPublic.getLocalData("userInfo"));
     if (!this.userInfo) return;
+    //常用标签
+      if (this.userInfo) {
+        console.log(this.userInfo);
+        if(this.userInfo.userRole == '8888' || this.userInfo.userRole == '9999') {
+          fjPublic.setLocalData(
+            "commonLinks",
+            JSON.stringify([
+              { name: "首页", routeName: "/index" },
+              { name: "数据中心", routeName: "/data-center" },
+              { name: "工作任务", routeName: "/work-manage-mission" },
+              { name: "考勤历史", routeName: "/fjAttend-history" },
+              { name: "请假休假", routeName: "/fjAttend-leave" },
+              { name: "单位考核", routeName: "/unit-assessment" },
+              { name: "个人考核", routeName: "/personal-assessment" },
+              { name: "组织架构", routeName: "/organizational-structure" }
+            ])
+          );
+        }else if((this.userInfo.userRole == '1002')) {
+          console.log(this.userInfo.userRole);
+          fjPublic.setLocalData(
+            "commonLinks",
+            JSON.stringify([
+              { name: "首页", routeName: "/index" },
+              { name: "工作任务", routeName: "/work-manage-mission" },
+              { name: "考勤历史", routeName: "/fjAttend-history" },
+              { name: "请假休假", routeName: "/fjAttend-leave" },
+              { name: "个人考核", routeName: "/personal-assessment" },
+              { name: "组织架构", routeName: "/organizational-structure" }
+            ])
+          );
+        }else {
+          fjPublic.setLocalData(
+            "commonLinks",
+            JSON.stringify([
+              { name: "首页", routeName: "/index" },
+              { name: "工作任务", routeName: "/work-manage-mission" },
+              { name: "考勤历史", routeName: "/fjAttend-history" },
+              { name: "请假休假", routeName: "/fjAttend-leave" },
+              { name: "个人考核", routeName: "/personal-assessment" },
+            ])
+          );
+        }
+      }
     //
     fjSideNav.navData = this.operateNavDatas[this.userInfo.userRole].call(this);
     //导航栏

@@ -106,9 +106,6 @@
                       <img style="width: 250px;height: 250px;" :src="ajaxUrlDNN + '/readRecruitQTCode'"/>
                     </div>
                   </el-tooltip>
-                  <!--<el-button plain @click="addRecruit">-->
-                    <!--<span>添加</span>-->
-                  <!--</el-button>-->
                 </el-form-item>
               </el-col>
             </el-form>
@@ -266,7 +263,7 @@ export default {
   mounted: function() {
     // 初始化派出所下拉列表
     this.initSupDeptIds();
-    // 初始化采集列表
+    // 初始化列表
     this.searchList();
     return;
   },
@@ -500,80 +497,6 @@ export default {
         query: { id: data.id, step: data.step, state: state }
       });
     },
-    addRecruit: function() {
-      var defer = $.Deferred();
-      var vm = this;
-      var educations = [
-        {
-          eduDate: "2011/09-2014/06",
-          schoolName: "四川大学锦城学院",
-          majorName: "艺术系表演专业",
-          degrees: "全国微电影金锚奖、年度新锐剧星"
-        }
-      ];
-      var works = [
-        {
-          worDate: "2015/09-2019/03",
-          companyName: "唐嫣工作室",
-          positionName: "演员"
-        }
-      ];
-      var families = [
-        {
-          name: "邓辉",
-          relation: "丈夫",
-          positionName: "导演"
-        }
-      ];
-      // console.log(JSON.stringify(families));
-      // console.log(JSON.stringify(works));
-      // console.log(JSON.stringify(educations));
-      $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/addRecruit",
-        type: "POST",
-        data: {
-          name: "陈钰琪",
-          sex: "2",
-          birth: "1992-07",
-          nation: "01",
-          birthPlace: "四川省成都市",
-          marriage: "10",
-          phone: "17673055002",
-          politics: "01",
-          soldier: "0",
-          hw: "170/45",
-          education: "20",
-          idNum: "501104199207297869",
-          ePerson: "邓辉",
-          ePersonPhone: "17673055042",
-          address: "四川省成都市锦城区",
-          deptId: "430501010000",
-          edus: JSON.stringify(educations),
-          fams: JSON.stringify(families),
-          wors: JSON.stringify(works)
-        },
-        dataType: "json",
-        success: function(data) {
-          if (data.errorCode == 0) {
-            vm.$message({
-              type: "success",
-              message: data.errorMsg
-            });
-            vm.searchList();
-          } else {
-            vm.$message({
-              type: "error",
-              message: data.errorMsg
-            });
-          }
-          defer.resolve();
-        },
-        error: function(err) {
-          defer.reject();
-        }
-      });
-      return defer;
-    }
   },
   computed: {},
   beforeDestroy() {},

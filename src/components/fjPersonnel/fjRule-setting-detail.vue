@@ -46,7 +46,7 @@
     </div>
     <!-- 审核弹出框 -->
     <el-dialog
-      title="配置工资规则"
+      title="配置合同规则"
       :visible.sync="checkDialogVisible"
       :modal-append-to-body="checkDialogVisibleModal"
       style="position: absolute"

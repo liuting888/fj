@@ -59,7 +59,7 @@
                     <el-form-item label="入职日期" class="row-img-padding">
                       <el-date-picker
                         :disabled="isDisabled"
-                        v-model="archivesInfo.entryTime"
+                        v-model="jobInfo.entryTime"
                         type="date"
                         value-format="yyyy-MM-dd"
                         :placeholder="isDisabled?'':'请选择'"
@@ -90,7 +90,7 @@
                     <el-form-item label="所属派出所" class="row-img-padding">
                       <el-select
                         :disabled="isDisabled"
-                        v-model="recruitInfo.deptId"
+                        v-model="jobInfo.deptname"
                         :placeholder="isDisabled?'':'请选择'"
                       >
                         <el-option
@@ -393,7 +393,7 @@
                       ></el-date-picker>
                     </el-form-item>
                   </el-col>
-                  <el-col :lg="6" :xl="5">
+                  <el-col :lg="8" :xl="7">
                     <el-form-item label="输入查询：">
                       <el-input
                         v-model="searchForm.keyword"
@@ -756,8 +756,8 @@ export default {
           padding-right: 150px;
         }
       }
-      .el-input--prefix{
-        .el-input__inner{
+      .el-input--prefix {
+        .el-input__inner {
           padding-left: 15px;
         }
       }
@@ -854,10 +854,14 @@ export default {
     }
   }
   .fj-block-head {
-    height: 50px;
-    border-bottom: 0px;
-    .el-tabs__header {
-      padding-top: 10px;
+    border-bottom: none;
+    .el-tabs__item {
+      height: 50px;
+      line-height: 46px;
+      font-size: 16px;
+      font-weight: bold;
+      color: rgba(0, 0, 0, 0.65);
+      letter-spacing: 1px;
     }
     .archives-footer-btn {
       position: absolute;
@@ -865,7 +869,6 @@ export default {
       right: 0;
     }
   }
-
   .archives-contract {
     height: 800px;
     padding: 20px;

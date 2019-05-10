@@ -30,7 +30,7 @@
           <el-date-picker class="fj-fl" v-model="selectedDeptsMonth" value-format='yyyy-MM' @change="selectMonthForListData" type="month"
             placeholder="请选择月份">
           </el-date-picker>
-          <form name="formExcle" class="fj-fu" :action="ajaxUrlDNN+'/exportDeptReportList?month='+selectedDeptsMonth+'&type=1'" method="post"
+          <form name="formExcle" class="fj-fu" :action="ajaxUrlDNN+'/exportDeptReportList?month='+selectedDeptsMonth+'&type=1&pageOrNot=1'" method="post"
             enctype="multipart/form-data"></form>
           <el-button plain @click="exportData">导出</el-button>
         </div>
@@ -404,7 +404,16 @@
             },this));
         },
         beforeRouteEnter: function(to, from, next) {
-            next(function(vm){});
+            next(function(vm){
+              vm.clearTableRowClass();
+              fjPublic.openLoad('数据获取中...');
+              $.when(vm.getDeptsAppraiseRankPageData()).then(_.bind(function(){
+                fjPublic.closeLoad();
+              },vm),_.bind(function(){
+                fjPublic.closeLoad();
+                vm.$message({type:'warning',message:'获取单位考核排名数据失败'});
+              },vm));
+            });
         },
         beforeRouteLeave:function(to,from,next){
             $(window).off('resize');
@@ -419,8 +428,12 @@
         },
       filters: {
         getFormatScore: function (value, index) {
-          var arr = value.split(',');
-          return arr[index];
+          if(value){
+            var arr = value.split(',');
+            return arr[index];
+          }else {
+            return '--';
+          }
         }
       },
         methods: {
@@ -556,10 +569,10 @@
                     },
                     dataType:'json',
                     success:function(data){
-                        // console.log(data);
-                      var itemNames = data.blueLineList.itemNames.split(',');
-                      var itemScores = data.blueLineList.itemScores.split(',');
-                      var scores = data.blueLineList.scores.split(',');
+                      // console.log(data);
+                      var itemNames = (data.blueLineList && data.blueLineList.itemNames) ? data.blueLineList.itemNames.split(',') : ['该月无考核数据'];
+                      var itemScores = (data.blueLineList && data.blueLineList.itemScores) ? data.blueLineList.itemScores.split(',') : ['--'];
+                      var scores = (data.blueLineList && data.blueLineList.scores) ? data.blueLineList.scores.split(',') : ['--'];
                       var indicatorNames = {};
                       var maxValues = {};
                       var score = {};
@@ -666,13 +679,13 @@
                     dataType:'json',
                     success:function(data){
                         // console.log(data);
-                        vm.total = data.total;  //总数
+                      vm.total = data.total;  //总数
                       vm.assessmentData = null;
                       vm.assessmentData = data.list; //列表数据
                       vm.avgReport = data.avgReport;  // 当月考核平均数据
-                      vm.itemNames = vm.avgReport.itemNames.split(',');
-                      vm.itemScores = vm.avgReport.itemScores.split(',');
-                      vm.scores = vm.avgReport.scores.split(',');
+                      vm.itemNames = (vm.avgReport && vm.avgReport.itemNames) ? vm.avgReport.itemNames.split(',') : ['该月无考核数据'];
+                      vm.itemScores = (vm.avgReport && vm.avgReport.itemScores) ? vm.avgReport.itemScores.split(',') : ['--'];
+                      vm.scores = (vm.avgReport && vm.avgReport.scores) ? vm.avgReport.scores.split(',') : ['--'];
                       vm.appraiseAllScore = data.appraiseAllScore;
                         defer.resolve();
                     },
@@ -818,6 +831,7 @@
                 }
                 var that = this;
                 that.formLabelAlign['nowUser'] = $.cookie(fjPublic.loginCookieKey);
+                that.formLabelAlign['type'] = '2';
                 fjPublic.openLoad('提交中...');
                 $.ajax({
                     url: fjPublic.ajaxUrlDNN + "/addDeptAppraiseLog",

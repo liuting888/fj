@@ -106,13 +106,7 @@
           </el-row>
         </div>
         <el-table :data="tableDataList" v-if="activeIndex==0">
-          <el-table-column
-            prop="time"
-            label="发放日期"
-            :formatter="timeFormatter"
-            width="100"
-            :key="Math.random()"
-          ></el-table-column>
+          <el-table-column prop="time" label="发放日期" width="100" :key="Math.random()"></el-table-column>
           <el-table-column prop="deptBelongName" label="单位" width="120" :key="Math.random()"></el-table-column>
           <el-table-column prop="deptName" label="辅警站" width="120" :key="Math.random()"></el-table-column>
           <el-table-column prop="userName" label="姓名" width="80" :key="Math.random()"></el-table-column>
@@ -137,10 +131,10 @@
           <el-table-column prop="unemployment" label="失业保险" :key="Math.random()"></el-table-column>
           <el-table-column prop="injury" label="工伤保险" :key="Math.random()"></el-table-column>
           <el-table-column prop="maternity" label="生育保险" :key="Math.random()"></el-table-column>
-          <el-table-column prop="illness" label="大病互助保险" width="120" :key="Math.random()" ></el-table-column>
+          <el-table-column prop="illness" label="大病互助保险" width="120" :key="Math.random()"></el-table-column>
           <el-table-column prop="deduct" label="扣发合计" :key="Math.random()"></el-table-column>
           <el-table-column prop="sum" label="实发合计" :key="Math.random()"></el-table-column>
-          <el-table-column prop="bankCard" label="银行卡号" width="180" :key="Math.random()" ></el-table-column>
+          <el-table-column prop="bankCard" label="银行卡号" width="180" :key="Math.random()"></el-table-column>
           <el-table-column label="操作" :key="Math.random()">
             <template slot-scope="scope">
               <span class="ope-txt" @click="openDetail(scope.row.userId,1)">详情</span>
@@ -471,7 +465,7 @@ export default {
     this.initDeptIds();
     // 初始化派出所下拉列表
     this.initSupDeptIds();
-    // 初始化请假休假列表
+    // 初始化列表
     this.searchList();
 
     return;
@@ -479,7 +473,6 @@ export default {
   methods: {
     //导出工资列表
     exportExcl() {
-      // console.log(fjPublic.ajaxUrlDNN + '/exportPayrollExcel?endTime=' + this.searchForm.endTime + '&userId=' + $.parseJSON(fjPublic.getLocalData('userInfo')).userId + '&startTime=' + this.searchForm.startTime + '&pageNumber=' + this.currentPage  + '&pageSize=' + this.pageSize);
       window.open(
         fjPublic.ajaxUrlDNN +
           "/exportPayrollExcel?endTime=" +
@@ -713,10 +706,14 @@ export default {
 <style scope lang="less">
 .wage {
   .fj-block-head {
-    height: 50px;
-    border-bottom: 0px;
-    .el-tabs__header {
-      padding-top: 10px;
+    border-bottom: none;
+    .el-tabs__item {
+      height: 50px;
+      line-height: 46px;
+      font-size: 16px;
+      font-weight: bold;
+      color: rgba(0, 0, 0, 0.85);
+      letter-spacing: 1px;
     }
   }
   .upload-demo {

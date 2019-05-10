@@ -57,7 +57,7 @@
                         <el-input class="fj-fl search" v-model="userNameOrAccount" suffix-icon="el-icon-search" clearable placeholder="请输入姓名或警号" @input="changeRnakListDataNA" @clear="changeRnakListDataNA"></el-input>
                     </div>
                     <div class="btn-box">
-                        <form style="display:none;" name="exportRankForm" :action="exportFileUrl+'/exportUserReportList?deptId='+rankPcsId+'&month='+selectedRankMonth+'&page='+currentPage+'&userNameOrAccount='+userNameOrAccount+'&rows='+pageSize"
+                        <form style="display:none;" name="exportRankForm" :action="exportFileUrl+'/exportUserReportList?deptId='+rankPcsId+'&month='+selectedRankMonth+'&page='+currentPage+'&userNameOrAccount='+userNameOrAccount+'&rows='+pageSize + '&pageOrNot=1'"
                             method="post" enctype="multipart/form-data"></form>
                         <el-button :class="{'is-disabled':notCurMonthTime}" type="primary" @click="openMFSpopMultiple"><!-- <i class="el-icon-edit"></i> --><span>批量考核</span></el-button>
                         <el-button plain @click="exportPoliceAppraiseList"><!-- <i class="el-icon-upload2"></i> --><span>导出</span></el-button>
@@ -414,7 +414,7 @@ export default {
                     this.rankPcsId = this.userInfo.deptId; //设置当前派出所id
                 },
                 [fjPublic.userRoles.qj]:function(){
-                    this.rankPcsId = this.userInfo.deptId.substr(0,6)+'010000'; //设置当前派出所id
+                    this.rankPcsId = this.userInfo.deptId; //设置当前区级部门id
                 },
                 [fjPublic.userRoles.sj]:function(){},
                 [fjPublic.userRoles.cg]:function(){}
@@ -423,7 +423,7 @@ export default {
                 [fjPublic.userRoles.pcs]:function(){},
                 [fjPublic.userRoles.qj]:function(){
                     if(!this.rankPcsId){
-                        this.rankPcsId = this.userInfo.deptId.substr(0,6)+'010000'; //设置当前派出所id
+                        this.rankPcsId = this.userInfo.deptId; //设置当前派出所id
                     }
                 },
                 [fjPublic.userRoles.sj]:function(){},
@@ -485,6 +485,14 @@ export default {
             $(window).off('resize').on('resize',_.debounce(_.bind(function(){
                 this.setThisPageCharts();
             },vm),200));
+          vm.clearTableRowClass();
+          fjPublic.openLoad('获取数据中...');
+          $.when(vm.getPoliceAppraiseRankPageData()).then(_.bind(function(){
+            fjPublic.closeLoad('');
+          },vm),_.bind(function(){
+            fjPublic.closeLoad('');
+            vm.$message({tyep:'warning',message:'获取数据失败'});
+          },vm));
         });
     },
     beforeRouteLeave:function(to,from,next){
@@ -500,8 +508,12 @@ export default {
     },
   filters: {
     getFormatScore: function (value, index) {
-      var arr = value.split(',');
-      return arr[index];
+      if(value){
+        var arr = value.split(',');
+        return arr[index];
+      }else {
+        return '--'
+      }
     }
   },
     methods:{
@@ -558,7 +570,7 @@ export default {
 				success:function(data){
                     //console.log(data);
                     vm.FLdeptsData = _.filter(data.list,function(item){
-                        return item.deptId!='411342000000'&&item.deptId!='430500000000';
+                        return item.deptId!='123456';
                     });
 					defer.resolve();
 				},
@@ -590,6 +602,7 @@ export default {
 				url:fjPublic.ajaxUrlDNN + '/searchDeptsByFenju',
 				type:'POST',
 				data:{
+				            flag: '1',
                     parentDeptId:id  //根据分局id
                 },
 				dataType:'json',
@@ -605,6 +618,8 @@ export default {
 					defer.reject();
 				}
 			});
+          this.rankPcsId = id;
+          this.changeRnakListData();
 			return defer;
         },
         changeRnakListData:function(id){ //选择派出所的时候，切换列表数据
@@ -707,9 +722,9 @@ export default {
 				dataType:'json',
 				success:function(data){
                     // console.log(data);
-                    var itemNames = data.blueLineList.itemNames.split(',');
-          var itemScores = data.blueLineList.itemScores.split(',');
-          var scores = data.blueLineList.scores.split(',');
+          var itemNames = (data.blueLineList && data.blueLineList.itemNames) ? data.blueLineList.itemNames.split(',') : ['该月无考核数据'];
+          var itemScores = (data.blueLineList && data.blueLineList.itemScores) ?  data.blueLineList.itemScores.split(',') : ['--'];
+          var scores = (data.blueLineList && data.blueLineList.scores) ?  data.blueLineList.scores.split(',') : ['--'];
           var indicatorNames = {};
           var maxValues = {};
           var score = {};
@@ -772,6 +787,10 @@ export default {
         getPoliceAppraiseRankPageData:function(){ //获取个人考核排名数据
             var defer = $.Deferred();
             var vm = this;
+            // 派出所权限，默认deptId
+          if(this.userInfo && '1001' == this.userInfo.userRole) {
+            this.rankPcsId = this.userInfo.deptId;
+          }
 			$.ajax({
 				url:fjPublic.ajaxUrlDNN + '/getUserAppraiseReports',
 				type:'POST',
@@ -779,7 +798,7 @@ export default {
                     page:this.currentPage, //页码
                     rows:this.pageSize,   //每页条数
                     month:this.selectedRankMonth,  //查询月份，默认当月
-                    deptId:this.rankPcsId,  //部门id
+                    deptId:this.rankPcsId ? this.rankPcsId : this.rankFenjvId,  //部门id,清楚派出所选项时，选择分局选项
                     userNameOrAccount:this.userNameOrAccount  //人员名称或警号
                 },
 				dataType:'json',
@@ -789,9 +808,9 @@ export default {
                     vm.assessmentData = null;
                     vm.assessmentData = data.list;  //列表数据
           vm.avgReport = data.avgReport;  // 当月考核平均数据
-          vm.itemNames = vm.avgReport.itemNames.split(',');
-          vm.itemScores = vm.avgReport.itemScores.split(',');
-          vm.scores = vm.avgReport.scores.split(',');
+          vm.itemNames = (vm.avgReport && vm.avgReport.itemNames) ? vm.avgReport.itemNames.split(',') : ['该月无考核数据'];
+          vm.itemScores = (vm.avgReport && vm.avgReport.itemScores) ? vm.avgReport.itemScores.split(',') : ['--'];
+          vm.scores = (vm.avgReport && vm.avgReport.scores) ? vm.avgReport.scores.split(',') : ['--'];
           vm.appraiseAllScore = data.appraiseAllScore;
 					defer.resolve();
 				},

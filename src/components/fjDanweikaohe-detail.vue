@@ -327,6 +327,7 @@ window.FjGrkhDetailBlock.prototype={
             data:{
                 id:this.infoData.id, //id
                 status:'1',  //撤销
+                type: '2'
             },
             dataType:'json',
             success:function(data){

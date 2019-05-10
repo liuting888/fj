@@ -8,7 +8,7 @@
       <div class="fj-block-body">
         <div class="fj-search-inline"></div>
         <el-table :data="attendLeaveData">
-          <el-table-column prop="time" label="发放日期" :formatter="timeFormatter" width="100"></el-table-column>
+          <el-table-column prop="time" label="发放日期"  width="100"></el-table-column>
           <el-table-column prop="deptBelongName" label="单位"  width="120"></el-table-column>
           <el-table-column prop="deptName" label="辅警站" width="120"></el-table-column>
           <el-table-column prop="userName" label="姓名" width="80"></el-table-column>

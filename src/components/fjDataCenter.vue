@@ -58,7 +58,7 @@
         <!-- 信息采集数统计 -->
         <div class="fj-block">
             <div class="fj-block-head">
-				<p class="title fj-fl">信息采集数统计</p>
+				<p class="title fj-fl">信息采集数统计(共{{infoOrderNums}}条)</p>
                 <div class="details fj-fr">
                     <el-date-picker
                         class="fj-fl"
@@ -124,7 +124,7 @@
         <!-- 工作任务统计 -->
         <div class="fj-block">
             <div class="fj-block-head">
-				<p class="title fj-fl">工作任务统计</p>
+				<p class="title fj-fl">工作任务统计(共{{missionNums}}条)</p>
                 <div class="details fj-fr">
                     <el-date-picker class="fj-fl"
                         v-model="workMisVal"
@@ -391,6 +391,8 @@ export default {
     name:'fjDataCenter',
     data:function(){
         return {
+          infoOrderNums: 0, // 采集总数
+          missionNums: 0, // 任务总数
             activityBtns:[ //活跃度三个筛选按钮
                 {txt:'今日',type:'dd',selected:true},
                 {txt:'本周',type:'iw',selected:false},
@@ -1064,10 +1066,10 @@ export default {
             circleColors:['#BAE7FF','#69C0FF','#1890FF','#0050B3'],
             setLabelsOffset:{
                 '3':function(){
-                    return new qq.maps.Size(-18, 10);
+                    return new AMap.Size(-18, 10);
                 },
                 '7':function(){
-                    return new qq.maps.Size(-58, 10);
+                    return new AMap.Size(-58, 10);
                 },
             },
             polygons:[],
@@ -1103,15 +1105,15 @@ export default {
 					scaleControl: true,	//比例尺
 					disableDoubleClickZoom : true,
 					zoom:parseInt(fjPublic.cityInfos.initZoomDc),
-					mapTypeId: qq.maps.MapTypeId.ROADMAP, //该地图类型显示普通的街道地图。
+					// mapTypeId: AMap.MapTypeId.ROADMAP, //该地图类型显示普通的街道地图。
 					mapTypeControl:false, //不显示地图类型控件
 					panControl:false,   //不显示平移控件
 					zoomControl:false,  //不显示缩放控件
 					scaleControl:true,  //不显示比例尺控件
 				};
-                this.initMapCenter = new qq.maps.LatLng(fjPublic.cityInfos.lat,fjPublic.cityInfos.lng);
+                this.initMapCenter = new AMap.LngLat(fjPublic.cityInfos.lng, fjPublic.cityInfos.lat);
 				this.$set(this.mapOption,'center',this.initMapCenter);
-                this.qqMap = new qq.maps.Map(document.getElementById('fj-dc-map'),this.mapOption);
+                this.qqMap = new AMap.Map(document.getElementById('fj-dc-map'),this.mapOption);
                 this.setCircleColorSize();
                 this.setAreaPolyLine();
                 this.setAreaCircle();
@@ -1159,44 +1161,46 @@ export default {
             $this.siblings('.rank-pop').css({'right':'20px'}).end().hide();
         },
         setAreaCircle:function(){ //设置圆环
-            var Label = function(opts) {
-                qq.maps.Overlay.call(this, opts);
-                this.options = opts;
-            }
-            var mask = this.mask =document.body.querySelector('#fj-dc-map_mask')
-            //继承Overlay基类
-            Label.prototype = new qq.maps.Overlay();
-            //定义construct,实现这个接口来初始化自定义的Dom元素
-            Label.prototype.construct = function() {
-                this.dom = document.createElement('div');
-                this.dom.setAttribute('class','a')
-                this.dom.style.cssText='position:absolute;';
-                this.dom.innerHTML = new ActivityCircle({
-                    bgColor:this.options.bgColor,
-                    size:this.options.size
-                }).template;
-                //将dom添加到覆盖物层，overlayLayer的顺序为容器 1，此容器中包含Polyline、Polygon、GroundOverlay等
-                //this.getPanes().overlayLayer.appendChild(this.dom);
-                //将dom添加到覆盖物层，overlayMouseTarget的顺序容器 5，此容器包含透明的鼠标相应元素，用于接收Marker的鼠标事件
-                this.getPanes().overlayMouseTarget.appendChild(this.dom);
-                //mask.appendChild(this.dom);
-            }
-            //绘制和更新自定义的dom元素
-            Label.prototype.draw = function() {
-                //获取地理经纬度坐标
-                var position = this.get('position');
-                if (position) {
-                    var pixel = this.getProjection().fromLatLngToDivPixel(position);
-                    if(this.options.offset){
-                        this.dom.style.left = pixel.getX()-this.options.offset.left + 'px';
-                        this.dom.style.top = pixel.getY()-this.options.offset.top + 'px';
-                    }
-                }
-            }
-            Label.prototype.destroy = function() {
-                //移除dom
-                this.dom.parentNode.removeChild(this.dom);
-            }
+            // var Label = function(opts) {
+            //     AMap.Overlay.call(this, opts);
+            //     this.options = opts;
+            // }
+            // var mask = this.mask =document.body.querySelector('#fj-dc-map_mask')
+            // //继承Overlay基类
+            // Label.prototype = new AMap.Overlay();
+            // //定义construct,实现这个接口来初始化自定义的Dom元素
+            // Label.prototype.construct = function() {
+            //     this.dom = document.createElement('div');
+            //     this.dom.setAttribute('class','a')
+            //     this.dom.style.cssText='position:absolute;';
+            //     this.dom.innerHTML = new ActivityCircle({
+            //         bgColor:this.options.bgColor,
+            //         size:this.options.size
+            //     }).template;
+            //     //将dom添加到覆盖物层，overlayLayer的顺序为容器 1，此容器中包含Polyline、Polygon、GroundOverlay等
+            //     //this.getPanes().overlayLayer.appendChild(this.dom);
+            //     //将dom添加到覆盖物层，overlayMouseTarget的顺序容器 5，此容器包含透明的鼠标相应元素，用于接收Marker的鼠标事件
+            //     this.getPanes().overlayMouseTarget.appendChild(this.dom);
+            //     //mask.appendChild(this.dom);
+            // }
+            // //绘制和更新自定义的dom元素
+            // Label.prototype.draw = function() {
+            //     //获取地理经纬度坐标
+            //     var position = this.get('position');
+            //     if (position) {
+            //         var pixel = this.getProjection().fromLatLngToDivPixel(position);
+            //         if(this.options.offset){
+            //             this.dom.style.left = pixel.getX()-this.options.offset.left + 'px';
+            //             this.dom.style.top = pixel.getY()-this.options.offset.top + 'px';
+            //         }
+            //     }
+            // }
+            // Label.prototype.destroy = function() {
+            //     //移除dom
+            //     this.dom.parentNode.removeChild(this.dom);
+            // }
+            console.log(this.areaCenters);
+            
             _.each(this.areaCenters,function(item,i){
                 var tmplat = parseFloat(item.lat);
 				var tmplat2 = item.lat;
@@ -1206,16 +1210,28 @@ export default {
 					item.lat = tmplng2;
 					item.lng = tmplat2;
 				}
-                var center = new qq.maps.LatLng(item.lat, item.lng);
-                this.circles.push(
-                    new Label({
-                        map: this.qqMap,
-                        position: center,
-                        bgColor:this.areaInfos[i].bgColor,
-                        size:this.areaInfos[i].size,
-                        offset:this.areaInfos[i].offset
-                    })
-                );
+                var center = new AMap.LngLat(item.lng, item.lat);
+                var cDom = new ActivityCircle({
+                    bgColor:this.areaInfos[i].bgColor,
+                    size:this.areaInfos[i].size
+                }).template;
+                var markerC = new AMap.Marker({
+                    map:this.qqMap,
+                    position:center, //基点位置
+                    offset: new AMap.Pixel(0, 0), //相对于基点的偏移位置
+                    content:cDom,   //自定义覆盖物内容
+                    size:this.areaInfos[i].size
+                });
+                this.circles.push(markerC)
+                // this.circles.push(
+                //     new Label({
+                //         map: this.qqMap,
+                //         position: center,
+                //         bgColor:this.areaInfos[i].bgColor,
+                //         size:this.areaInfos[i].size,
+                //         offset:this.areaInfos[i].offset
+                //     })
+                // );
             },this);
         },
         setCircleColorSize:function(){  //根据活跃人数设置circle的背景色
@@ -1273,17 +1289,17 @@ export default {
                 for(var k = 0;k<path_count;k++){
                     var path = [];
                     _.each(item.positions[k].positions,function(pos){
-					    path.push(new qq.maps.LatLng(pos.lat,pos.lng));
+					    path.push(new AMap.LngLat(pos.lng, pos.lat));
                     });
                     pathArr.push(path);
                 }
                 this.polygons.push(
-                    new qq.maps.Polygon({
+                    new AMap.Polygon({
                         cursor: 'crosshair',
                         map: this.qqMap,
                         path: pathArr,
                         cursor: 'crosshair',
-                        strokeColor:new qq.maps.Color(0,0,0,.8),
+                        strokeColor: 'rgb(0,0,0,.8)',
                         fillColor:'#F0F2F5',
                         strokeDashStyle: 'solid'
                     })
@@ -1292,7 +1308,7 @@ export default {
                 if(item.area_name.length+'' in this.setLabelsOffset){
                     offsetVal = this.setLabelsOffset[item.area_name.length].call(this);
                 }else{
-                    offsetVal = new qq.maps.Size(0, 0);
+                    offsetVal = new AMap.Size(0, 0);
                 }
                 //item.areaCenter
                 var labelInfoArr = [];
@@ -1311,19 +1327,33 @@ export default {
                             lng:item2.area_center_lng
                         });
                     }
-                    labelInfoArr.push(
-                        new qq.maps.Label({
-                            content:item.area_name,
-                            map: this.qqMap,
-                            //相对于position位置偏移值，x方向向右偏移为正值，y方向向下偏移为正值，反之为负。
-                            offset:offsetVal,
-                            //标签位置坐标，若offset不设置，默认标签左上角对准该位置。
-                            position: new qq.maps.LatLng(item2.area_center_lat,item2.area_center_lng),
-                            style:{
-                                border:'none',background:'transparent',fontSize:'18px',color:'rgba(0,0,0,1)'
-                            }
-                        })
-                    );
+
+                    var centertc = new AMap.LngLat(item2.area_center_lng, item2.area_center_lat);
+                    // var cDom = new ActivityCircle({
+                    //     bgColor:this.options.bgColor,
+                    //     size:this.options.size
+                    // }).template;
+                    
+                    var markertc = new AMap.Text({
+                        map:vm.qqMap,
+                        position:centertc,
+                        offset:new AMap.Pixel(0, 0),
+                        text:item.area_name
+                    });
+                    labelInfoArr.push(markertc)
+                    // labelInfoArr.push(
+                    //     new AMap.Label({
+                    //         content:item.area_name,
+                    //         map: this.qqMap,
+                    //         //相对于position位置偏移值，x方向向右偏移为正值，y方向向下偏移为正值，反之为负。
+                    //         offset:offsetVal,
+                    //         //标签位置坐标，若offset不设置，默认标签左上角对准该位置。
+                    //         position: new AMap.LngLat(item2.area_center_lat,item2.area_center_lng),
+                    //         style:{
+                    //             border:'none',background:'transparent',fontSize:'18px',color:'rgba(0,0,0,1)'
+                    //         }
+                    //     })
+                    // );
                 },this);
                 this.labels.push(labelInfoArr);
             },this);
@@ -1389,6 +1419,7 @@ export default {
 				success:function(data){
                     //console.log(data);
                     //信息采集数据图表
+                    vm.infoOrderNums = data.infoOrderNums;  // 采集总数
                     vm.IACoptions.series[0].data.splice(0,vm.IACoptions.series[0].data.length);
                     vm.IACoptions.xAxis.data.splice(0,vm.IACoptions.xAxis.data.length);
                     _.each(data.numCountList,function(item,i){
@@ -1419,7 +1450,7 @@ export default {
                         vm.$set(vm.ATCoption.series[0].data[i],'value',item.nums);
                         //
                         vm.ATCoption.xAxis.data.push({value:''});
-                        vm.$set(vm.ATCoption.xAxis.data[i],'value',item.infoDesc.slice(0,4));
+                        vm.$set(vm.ATCoption.xAxis.data[i],'value',item.infoDesc.replace('登记表', ''));
                     });
                     //地区分布图表的数据
                     vm.IAACoption.series[0].data.splice(0,vm.IAACoption.series[0].data.length);
@@ -1472,11 +1503,12 @@ export default {
 				success:function(data){
                     //console.log(data);
                     //工作任务统计---四个环形图表
+                    vm.missionNums = data.missionNums;
                     var tmpStatesArr = [
                         {state:0,name:'待处理'},
                         {state:1,name:'进行中'},
                         {state:2,name:'待审核'},
-                        {state:3,name:'审核完成'}
+                        {state:3,name:'已审核'}
                     ];
                     var misSum =0;
                     _.each(data.typeCountList,function(item){

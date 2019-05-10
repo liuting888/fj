@@ -4,14 +4,12 @@
             <fj-breadNav :bread-data="breadData"></fj-breadNav>
         </div>
         <div class="fj-block content">
-          <div class="fj-block-head kaohe">
             <el-tabs v-model="activeName" @tab-click="handleClick">
               <el-tab-pane label="当月考核规则" name="0">
               </el-tab-pane>
               <el-tab-pane label="下月考核规则" name="1">
               </el-tab-pane>
             </el-tabs>
-          </div>
             <div class="fj-block-body">
                 <!-- <p class="add-rule">
                     <i class="el-icon-circle-plus"></i><span>添加规则</span>
@@ -30,7 +28,7 @@
                           <el-select class="fj-fl" v-model="searchType" @change="getRulesByType" clearable  placeholder="请选择规则类型">
                             <el-option v-for="item in types" :key="item.id" :label="item.label" :value="item.id"></el-option>
                           </el-select>
-                            <el-checkbox style="margin-left: 10px;" v-model="searchSystem" @change="changeSearchSystem">系统考核规则(市公安局)</el-checkbox>
+                            <el-checkbox style="margin-left: 10px;line-height:30px;" v-model="searchSystem" @change="changeSearchSystem">系统考核规则(市公安局)</el-checkbox>
                         </div>
                         <div class="item fj-fl">
                             <span class="fj-fl title">关键字：</span>
@@ -38,11 +36,11 @@
                         </div>
                         <div class="item fj-fl">
                             <el-button class="fj-fl" type="primary" @click="getRulesDataByNR"><i class="el-icon-search"></i><span>查询</span></el-button>
-                            <el-button class="fj-fl" type="primary" @click="addRules"><i class="el-icon-circle-plus"></i><span>添加规则</span></el-button>
+                            <el-button class="fj-fl" type="primary" @click="addRules"><i class="el-icon-plus"></i><span>添加规则</span></el-button>
                         </div>
                     </li>
                 </ul>
-                <el-table :data="rulesData">
+                <el-table :data="rulesData" style="margin-top: 15px;">
                     <el-table-column prop="content" show-overflow-tooltip class-name="align-left" label="规则描述"></el-table-column>
                     <el-table-column prop="score" label="分值"></el-table-column>
                     <el-table-column label="考核类型">

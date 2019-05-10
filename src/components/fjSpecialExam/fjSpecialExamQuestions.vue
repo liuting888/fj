@@ -26,9 +26,9 @@
                 <el-option :value="'2'" label="多选题"></el-option>-->
                 <el-option
                   v-for="item in typeList"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
+                  :key="item.itemid"
+                  :label="item.itemvalue"
+                  :value="item.itemid"
                 ></el-option>
               </el-select>
             </div>
@@ -37,9 +37,9 @@
               <el-select v-model="ruleForm.data.examPeople">
                 <el-option
                   v-for="item in examPeopleList"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
+                  :key="item.itemid"
+                  :label="item.itemvalue"
+                  :value="item.itemid"
                 ></el-option>
               </el-select>
             </div>
@@ -213,8 +213,8 @@ export default {
   mounted() {
     this.setCreated();
     this.getDetailList();
-    this.getDictListByType("SJ_TMLX", "typeList"); //题目类型
-    this.getDictListByType("TZLX", "examPeopleList"); //考试类型
+    this.getDictListByType("TZLX", "typeList"); //题库类型
+    this.getDictListByType("SJ_TMLX", "examPeopleList"); //题目类型
   },
   methods: {
     /**
@@ -234,7 +234,7 @@ export default {
         },
         dataType: "json",
         success: function(data) {
-          vm.list = data.list;
+          vm[list] = data.data;
           defer.resolve();
         },
         error: function(err) {

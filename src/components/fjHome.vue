@@ -45,7 +45,7 @@
 							</template>
 						</el-table-column>
 						<el-table-column prop="deptname" label="单位名称" show-overflow-tooltip></el-table-column>
-						<el-table-column prop="useraccount" label="警号"></el-table-column>
+						<el-table-column prop="useraccount" label="警号" show-overflow-tooltip></el-table-column>
 						<el-table-column prop="appstate" label="APP状态">
 							<template slot-scope="slot">
 								<span class="normal-txt" :class="[slot.row.appstate=='离线'?'off-line':'on-line']" @click="gotoPL(slot.row)">{{slot.row.appstate}}</span>
@@ -512,7 +512,7 @@ export default {
 							},
 							{
 								value:0,
-								name:'审核完成',
+								name:'已审核',
 								label:{
 									normal:{
 										show:false,
@@ -589,7 +589,7 @@ export default {
 			gInfoOption:{
 				title:{
 					show:true,
-					text:'八大台账',
+					text:'七大台账',
 					textStyle:{
 						color:'#000',
 						fontFamily:'PingFangSC',
@@ -660,21 +660,22 @@ export default {
           itemNames: [],
           itemTypes: [],
 			qqMap:null,  //腾讯地图
+			locaMap: null,
 			labelInfos:{
-				'绥宁县':'<div class="infoWindow"><p class="title">绥宁县</p><p class="title">215个工作站</p></div>',
-				'邵阳县':'<div class="infoWindow"><p class="title">邵阳县</p><p class="title">410个工作站</p></div>',
-				'隆回县':'<div class="infoWindow"><p class="title">隆回县</p><p class="title">514个工作站</p></div>',
-				'洞口县':'<div class="infoWindow"><p class="title">洞口县</p><p class="title">334个工作站</p></div>',
-				'新宁县':'<div class="infoWindow"><p class="title">新宁县</p><p class="title">299个工作站</p></div>',
-				'大祥区':'<div class="infoWindow"><p class="title">大祥区</p><p class="title">38个工作站</p></div>',
-				'双清区':'<div class="infoWindow"><p class="title">双清区</p><p class="title">34个工作站</p></div>',
-				'北塔区':'<div class="infoWindow"><p class="title">北塔区</p><p class="title">16个工作站</p></div>',
-				'邵东县':'<div class="infoWindow"><p class="title">邵东县</p><p class="title">521个工作站</p></div>',
-				'新邵县':'<div class="infoWindow"><p class="title">新邵县</p><p class="title">402个工作站</p></div>',
-				'武冈市':'<div class="infoWindow"><p class="title">武冈市</p><p class="title">299个工作站</p></div>',
-				'城步苗族自治县':'<div class="infoWindow"><p class="title">城步苗族自治县</p><p class="title">184个工作站</p></div>'
+				'绥宁县':'<div class="infoWindow"><p class="infoWindow-title">绥宁县</p><p class="infoWindow-title">215个工作站</p></div>',
+				'邵阳县':'<div class="infoWindow"><p class="infoWindow-title">邵阳县</p><p class="infoWindow-title">410个工作站</p></div>',
+				'隆回县':'<div class="infoWindow"><p class="infoWindow-title">隆回县</p><p class="infoWindow-title">514个工作站</p></div>',
+				'洞口县':'<div class="infoWindow"><p class="infoWindow-title">洞口县</p><p class="infoWindow-title">334个工作站</p></div>',
+				'新宁县':'<div class="infoWindow"><p class="infoWindow-title">新宁县</p><p class="infoWindow-title">299个工作站</p></div>',
+				'大祥区':'<div class="infoWindow"><p class="infoWindow-title">大祥区</p><p class="infoWindow-title">38个工作站</p></div>',
+				'双清区':'<div class="infoWindow"><p class="infoWindow-title">双清区</p><p class="infoWindow-title">34个工作站</p></div>',
+				'北塔区':'<div class="infoWindow"><p class="infoWindow-title">北塔区</p><p class="infoWindow-title">16个工作站</p></div>',
+				'邵东县':'<div class="infoWindow"><p class="infoWindow-title">邵东县</p><p class="infoWindow-title">521个工作站</p></div>',
+				'新邵县':'<div class="infoWindow"><p class="infoWindow-title">新邵县</p><p class="infoWindow-title">402个工作站</p></div>',
+				'武冈市':'<div class="infoWindow"><p class="infoWindow-title">武冈市</p><p class="infoWindow-title">299个工作站</p></div>',
+				'城步苗族自治县':'<div class="infoWindow"><p class="infoWindow-title">城步苗族自治县</p><p class="infoWindow-title">184个工作站</p></div>'
 			},
-			hideLabels:['大祥区','双清区','北塔区'],
+			hideLabels:[],//'大祥区','双清区','北塔区'
 			initMapCenter:'', //地图初始中心点
 			initMapScale:'',   //地图初始比例
 			area_parent:'00001',  //获取区域经纬度用-初始id
@@ -700,7 +701,7 @@ export default {
 							var tmpVal = _.find(this.hideLabels,function(v){
 								return item.area_name == v;
 							},this);
-							tmpVal?item2.setVisible(false):item2.setVisible(true);
+							tmpVal?item2.hide():item2.show();
 						},this);
 					},this);
 				},
@@ -715,7 +716,7 @@ export default {
 							var tmpVal = _.find(this.hideLabels,function(v){
 								return item.area_name == v;
 							},this);
-							(tmpVal)&&(item2.setVisible(false));
+							(tmpVal)&&(item2.hide());
 						},this);
 					},this);
 				},
@@ -749,22 +750,22 @@ export default {
 			],
 			setLabelsOffset:{
 				'3':function(){
-					return new qq.maps.Size(-18, 10);
+					return new AMap.Size(-18, 10);
 				},
 				'4':function(){
-                    return new qq.maps.Size(-18, 10);
+                    return new AMap.Size(-18, 10);
 				},
 				'5':function(){
-                    return new qq.maps.Size(-18, 10);
+                    return new AMap.Size(-18, 10);
 				},
 				'6':function(){
-                    return new qq.maps.Size(-18, 10);
+                    return new AMap.Size(-18, 10);
 				},
                 '7':function(){
-                    return new qq.maps.Size(-58, 10);
+                    return new AMap.Size(-58, 10);
                 },
                 '8':function(){
-                    return new qq.maps.Size(-58, 10);
+                    return new AMap.Size(-58, 10);
                 },
 			},
 			bili:'',
@@ -834,19 +835,22 @@ export default {
 					scaleControl: true,	//比例尺
 					disableDoubleClickZoom : true,
 					zoom:parseInt(fjPublic.cityInfos.initZoomIndex),			//缩放控件1-18
-					mapTypeId: qq.maps.MapTypeId.ROADMAP, //该地图类型显示普通的街道地图。
+					// mapTypeId: AMap.MapTypeId.ROADMAP, //该地图类型显示普通的街道地图。
 					mapTypeControl:false, //不显示地图类型控件
 					panControl:false,   //不显示平移控件
 					zoomControl:false,  //不显示缩放控件
 					scaleControl:true,  //不显示比例尺控件
+					// pitch:30, // 地图俯仰角度，有效范围 0 度- 83 度
+    				// viewMode:'3D' // 地图模式
 				};
-				this.initMapCenter = new qq.maps.LatLng(fjPublic.cityInfos.lat,fjPublic.cityInfos.lng);
+				this.initMapCenter = new AMap.LngLat(fjPublic.cityInfos.lng, fjPublic.cityInfos.lat);
 				this.$set(this.mapOption,'center',this.initMapCenter);
 				var oMapDom = document.getElementById('fcv-home-map');
 	 			var height = oMapDom.offsetHeight;
 	 			var weight = oMapDom.offsetWidth;
 				this.bili = weight/height;
-				this.qqMap = new qq.maps.Map(oMapDom,this.mapOption);
+				this.qqMap = new AMap.Map(oMapDom,this.mapOption);
+				// this.locaMap = Loca.create(this.qqMap);
 				this.initMapScale = this.qqMap.getZoom();
 				//设置区域轮廓
 				this.setFirstLevelArea();
@@ -856,11 +860,11 @@ export default {
 				};
 				//地图缩放事件
 				var vm = this;
-				qq.maps.event.addListener(this.qqMap,'zoom_changed',_.debounce(function(a){
+				AMap.event.addListener(this.qqMap,'zoom_changed',_.debounce(function(a){
 					if(a.target.zoom<8||vm.level!=1){
 						_.each(vm.BasicInfoWindows,function(item){
 							_.each(item,function(item2){
-								item2.setVisible(false);
+								item2.hide();
 							});
 						});
 						return;
@@ -915,8 +919,12 @@ export default {
 	},
   filters: {
     getFormatScore: function (value, index) {
-      var arr = value.split(',');
-      return arr[index];
+      if(value) {
+        var arr = value.split(',');
+        return arr[index];
+      }else {
+        return '待刷新';
+      }
     }
   },
 	methods:{
@@ -1003,23 +1011,18 @@ export default {
 			}
 		},
 		setMarkerCluster:function(){ //设置人员标记点聚合
-			if(this.personMVCArr.getLength()>0){
-				this.personMarkerCluster = new qq.maps.MarkerCluster({
-					map:this.qqMap,
-					minimumClusterSize:2,
-					markers:this.personMVCArr,
-					zoomOnClick:true,
-					gridSize:30,
-					averageCenter:true,
-					maxZoom:18
+			if(this.personMVCArr.length>0){
+				this.personMarkerCluster = new AMap.MarkerClusterer(this.qqMap, this.personMVCArr, {
+					averageCenter:true
 				});
 			}
 		},
 		clearPersonMarkers:function(){ //清除人员分布标记
 			_.each(this.personMarkers,function(item,i){
-				item.setMap(null);
+				// item.setMap(null);
+				this.qqMap.remove(item)
 				item = null;
-				this.personInfoWins[i].setMap(null);
+				// this.personInfoWins[i].setMap(null);
 				this.personInfoWins[i] = null;
 			},this);
 			this.personMarkers.splice(0,this.personMarkers.length);
@@ -1027,49 +1030,50 @@ export default {
 		},
 		setPersonMarkers:function(){ //设置人员分布标记
 			var vm = this;
-			var Label = function(opts) {
-                qq.maps.Overlay.call(this, opts);
-                this.options = opts;
-            }
-            //继承Overlay基类
-            Label.prototype = new qq.maps.Overlay();
-            //定义construct,实现这个接口来初始化自定义的Dom元素
-            Label.prototype.construct = function() {
-                this.dom = document.createElement('div');
-                this.dom.setAttribute('class','a');
-                this.dom.style.cssText='position:absolute;';
-                this.dom.innerHTML = new homeActivityCircle({
-					count:this.options.count,
-					state:this.options.state
-                }).template;
-                //将dom添加到覆盖物层，overlayLayer的顺序为容器 1，此容器中包含Polyline、Polygon、GroundOverlay等
-                //this.getPanes().overlayLayer.appendChild(this.dom);
-                //将dom添加到覆盖物层，overlayMouseTarget的顺序容器 5，此容器包含透明的鼠标相应元素，用于接收Marker的鼠标事件
-                this.getPanes().overlayMouseTarget.appendChild(this.dom);
-            }
-            //绘制和更新自定义的dom元素
-            Label.prototype.draw = function() {
-                //获取地理经纬度坐标
-                var position = this.get('position');
-                if (position) {
-                    var pixel = this.getProjection().fromLatLngToDivPixel(position);
-                    this.dom.style.left = pixel.getX()-12+'px';
-                    this.dom.style.top = pixel.getY()+20+ 'px';
-                }
-            }
-            Label.prototype.destroy = function() {
-                //移除dom
-                this.dom.parentNode.removeChild(this.dom);
-			}
+			// var Label = function(opts) {
+            //     AMap.Overlay.call(this, opts);
+            //     this.options = opts;
+            // }
+            // //继承Overlay基类
+            // Label.prototype = new AMap.Overlay();
+            // //定义construct,实现这个接口来初始化自定义的Dom元素
+            // Label.prototype.construct = function() {
+            //     this.dom = document.createElement('div');
+            //     this.dom.setAttribute('class','a');
+            //     this.dom.style.cssText='position:absolute;';
+            //     this.dom.innerHTML = new homeActivityCircle({
+			// 		count:this.options.count,
+			// 		state:this.options.state
+            //     }).template;
+            //     //将dom添加到覆盖物层，overlayLayer的顺序为容器 1，此容器中包含Polyline、Polygon、GroundOverlay等
+            //     //this.getPanes().overlayLayer.appendChild(this.dom);
+            //     //将dom添加到覆盖物层，overlayMouseTarget的顺序容器 5，此容器包含透明的鼠标相应元素，用于接收Marker的鼠标事件
+            //     this.getPanes().overlayMouseTarget.appendChild(this.dom);
+            // }
+            // //绘制和更新自定义的dom元素
+            // Label.prototype.draw = function() {
+            //     //获取地理经纬度坐标
+            //     var position = this.get('position');
+            //     if (position) {
+            //         var pixel = this.getProjection().fromLatLngToDivPixel(position);
+            //         this.dom.style.left = pixel.getX()-12+'px';
+            //         this.dom.style.top = pixel.getY()+20+ 'px';
+            //     }
+            // }
+            // Label.prototype.destroy = function() {
+            //     //移除dom
+            //     this.dom.parentNode.removeChild(this.dom);
+			// }
 			//点聚合markers数组
-			if(this.personMVCArr&&this.personMVCArr.elems.length){
-				this.personMVCArr.forEach(function(element,index){
-					element = null;
-				});
+			if(this.personMVCArr){
+				// this.personMVCArr.forEach(function(element,index){
+				// 	element = null;
+				// });
 				this.personMVCArr = null;
 			}
-			this.personMVCArr = new qq.maps.MVCArray();
+			this.personMVCArr = [];
 			var k=0;
+			console.log(this.userList)
 			_.each(this.userList,function(item,i){
 				var tmplat = parseFloat(item.lat);
 				var tmplat2 = item.lat;
@@ -1080,62 +1084,81 @@ export default {
 					item.lng = tmplat2;
 				}
 				$.Deferred(function(defer){
-					var geocoder = new qq.maps.Geocoder();
-					geocoder.setComplete(function(result){
+					var geocoder = new AMap.Geocoder();
+					AMap.event.addListener(geocoder, "complete",function(result){
 						defer.resolve(result);
-					});
-					geocoder.setError(function(){
+					})
+					// geocoder.complete(function(result){
+					// 	defer.resolve(result);
+					// });
+					// geocoder.error(function(){
 
-					});
-					geocoder.getAddress(new qq.maps.LatLng(item.lat,item.lng));
+					// });
+					geocoder.getAddress(new AMap.LngLat(item.lng, item.lat));
 				}).promise().then(function(result){
-					var marker = new qq.maps.Marker({
-						position: new qq.maps.LatLng(item.lat,item.lng),
+
+					// //设置人员活动标记
+					var cDom = new homeActivityCircle({
+						count:3,
+						state:item.userstate
+                	}).template;
+					var markerC = new AMap.Marker({
 						map:vm.qqMap,
-						icon:new qq.maps.MarkerImage(
-							'static/images/online_home.png',
-							new qq.maps.Size(48,48),
-							new qq.maps.Point(12, 0),
-							new qq.maps.Point(12, 6),
-							new qq.maps.Size(48,48)
-						),
-						animation:qq.maps.MarkerAnimation.DOWN,
-						draggable: true,
-						visible: true,
+						position:new AMap.LngLat(item.lng,item.lat), //基点位置
+						offset:new AMap.Pixel(-5,-17), //相对于基点的偏移位置
+						content:cDom   //自定义覆盖物内容
+					});
+					vm.circles.push(markerC)
+
+					var marker = new AMap.Marker({
+						position: new AMap.LngLat(item.lng, item.lat),
+						map:vm.qqMap,
+						icon:new AMap.Icon({
+							'image':'static/images/online_home.png',
+							'size':new AMap.Size(48,48)
+						}),
+						animation:'AMAP_ANIMATION_DROP',
+						visible: true
 					});
 					marker.index = i;
 					marker.userid = item.userid;
 					marker.deptname = item.deptid;
-					var iwDom = '<div class="fj-home-infoWindow fj-clear">\
+					
+
+					marker.on('mouseover',function(a){
+						var iwDom = '<div class="fj-home-infoWindow fj-clear">\
 						<div class="img-box fj-fl"><img src="'+vm.headImgUrl+item.userid+'"  alt=""/></div>\
 						<div class="txt-box fj-fl">\
 							<p class="line"><span class="title">姓名:</span><span class="content">'+item.username+'</span></p>\
 							<p class="line"><span class="title">部门:</span><span class="content">'+item.deptid+'</span></p>\
-							<p class="line"><span class="title">地理位置:</span><span class="content">'+result.detail.address+'</span></p>\
+							<p class="line"><span class="title">地理位置:</span><span class="content">'+result.regeocode.formattedAddress+'</span></p>\
 						</div>\
 					</div>';
-					//设置人员活动标记
-					vm.circles.push(
-						new Label({
-							map: vm.qqMap,
-							position: new qq.maps.LatLng(item.lat,item.lng),
-							count:3,
-							state:item.userstate
-						})
-					);
-					var infoWin = new qq.maps.InfoWindow({
-						map:vm.qqMap,
-						content: iwDom,
-						position: new qq.maps.LatLng(item.lat,item.lng),
-						zIndex:10
+					// //设置人员活动标记
+					// vm.circles.push(
+					// 	new Label({
+					// 		map: vm.qqMap,
+					// 		position: new AMap.LngLat(item.lng,item.lat),
+					// 		count:3,
+					// 		state:item.userstate
+					// 	})
+					// );
+						var infoWin = new AMap.InfoWindow({
+							map:vm.qqMap,
+							content: iwDom,
+							position: new AMap.LngLat(item.lng, item.lat),
+							zIndex:10,
+							offset:new AMap.Pixel(6, -28),
+							autoMove:true,
+							closeWhenClickMap:true,
+							showShadow:true
+						});
 					});
-					qq.maps.event.addListener(marker,'mouseover',function(a){
-						vm.personInfoWins[a.target.index].open();
+					marker.on('mouseout',function(a){
+						// infoWin.close();
+						vm.qqMap.clearInfoWindow()
 					});
-					qq.maps.event.addListener(marker,'mouseout',function(a){
-						vm.personInfoWins[a.target.index].close();
-					});
-					qq.maps.event.addListener(marker,'click',function(a){
+					marker.on('click',function(a){
 						//点击跳转至个人信息界面
 						//fjSideNav.clearItemsState();
 						var testBool = vm.UserControl[vm.userInfo.userRole].call(vm,a.target.deptname);
@@ -1143,7 +1166,7 @@ export default {
 						vm.$router.push({path:'/organizational-structure-pInfo',query:{userId:item.userid,isFrom:'fromIndexMap'}});
 					});
 					vm.personMarkers.push(marker);
-					vm.personInfoWins.push(infoWin);
+					// vm.personInfoWins.push(infoWin);
 					vm.personMVCArr.push(marker);
 					k++;
 					if(k>=vm.userList.length){
@@ -1194,15 +1217,15 @@ export default {
 			var zoomTo;
 			for(var i=0;i<=17;i++){
 				if(LngVal <0.0064){
-					zoomTo = 18-i;
+					zoomTo = 19-i;
 					break;
 				}else{
 					LngVal = LngVal/2;
 				}
 			}
-			this.qqMap.zoomTo(zoomTo);
+			this.qqMap.setZoom(zoomTo);
 			//移动地图中心
-			var mapCenter=new qq.maps.LatLng(perLat,perLng);
+			var mapCenter=new AMap.LngLat(perLng, perLat);
 			this.qqMap.setCenter(mapCenter);
 			//map.panTo(mapCenter);
 			return {
@@ -1232,7 +1255,7 @@ export default {
 					this.clearNextLevelArea();
 					//nav修改
 					this.deleteAreaNavItem();
-					this.qqMap.zoomTo(this.FLzc.zoomTo);
+					this.qqMap.setZoom(this.FLzc.zoomTo);
 					this.qqMap.setCenter(this.FLzc.mapCenter);
 					//
 					this.showFirstLevelArea();
@@ -1277,26 +1300,27 @@ export default {
 				for(var k=0;k<path_count;k++){
 					var path = [];
 					_.each(item.positions[k].positions,function(pos){
-						path.push(new qq.maps.LatLng(pos.lat,pos.lng));
+						path.push(new AMap.LngLat(pos.lng, pos.lat));
 						if(isNext){
-							vm.posiArray.push(new qq.maps.LatLng(pos.lat,pos.lng));
+							vm.posiArray.push(new AMap.LngLat(pos.lng,pos.lat));
 						}
 					});
 					pathArrs.push(path);
 				}
-				pgs.push(new qq.maps.Polygon({
+				pgs.push(new AMap.Polygon({
 					clickable: true,
 					cursor: 'crosshair',
 					map: this.qqMap,
 					path: pathArrs,
-					cursor: 'crosshair',
-					strokeColor:new qq.maps.Color(255,255,255,.8),
+					strokeColor: '#FFFFFF',
+					strokeOpacity:0.8,
 					fillColor:this.areaColors[index],
+					fillOpacity:0.9,
 					strokeDashStyle: 'solid'
 				}));
 				var labelInfoArr = [];
 				_.each(item.areaCenter,function(centerObj){
-					var iwContent = this.labelInfos[item.area_name]?this.labelInfos[item.area_name]:'<div class="infoWindow"><p class="title">'+item.area_name+'</p></div>';
+					var iwContent = this.labelInfos[item.area_name]?this.labelInfos[item.area_name]:'<div class="infoWindow"><p class="infoWindow-title">'+item.area_name+'</p></div>';
 					var tmplat = parseFloat(centerObj.area_center_lat);
 					var tmplat2 = centerObj.area_center_lat;
 					var tmplng = parseFloat(centerObj.area_center_lng);
@@ -1305,14 +1329,11 @@ export default {
 						centerObj.area_center_lat = tmplng2;
 						centerObj.area_center_lng = tmplat2;
 					}
-					labelInfoArr.push(new qq.maps.Label({
+					labelInfoArr.push(new AMap.Text({
 						map:this.qqMap,
-						content: iwContent,
-						position: new qq.maps.LatLng(centerObj.area_center_lat,centerObj.area_center_lng),
-						offset:new qq.maps.Size(-20, -20), //相对于position位置偏移值，x方向向右偏移为正值，y方向向下偏移为正值，反之为负。
-						style:{
-							'color':'#000',background:'transparent','border':'none','font-size':'16px','line-height':'16px'
-						},
+						text: iwContent,
+						position: new AMap.LngLat(centerObj.area_center_lng, centerObj.area_center_lat),
+						// offset:new AMap.Size(-20, -20), //相对于position位置偏移值，x方向向右偏移为正值，y方向向下偏移为正值，反之为负。
 						zIndex:10
 					}));
 					iws.push(labelInfoArr);
@@ -1322,14 +1343,14 @@ export default {
 				pgs[i].infoIndex = i;
 				pgs[i].area_id = item.area_id;
 				pgs[i].area_name = item.area_name;
-				pgs[i].childAreaCenter = new qq.maps.LatLng(item.areaCenter[0].area_center_lat,item.areaCenter[0].area_center_lng);
+				pgs[i].childAreaCenter = new AMap.LngLat(item.areaCenter[0].area_center_lat,item.areaCenter[0].area_center_lng);
 				index++;
 				//把第一级区域的区label隐藏
 				if(vm.level==1){
 					_.each(this.hideLabels,function(v){
 						if(iws[i].area_name==v){
 							_.each(iws[i],function(item2){
-								item2.setVisible(false);
+								item2.hide();
 							});
 						}
 					});
@@ -1345,19 +1366,19 @@ export default {
 				defer.resolve();
 			}).promise().then(function(){
 				_.each(vm.BasicPolygons,function(item,i){
-					qq.maps.event.addListener(item,'mouseover',function(a){
+					AMap.event.addListener(item,'mouseover',function(a){
 						item.setOptions({
-							fillColor:new qq.maps.Color(255,100,97,1)
+							fillColor: 'rgb(255,100,97,1)'
 						});
 						//vm.BasicInfoWindows[a.target.infoIndex].open();
 					});
-					qq.maps.event.addListener(item,'mouseout',function(a){
+					AMap.event.addListener(item,'mouseout',function(a){
 						item.setOptions({
 							fillColor:item.initFillColor
 						});
 						//vm.BasicInfoWindows[a.target.infoIndex].close();
 					});
-					qq.maps.event.addListener(item,'click',function(a){
+					AMap.event.addListener(item,'click',function(a){
 						//隐藏一级区域
 						vm.hideFirstLevelArea();
 						vm.level++;
@@ -1374,7 +1395,7 @@ export default {
 					visible:false
 				});
 				_.each(this.BasicInfoWindows[i],function(item2){
-					item2.setVisible(false);
+					item2.hide();
 				},this);
 			},this);
 		},
@@ -1388,7 +1409,7 @@ export default {
 				},this);
 				if(!tmpVal){
 					_.each(this.BasicInfoWindows[i],function(item2){
-						item2.setVisible(true);
+						item2.show();
 					},this);
 				}
 			},this);
@@ -1396,11 +1417,11 @@ export default {
 		removePolygonsEvents:function(){ //移除polygon绑定的事件
 			if(this.nextEventsOfmi.length&&this.nextEventsOfmo.length&&this.nextEventsOfclick){
 				_.each(this.nextEventsOfmi,function(item,i){
-					qq.maps.event.removeListener(item);
+					AMap.event.removeListener(item);
 					item = null;
-					qq.maps.event.removeListener(this.nextEventsOfmo[i]);
+					AMap.event.removeListener(this.nextEventsOfmo[i]);
 					this.nextEventsOfmo[i] = null;
-					qq.maps.event.removeListener(this.nextEventsOfclick[i]);
+					AMap.event.removeListener(this.nextEventsOfclick[i]);
 					this.nextEventsOfclick[i] = null;
 				},this);
 				this.nextEventsOfmi.splice(0,this.nextEventsOfmi.length);
@@ -1442,16 +1463,16 @@ export default {
 					defer.resolve();
 				}).promise().then(function(){
 					_.each(vm.nextPolygons,function(item,i){
-						var miEvt = qq.maps.event.addListener(item,'mouseover',function(a){
+						var miEvt = AMap.event.addListener(item,'mouseover',function(a){
 							item.setOptions({
-								fillColor:new qq.maps.Color(255,100,97,1)
+								fillColor: 'rgb(255,100,97,1)'
 							});
 							//vm.nextInfoWindows[a.target.infoIndex].open();
 						});
 						if(vm.level>1){ //mouseover事件处理
 							vm.nextEventsOfmi.push(miEvt);
 						}
-						var moEvt = qq.maps.event.addListener(item,'mouseout',function(a){
+						var moEvt = AMap.event.addListener(item,'mouseout',function(a){
 							item.setOptions({
 								fillColor:item.initFillColor
 							});
@@ -1460,7 +1481,7 @@ export default {
 						if(vm.level>1){ //mouseout事件处理
 							vm.nextEventsOfmo.push(moEvt);
 						}
-						var clickEvt = qq.maps.event.addListener(item,'click',function(a){
+						var clickEvt = AMap.event.addListener(item,'click',function(a){
 							//
 							vm.clearNextLevelArea();
 							vm.level++;
@@ -1495,10 +1516,11 @@ export default {
 			}
 		},
 		clearCircles:function(){  //清除人员标记
-			_.each(this.circles,function(item){
-				item.destroy();
-				item = null;
-			},this);
+			// _.each(this.circles,function(item){
+			// 	item.destroy();
+			// 	item = null;
+			// },this);
+			this.qqMap.remove(this.circles)
 			this.circles.splice(0,this.circles.length);
 		},
 		getHomePagePostion:function(area_id,area_name){ //获取人员分布
@@ -1513,7 +1535,7 @@ export default {
 				},
 				dataType:'json',
 				success:function(data){
-					//console.log(data);
+					// console.log(data);
 					//绘制人员分布markers
 					vm.userList.splice(0,vm.userList.length);
 					vm.userList = null;
@@ -1758,6 +1780,7 @@ export default {
 					//数据
 					vm.gInfoOption.series[0].data.splice(0,vm.gInfoOption.series[0].data.length);
 					vm.gInfoOption.xAxis.data.splice(0,vm.gInfoOption.xAxis.data.length);
+					vm.gInfoOption.title.text = '七大台账(共' + data.nums + '条)';
 					_.each(data.chaj,function(v,i){
 						vm.gInfoOption.series[0].data.push({name:'',value:'',label:{align:'right'},itemStyle:{color:'#1890FF',}});
 						vm.gInfoOption.xAxis.data.push({value:''});
@@ -2045,16 +2068,17 @@ export default {
 </script>
 <style>
 /* 首页 */
-.fj-content_view.home .fj-home-infoWindow {min-width:400px;height:200px;max-height:240px;}
-.fj-content_view.home .fj-home-infoWindow .img-box {width:175px;height:100%;margin-right:20px;font-size:0;}
+.fj-content_view.home .fj-home-infoWindow {min-width:400px;height:100px;max-height:200px;}
+.fj-content_view.home .fj-home-infoWindow .img-box {width:100%;height:100%;margin-right:20px;font-size:0;text-align: center}
 .fj-content_view.home .fj-home-infoWindow .img-box:after {content:'';display:inline-block;width:0;height:100%;vertical-align:middle;}
 .fj-content_view.home .fj-home-infoWindow .img-box > img {max-width:100%;max-height:100%;vertical-align:middle;}
-.fj-content_view.home .fj-home-infoWindow .txt-box {width:220px;padding-top:20px;}
+.fj-content_view.home .fj-home-infoWindow .txt-box {width:100%;padding-top:10px;}
 .fj-content_view.home .fj-home-infoWindow .txt-box .line {word-break: break-all;word-wrap:break-word;font-size:0px;line-height:24px;}
-.fj-content_view.home .fj-home-infoWindow .txt-box .title {display:inline-block;width:68px;margin-right:10px;font-size:14px;color:rgba(0,0,0,.85);text-align:right;}
+.fj-content_view.home .fj-home-infoWindow .txt-box .title {display:inline-block;width:80px;margin-right:10px;font-size:14px;color:rgba(0,0,0,.85);text-align:right;}
 .fj-content_view.home .fj-home-infoWindow .txt-box .content {font-size:14px;}
 .fj-content_view.home > .fj-left-col {width:69.646017%;padding-right:18px;}
 .fj-content_view.home > .fj-right-col {width:30.2654867%;}
+.infoWindow-title {font-size:14px;color:rgba(0,0,0,.85);}
 /* 辅警在线人数 */
 .fj-block-head > .title > .online-count {color:rgba(0,0,0,.25);font-size:12px;}
 /* 全屏图标 */

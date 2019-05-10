@@ -219,7 +219,7 @@ export default {
     this.initDeptIds();
     // 初始化派出所下拉列表
     this.initSupDeptIds();
-    // 初始化请假休假列表
+    // 初始化列表
     this.searchList();
 
     return;

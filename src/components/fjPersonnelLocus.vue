@@ -101,18 +101,18 @@ export default {
                     var myLatlng;
                     if(vm.qqMap){
                         vm.path.splice(0,vm.path.length);
-                        myLatlng = new qq.maps.LatLng(vm.polylineData[0].lat,vm.polylineData[0].lng);
+                        myLatlng = new AMap.LngLat(vm.polylineData[0].lng, vm.polylineData[0].lat);
                         vm.qqMap.setCenter(myLatlng);
                         vm.setPolyline();
                         vm.setSEMarker();
                     }else{
-                        myLatlng = new qq.maps.LatLng(vm.polylineData[0].lat,vm.polylineData[0].lng);
-                        vm.qqMap = new qq.maps.Map(document.getElementById('plMap'),{
+                        myLatlng = new AMap.LngLat(vm.polylineData[0].lng, vm.polylineData[0].lat);
+                        vm.qqMap = new AMap.Map(document.getElementById('plMap'),{
                             center:myLatlng,		// 地图的中心地理坐标。
                             scaleControl: true,	//比例尺
                             disableDoubleClickZoom : true,
                             zoom:18,			//缩放控件1-18
-                            mapTypeId: qq.maps.MapTypeId.ROADMAP, //该地图类型显示普通的街道地图。
+                            // mapTypeId: AMap.MapTypeId.ROADMAP, //该地图类型显示普通的街道地图。
                             mapTypeControl:false, //不显示地图类型控件
                             panControl:false,   //不显示平移控件
                             zoomControl:false,  //不显示缩放控件
@@ -126,78 +126,78 @@ export default {
             });
         },
         hideMarkerLine:function(){
-            if(this.sMarker&&this.eMarker&&this.polyline){
-                this.sMarker.setVisible(false);
-                this.eMarker.setVisible(false);
-                this.polyline.setVisible(false);
+            if(this.qqMap) {
+                this.qqMap.clearMap();
             }
         },
         setPolyline:function(){
             var vm = this;
             _.each(vm.polylineData,function(pos){
-                vm.path.push(new qq.maps.LatLng(pos.lat,pos.lng));
+                vm.path.push(new AMap.LngLat(pos.lng, pos.lat));
             });
             if(vm.polyline){
                 vm.polyline.setMap(null);
                 vm.polyline = null;
             }
-            vm.polyline = new qq.maps.Polyline({
+            vm.polyline = new AMap.Polyline({
                 clickable: true,
                 cursor: 'crosshair',
                 map: vm.qqMap,
                 path: vm.path,
                 cursor: 'crosshair',
-                strokeColor:new qq.maps.Color(255,100,97,.8),
+                strokeColor: 'red',
                 strokeDashStyle: 'solid'
             });
         },
         setSEMarker:function(){
             var vm =this;
-            var myLatlng = new qq.maps.LatLng(vm.polylineData[0].lat,vm.polylineData[0].lng);
+            var myLatlng = new AMap.LngLat(vm.polylineData[0].lng, vm.polylineData[0].lat);
             if(vm.sMarker){
                 vm.sMarker.setMap(null);
                 vm.sMarker = null;
             }
-            vm.sMarker = new qq.maps.Marker({
+            var anchor = new AMap.Pixel(0, 39),
+            size = new AMap.Size(72, 100),
+            origin = new AMap.Pixel(0, 0),
+            icon = new AMap.Icon({
+                'image':"static/images/mapStart.png",
+                'size':size,
+                'imageOffset':anchor
+            });
+            vm.sMarker = new AMap.Marker({
                 //设置Marker的位置坐标
                 position: myLatlng,
                 //设置显示Marker的地图
-                map: vm.qqMap
+                map: vm.qqMap,
+                animation:'AMAP_ANIMATION_DROP',
+                'icon':icon
             });
-            vm.sMarker.setAnimation(qq.maps.MarkerAnimation.DOWN);
-            var anchor = new qq.maps.Point(0, 39),
-            size = new qq.maps.Size(72, 68),
-            origin = new qq.maps.Point(0, 0),
-            icon = new qq.maps.MarkerImage(
-                "static/images/mapStart.png",
-                size,
-                origin,
-                anchor
-            );
-            vm.sMarker.setIcon(icon);
-            var endLatlng = new qq.maps.LatLng(vm.polylineData[vm.polylineData.length-1].lat,vm.polylineData[vm.polylineData.length-1].lng);
+            // vm.sMarker.setAnimation(AMap.MarkerAnimation.DOWN);
+            // vm.sMarker.setIcon(icon);
+            var endLatlng = new AMap.LngLat(vm.polylineData[vm.polylineData.length-1].lng, vm.polylineData[vm.polylineData.length-1].lat);
             if(vm.eMarker){
                 vm.eMarker.setMap(null);
                 vm.eMarker = null;
             }
-            vm.eMarker = new qq.maps.Marker({
+            var anchor = new AMap.Pixel(0, 39),
+            size = new AMap.Size(72, 100),
+            origin = new AMap.Pixel(0, 0),
+            icon = new AMap.Icon({
+                'image':"static/images/mapEnd.png",
+                'size':size,
+                'imageOffset':anchor
+            });
+            vm.eMarker = new AMap.Marker({
                 //设置Marker的位置坐标
                 position: endLatlng,
                 dragable:true,
                 //设置显示Marker的地图
-                map: vm.qqMap
+                map: vm.qqMap,
+                animation:'AMAP_ANIMATION_BOUNCE',
+                'icon':icon
             });
-            vm.eMarker.setAnimation(qq.maps.MarkerAnimation.DOWN);
-            var anchor = new qq.maps.Point(0, 39),
-            size = new qq.maps.Size(72, 68),
-            origin = new qq.maps.Point(0, 0),
-            icon = new qq.maps.MarkerImage(
-                "static/images/mapEnd.png",
-                size,
-                origin,
-                anchor
-            );
-            vm.eMarker.setIcon(icon);
+            // vm.eMarker.setAnimation(AMap.MarkerAnimation.DOWN);
+            // vm.eMarker.setIcon(icon);
         },
         getPLpolyLineData:function(){
             var defer = $.Deferred();

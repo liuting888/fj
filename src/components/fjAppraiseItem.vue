@@ -4,77 +4,63 @@
       <fj-breadNav :bread-data="breadData"></fj-breadNav>
     </div>
     <div class="fj-block content">
-      <div class="fj-block-head kaohe">
-        <el-tabs v-model="activeName" @tab-click="handleClick">
-          <el-tab-pane label="辅警考核项配置" name="0">
-          </el-tab-pane>
-          <el-tab-pane label="地区考核项配置" name="1">
-          </el-tab-pane>
-          <el-tab-pane label="单位考核项配置" name="2">
-          </el-tab-pane>
-        </el-tabs>
-      </div>
+      <el-tabs v-model="activeName" @tab-click="handleClick">
+        <el-tab-pane label="辅警考核项配置" name="0">
+        </el-tab-pane>
+        <el-tab-pane label="地区考核项配置" name="1">
+        </el-tab-pane>
+        <el-tab-pane label="单位考核项配置" name="2">
+        </el-tab-pane>
+      </el-tabs>
       <div class="fj-block-body">
-        <el-form inline label-width="150px" label-position="left">
-          <el-col class="time-item">
-            <el-form-item :label="'考核项总分：' + policeAppraiseItems.allScore">
-            </el-form-item>
-          </el-col>
-        </el-form>
-        <el-form inline label-width="120px" label-position="left">
-          <el-col class="time-item">
-            <el-form-item label="当月启用考核项">
-            </el-form-item>
-          </el-col>
-        </el-form>
         <el-table :data="policeAppraiseItems.nowMonth" class="el-tables">
-          <el-table-column prop="name" label="考核项"></el-table-column>
-          <el-table-column prop="score" label="考核分值"></el-table-column>
-          <el-table-column label="考核项类型">
-            <template slot-scope="scope">
-              <p>{{scope.row.itemType | getAppraiseItemType}}</p>
-            </template>
+          <el-table-column :label="'当月启用考核项(' + policeAppraiseItems.allScore + '分)'">
+            <el-table-column prop="name" label="考核项"></el-table-column>
+            <el-table-column prop="score" label="考核分值"></el-table-column>
+            <el-table-column label="考核项类型">
+              <template slot-scope="scope">
+                <p>{{scope.row.itemType | getAppraiseItemType}}</p>
+              </template>
+            </el-table-column>
+            <el-table-column prop="userName" label="添加人员"></el-table-column>
+            <el-table-column label="添加时间">
+              <template slot-scope="scope">
+                <p>{{scope.row.insTime | getFormatInsTime}}</p>
+              </template>
+            </el-table-column>
+            <el-table-column prop="infoTypeNames" show-overflow-tooltip label="台账类型"></el-table-column>
+            <el-table-column prop="infoScore" label="单位分值(分/条)"></el-table-column>
           </el-table-column>
-          <el-table-column prop="userName" label="添加人员"></el-table-column>
-          <el-table-column label="添加时间">
-            <template slot-scope="scope">
-              <p>{{scope.row.insTime | getFormatInsTime}}</p>
-            </template>
-          </el-table-column>
-          <el-table-column prop="infoTypeNames" show-overflow-tooltip label="台账类型"></el-table-column>
-          <el-table-column prop="infoScore" label="单位分值(分/条)"></el-table-column>
         </el-table>
-        <el-form inline label-width="150px" label-position="left">
-          <el-col class="time-item">
-            <el-form-item label="下月待启用考核项">
-            </el-form-item>
-            <el-form-item>
-              <el-button @click="openDialog(null)">添加</el-button>
-              <el-button @click="copyAppraiseItems">同步当月考核项及规则</el-button>
-            </el-form-item>
-          </el-col>
+        <el-form inline label-width="150px" style="margin-top: 20px;margin-bottom: -10px;" label-position="left">
+          <el-form-item>
+            <el-button @click="openDialog(null)" type="primary" icon="el-icon-plus">添加</el-button>
+            <el-button @click="copyAppraiseItems" type="primary" icon="el-icon-refresh">同步当月考核项及规则</el-button>
+          </el-form-item>
         </el-form>
         <el-table :data="policeAppraiseItems.preMonth" class="el-tables">
-          <el-table-column prop="name" label="考核项"></el-table-column>
-          <el-table-column prop="score" label="考核分值"></el-table-column>
-          <el-table-column label="考核项类型">
-            <template slot-scope="scope">
-              <p>{{scope.row.itemType | getAppraiseItemType}}</p>
-            </template>
-          </el-table-column>
-          <el-table-column prop="userName" label="添加人员"></el-table-column>
-          <el-table-column label="添加时间">
-            <template slot-scope="scope">
-              <p>{{scope.row.insTime | getFormatInsTime}}</p>
-            </template>
-          </el-table-column>
-          <el-table-column prop="infoTypeNames" show-overflow-tooltip label="台账类型"></el-table-column>
-          <el-table-column prop="infoScore" label="单位分值(分/条)"></el-table-column>
-          <el-table-column label="操作">
-            <template slot-scope="scope">
-              <span class="ope-txt" @click="openDialog(scope.row)">修改</span>
-              <span class="ope-txt" @click="isDeleteItem(scope.row.id)">删除</span>
-            </template>
+          <el-table-column :label="'下月待启用考核项(' + policeAppraiseItems.allScore + '分)'">
+            <el-table-column prop="name" label="考核项"></el-table-column>
+            <el-table-column prop="score" label="考核分值"></el-table-column>
+            <el-table-column label="考核项类型">
+              <template slot-scope="scope">
+                <p>{{scope.row.itemType | getAppraiseItemType}}</p>
+              </template>
+            </el-table-column>
+            <el-table-column prop="userName" label="添加人员"></el-table-column>
+            <el-table-column label="添加时间">
+              <template slot-scope="scope">
+                <p>{{scope.row.insTime | getFormatInsTime}}</p>
+              </template>
+            </el-table-column>
+            <el-table-column prop="infoTypeNames" show-overflow-tooltip label="台账类型"></el-table-column>
+            <el-table-column prop="infoScore" label="单位分值(分/条)"></el-table-column>
+            <el-table-column label="操作">
+              <template slot-scope="scope">
+                <span class="ope-txt" @click="openDialog(scope.row)">修改</span>
+                <span class="ope-txt" @click="isDeleteItem(scope.row.id)">删除</span>
+              </template>
+            </el-table-column>
           </el-table-column>
         </el-table>
       </div>
@@ -94,7 +80,7 @@
         <el-form-item label="考核项类型" prop="itemType" :label-width="formLabelWidth">
           <el-select v-model="dialogForm.itemType" placeholder="请选择考核项类型" @change="showInfoChoose">
             <el-option
-              v-for="item in itemTypes"
+              v-for="item in (tabName == '0' ? itemTypes : itemTypes.slice(0, 1))"
               :key="item.id"
               :label="item.value"
               :value="item.id">
@@ -151,7 +137,8 @@ export default {
       itemTypes: [
         {value: '手动考核', id: '0'},
         {value: '台账考核', id: '1'},
-        {value: '轨迹考核', id: '2'}
+        {value: '轨迹考核', id: '2'},
+        {value: '任务考核', id: '3'}
       ],
       infoTypess: null,
       infoTypeDisabled: true,
@@ -201,7 +188,7 @@ export default {
   },
   filters: {
     getAppraiseItemType: function (value) {
-      return value == '0' ? '手动考核' : value == 1 ? '台账考核' : '轨迹考核';
+      return value == '0' ? '手动考核' : value == 1 ? '台账考核' : value == 2 ? '轨迹考核' : '任务考核';
     },
     getFormatInsTime: function (value) {
       return value.substr(0, 10);

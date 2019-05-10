@@ -189,7 +189,7 @@
                             <el-col :span="16">
                                 <el-form-item label="所属单位">
                                     <el-input v-model="SJdept" disabled></el-input>
-                                    <el-select class="ownDept1" v-model="basicInfo.ownDept1" :disabled="userInfo.userRole==userRolePcs||userInfo.userRole==userRoleQj||isShowMode" clearable @change="getPCSdataById">
+                                    <el-select class="ownDept1"  v-model="basicInfo.ownDept1" :disabled="userInfo.userRole==userRolePcs||userInfo.userRole==userRoleQj||isShowMode" clearable @change="getPCSdataById">
                                         <el-option v-for="item in FLdeptsData" :key="item.deptId" :label="item.deptName" :value="item.deptId"></el-option>
                                     </el-select>
                                     <el-select class="ownDept2" v-model="basicInfo.ownDept2" :disabled="userInfo.userRole==userRolePcs||isShowMode"  clearable @change="setRoleDeptIdByPcsId">
@@ -559,7 +559,7 @@ export default {
         };
         //电话号码
         //var telRegExp=/^((1[3|5|7|8][0-9])\d{8})|((0[1-9][0-9])\d{8})|((0[1-9][0-9])\d{7})|((0[1-9][0-9][0-9])\d{7})$/;
-        var telRegExp = /^1(3|4|5|6|7|8|9)\d{9}$/;
+        var telRegExp = /^1\d{10}$/;
         var validateTel = function(rule,value,callback){
             var telBool = telRegExp.test(value);
             if(!telBool){
@@ -746,7 +746,7 @@ export default {
                     },this);
                     this.deptId = this.userInfo.deptId;
                     //弹层中，区级单位名称
-                    this.$set(this.basicInfo,'ownDept1',this.userInfo.deptname);
+                    this.$set(this.basicInfo,'ownDept1',this.userInfo.deptId);
                     //部门菜单默认展开
                     this.treeInitOpened.push(this.userInfo.deptId);
                     //部门菜单的其它部门隐藏
@@ -1174,6 +1174,7 @@ export default {
             this.resizeELinputHeight();
         },
         setRoleDeptIdByPcsId:function(){  //根据派出所id获取上级数据
+            this.basicInfo.superiorUserId='';
             if(this.toggleUserPop){
                 this.getSuperiorList();
             }
@@ -1187,7 +1188,7 @@ export default {
             var SUbool = this.setRoleDeptIdOfSU[this.basicInfo.userRole].call(this);
             //console.log(SUbool);
             //console.log(this.basicInfo.userRole);
-            //console.log(this.deptIdOfSU);
+            console.log(this.deptIdOfSU);
             if(!SUbool)return;
             var vm = this;
             fjPublic.openLoad('获取对应上级信息...');
@@ -1387,17 +1388,17 @@ export default {
                         for(var k = 0;k<path_count;k++){
                             var path = [];
                             _.each(data.list[0].positions[k].positions,function(pos){
-                                path.push(new qq.maps.LatLng(pos.lat,pos.lng));
+                                path.push(new AMap.LngLat(pos.lng, pos.lat));
                             });
                             pathArr.push(path);
                         }
-                        vm.deptPolygon = new qq.maps.Polygon({
+                        vm.deptPolygon = new AMap.Polygon({
                             clickable: true,
                             cursor: 'crosshair',
                             map: vm.deptMap,
                             path: pathArr,
                             cursor: 'crosshair',
-                            strokeColor:new qq.maps.Color(255,100,97,.8),
+                            strokeColor: 'rgb(255,100,97,.8)',
                             fillColor:_.sample(vm.areaColors),
                             strokeDashStyle: 'solid'
                         });
@@ -1427,12 +1428,11 @@ export default {
                             if(i ==0){
                                 vm.$set(vm.deptPopInfo,'latlng',centerObj.area_center_lat+','+centerObj.area_center_lng);
                             }
-                            center = new qq.maps.LatLng(centerObj.area_center_lat,centerObj.area_center_lng);
+                            center = new AMap.LngLat(centerObj.area_center_lng, centerObj.area_center_lat);
                             var content = data.list[0].area_parent+data.list[0].areaname;
-                            vm.deptlabels.push(new qq.maps.Label({
-                                content: content,
+                            vm.deptlabels.push(new AMap.Text({
+                                text: content,
                                 map: vm.deptMap,
-                                offset: new qq.maps.Size(-10,-20),
                                 position: center,
                                 style: cssC,
                                 visible: true,
@@ -1440,7 +1440,7 @@ export default {
                             }));
                         });
                         vm.deptMap.setCenter(center);
-                        vm.deptMap.zoomTo(10);
+                        vm.deptMap.setZoom(10);
                     },
                     error:function(err){
                         vm.$message({type:'warning',message:'获取区域信息失败！'});
@@ -1510,12 +1510,13 @@ export default {
             });
         },
         setDeptMap:function(){ //设置单位弹层上的地图
+        if(this.deptMap != null) this.deptMap.clearMap()
             this.$nextTick(function(){
                 if(!this.deptMap){
-                    this.deptMap = new qq.maps.Map(document.getElementById('deptMap'),{
-                        center:new qq.maps.LatLng(fjPublic.cityInfos.lat,fjPublic.cityInfos.lng),		// 地图的中心地理坐标
+                    this.deptMap = new AMap.Map(document.getElementById('deptMap'),{
+                        center:new AMap.LngLat(fjPublic.cityInfos.lng, fjPublic.cityInfos.lat),		// 地图的中心地理坐标
                         zoom:8,
-                        mapTypeId: qq.maps.MapTypeId.ROADMAP, //该地图类型显示普通的街道地图。
+                        // mapTypeId: AMap.MapTypeId.ROADMAP, //该地图类型显示普通的街道地图。
 					    mapTypeControl:false, //不显示地图类型控件
 					    panControl:false,   //不显示平移控件
 					    zoomControl:false,  //不显示缩放控件
@@ -1720,6 +1721,7 @@ export default {
         },
         getPCSdataById:function(id){ //根据分局id获取派出所数据
             if(!id){
+                this.basicInfo.superiorUserId = ''; //清空上级
                 this.basicInfo.ownDept2 = ''; //清空分局部门id的时候
                 this.SLdeptsData.splice(0,this.SLdeptsData.length);
                 this.clearSUData(); //清空上级下拉框数据
@@ -2124,6 +2126,7 @@ export default {
             });
         },
         filterOwnDepts:function(roleId){ //选择角色时，隐藏相应的部门选择框
+            this.basicInfo.superiorUserId='';
             var oBasicForm = $(this.$refs['bacicForm'].$el);
             switch(roleId){
                 case this.userRoleFj:
@@ -2226,11 +2229,15 @@ export default {
                 return this.basicInfo.superiorUserId == item.id;
             },this);
             if(!this.deptId||!this.deptName)return;
-            if(!superiorUserNameObj){
-                this.$message({type:'warning',message:'修改用户角色或部门需要重新选择上级！'});
-                return;
+            if(this.isModifyMode&&!this.basicInfo.superiorUserId&&this.basicInfo.superiorUserName){//编辑不能讲上级修改为无--会影响已发任务审核流程
+               this.$message({type:'warning',message:'修改用户不能删掉已有上级信息！'});
+               return;
             }
-            var superiorUserName = superiorUserNameObj.label;
+            // if(!superiorUserNameObj){
+            //     this.$message({type:'warning',message:'修改用户角色或部门需要重新选择上级！'});
+            //     return;
+            // }
+            var superiorUserName = superiorUserNameObj?superiorUserNameObj.label:'';
             //提交
             this.$set(this.basicInfo,'nowUser',$.cookie(fjPublic.loginCookieKey));
             this.$set(this.basicInfo,'roleName',roleName);

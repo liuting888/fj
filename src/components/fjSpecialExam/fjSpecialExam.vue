@@ -27,9 +27,9 @@
                   >
                     <el-option
                       v-for="item in subjectList"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
+                      :key="item.itemid"
+                      :label="item.itemvalue"
+                      :value="item.itemid"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -557,11 +557,11 @@ export default {
         url: fjPublic.ajaxUrlDNN + "/getDictListByType",
         type: "POST",
         data: {
-          type: "SJ_TMLX"
+          type: "TZLX"
         },
         dataType: "json",
         success: function(data) {
-          vm.subjectList = data.list;
+          vm.subjectList = data.data;
           defer.resolve();
         },
         error: function(err) {

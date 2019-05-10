@@ -48,7 +48,7 @@
               <el-button plain @click="allEdit" :class="{'is-disabled':!isCurMonth}">批量操作</el-button>
               <!--<el-button plain @click="getALog">记录查询</el-button>-->
               <el-button plain @click="exportData">导出</el-button>
-              <form name="formExcle" class="fj-fu" :action="ajaxUrlDNN+'/exportDeptReportList?supDeptId='+supDeptId+'&month='+selectedRTmonthVal+'&page='+currentPage+'&deptName='+deptName+'&rows='+pageSize+'&type=2'"
+              <form name="formExcle" class="fj-fu" :action="ajaxUrlDNN+'/exportDeptReportList?supDeptId='+supDeptId+'&month='+selectedRTmonthVal+'&page='+currentPage+'&deptName='+deptName+'&rows='+pageSize+'&type=2&pageOrNot=1'"
                 method="post" enctype="multipart/form-data">
               </form>
             </div>
@@ -591,7 +591,9 @@
       },this));
     },
     beforeRouteEnter: function (to, from, next) {
-      next(function (vm) {});
+      next(function (vm) {
+        vm.getRTListData();
+      });
     },
     beforeRouteLeave:function(to,from,next){
       $(window).off('resize');
@@ -599,8 +601,12 @@
     },
     filters: {
       getFormatScore: function (value, index) {
-        var arr = value.split(',');
-        return arr[index];
+        if(value) {
+          var arr = value.split(',');
+          return arr[index];
+        }else {
+          return '--';
+        }
       }
     },
     methods: {
@@ -753,9 +759,9 @@
                   //     platformManage: 15,
                   //     train:15
                   // };
-                var itemNames = data.blueLineList.itemNames.split(',');
-                var itemScores = data.blueLineList.itemScores.split(',');
-                var scores = data.blueLineList.scores.split(',');
+                var itemNames = (data.blueLineList && data.blueLineList.itemNames) ? data.blueLineList.itemNames.split(',') : ['该月无考核数据'];
+                var itemScores = (data.blueLineList && data.blueLineList.itemScores) ? data.blueLineList.itemScores.split(',') : ['--'];
+                var scores = (data.blueLineList && data.blueLineList.scores) ? data.blueLineList.scores.split(',') : ['--'];
                 var indicatorNames = {};
                 var maxValues = {};
                 var score = {};
@@ -850,9 +856,9 @@
             that.assessmentData = null;
             that.assessmentData = data.list;
             that.avgReport = data.avgReport;  // 当月考核平均数据
-            that.itemNames = that.avgReport.itemNames.split(',');
-            that.itemScores = that.avgReport.itemScores.split(',');
-            that.scores = that.avgReport.scores.split(',');
+            that.itemNames = (that.avgReport && that.avgReport.itemNames) ? that.avgReport.itemNames.split(',') : ['该月无考核数据'];
+            that.itemScores = (that.avgReport && that.avgReport.itemScores) ? that.avgReport.itemScores.split(',') : ['--'];
+            that.scores = (that.avgReport && that.avgReport.scores) ? that.avgReport.scores.split(',') : ['--'];
             that.appraiseAllScore = data.appraiseAllScore;
             defer.resolve();
           },
@@ -1025,6 +1031,7 @@
         var that = this;
         var defer = $.Deferred();
         that.formLabelAlign['nowUser'] = $.cookie(fjPublic.loginCookieKey);
+        that.formLabelAlign['type'] = '1';
         fjPublic.openLoad('提交中...');
         $.ajax({
           url: fjPublic.ajaxUrlDNN + "/addDeptAppraiseLog",

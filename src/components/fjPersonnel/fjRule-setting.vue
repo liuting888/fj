@@ -67,27 +67,27 @@
           </el-table-column>
         </el-table>
         <el-table :data="tableDataList" v-if="activeIndex==1">
-          <el-table-column prop="userId" label="合同名称" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="适用单位" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="适用岗位" :key="Math.random()"></el-table-column>
-          <el-table-column prop="userAccount" label="创建人" :key="Math.random()"></el-table-column>
+          <el-table-column prop="name" label="合同名称" :key="Math.random()"></el-table-column>
+          <el-table-column prop="depdName" label="适用单位" :key="Math.random()"></el-table-column>
+          <el-table-column prop="job" label="适用岗位" :key="Math.random()"></el-table-column>
+          <el-table-column prop="userName" label="创建人" :key="Math.random()"></el-table-column>
           <el-table-column
             label="创建时间"
             show-overflow-tooltip
             :formatter="timeFormatter"
-            prop="apply_time"
+            prop="insTime"
             :key="Math.random()"
           ></el-table-column>
-          <el-table-column label="状态" prop="leave_state" width="120px" :key="Math.random()">
+          <el-table-column label="状态" prop="state" width="120px" :key="Math.random()">
             <template slot-scope="scope">
-              <el-switch v-model="scope.row.signType" active-color="#13ce66" inactive-color="#ccc"></el-switch>
-              <span>{{scope.row.leave_state == 0?'开启':'关闭'}}</span>
+              <el-switch v-model="scope.row.state" active-color="#13ce66" inactive-color="#ccc"></el-switch>
+              <span>{{scope.row.state == 0?'开启':'关闭'}}</span>
             </template>
           </el-table-column>
           <el-table-column
             label="合同到期提醒"
             show-overflow-tooltip
-            prop="leader_content"
+            prop="time"
             class-name="textLeft"
             :key="Math.random()"
           ></el-table-column>
@@ -147,6 +147,23 @@
           <el-form-item label="模板名称">
             <el-input v-model="ruleForm.templateName" placeholder="请输入"></el-input>
           </el-form-item>
+          <el-form-item label="适用单位">
+            <!-- <el-input v-model="ruleForm.deptId" placeholder="请输入"></el-input> -->
+            <el-select
+              @change="changeDeptId"
+              clearable
+              filterable
+              v-model="ruleForm.deptId"
+              size="small"
+            >
+              <el-option
+                v-for="item in deptIds"
+                :key="item.deptid"
+                :label="item.deptname"
+                :value="item.deptid"
+              ></el-option>
+            </el-select>
+          </el-form-item>
           <el-form-item label="基本工资">
             <el-input v-model="ruleForm.basePay" placeholder="请输入"></el-input>
           </el-form-item>
@@ -171,9 +188,9 @@
           <el-form-item label="其他">
             <el-input v-model="ruleForm.other" placeholder="请输入"></el-input>
           </el-form-item>
-          <el-form-item label="应发合计">
+          <!-- <el-form-item label="应发合计">
             <el-input v-model="ruleForm.road" placeholder="请输入"></el-input>
-          </el-form-item>
+          </el-form-item>-->
           <el-form-item label="养老保险">
             <el-input v-model="ruleForm.pension" placeholder="请输入"></el-input>
           </el-form-item>
@@ -278,8 +295,8 @@ export default {
       // nowUser: $.cookie(fjPublic.loginCookieKey),
       // // 分局
       // supDeptIds: null,
-      // // 派出所
-      // deptIds: null,
+      // 派出所
+      deptIds: null,
       // 状态
       activeIndex: "0",
       statuses: [
@@ -367,14 +384,14 @@ export default {
       this.activeIndex = tab.index;
       this.activeIndex == 0
         ? (this.searchListUrl = "/getPayrollTemplateList")
-        : (this.searchListUrl = "/getComplainList");
+        : (this.searchListUrl = "/getContractTemplateList");
       this.currentPage = 1;
       this.searchList();
     },
     // 设置获取列表参数
     setSearchList: function() {
-      this.searchForm["page"] = this.currentPage;
-      this.searchForm["rows"] = this.pageSize;
+      this.searchForm["pageNumber"] = this.currentPage;
+      this.searchForm["pageSize"] = this.pageSize;
     },
     // 打开工资配置弹框
     openWageDialog: function(id, status) {
@@ -395,10 +412,10 @@ export default {
     addWage: function() {
       this.ruleForm = {};
       this.addWageVisible = true;
+      this.initDeptIds();
     },
     // 修改工资状态
     delWage: function(id, state) {
-      console.log(id, state);
       var defer = $.Deferred();
       var vm = this;
       $.ajax({
@@ -410,7 +427,6 @@ export default {
         },
         dataType: "json",
         success: function(data) {
-          console.log(data);
           vm.searchList();
           defer.resolve();
         },
@@ -422,8 +438,29 @@ export default {
     },
     // 删除合同规则
     delContract: function(id, state) {
-      console.log(id);
+      // console.log(id);
       // this.addWageVisible = true;
+    },
+    // 初始化派出所
+    initDeptIds: function() {
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/getDeptAllList",
+        type: "POST",
+        data: {
+          parentDeptId: ""
+        },
+        dataType: "json",
+        success: function(data) {
+          vm.deptIds = data.data;
+          defer.resolve();
+        },
+        error: function(err) {
+          defer.reject();
+        }
+      });
+      return defer;
     },
     // 工资编辑弹框操作
     submitAudit: function() {
@@ -475,10 +512,14 @@ export default {
 <style scope lang="less">
 .rule {
   .fj-block-head {
-    height: 50px;
-    border-bottom: 0px;
-    .el-tabs__header {
-      padding-top: 10px;
+    border-bottom: none;
+    .el-tabs__item {
+      height: 50px;
+      line-height: 46px;
+      font-size: 16px;
+      font-weight: bold;
+      color: rgba(0, 0, 0, 0.85);
+      letter-spacing: 1px;
     }
   }
   .fj-search-inline {

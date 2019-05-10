@@ -393,7 +393,7 @@ export default {
     },
     //生成试卷
     createPaper() {
-      if(!this.ruleForm.data.score||!this.type.length>0){
+      if (!this.ruleForm.data.score || !this.type.length > 0) {
         return this.$message({
           message: "请完整填写试卷信息",
           type: "warning"
@@ -408,18 +408,25 @@ export default {
       let list = this.$refs.tree.getCheckedNodes();
       this.ruleForm.data.people = "";
       this.treePeople = "";
+      let treeList=[];
+      let peopleList=[];
       for (let index = 0; index < list.length; index++) {
         const element = list[index];
-        if (index < list.length - 1) {
-          this.ruleForm.data.people += element.id + ",";
-          this.treePeople += element.label + ",";
-        } else {
-          this.ruleForm.data.people += element.id;
-          this.treePeople += element.label;
+        if (element.children) {
+          treeList.push(element.id);
+          peopleList.push(element.label);
         }
       }
+      if (peopleList.length==0) {
+        for (let index = 0; index < list.length; index++) {
+          const element = list[index];
+          treeList.push(element.id);
+          peopleList.push(element.label);
+        }
+      }
+      this.ruleForm.data.people = treeList.join(',');
+      this.treePeople = peopleList.join(',');
       this.checkDialogVisible = false;
-      // console.log(this.ruleForm.data.people);
     },
     //删除考题
     delTopic(index) {
