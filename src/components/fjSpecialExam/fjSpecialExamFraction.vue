@@ -162,8 +162,9 @@ export default {
           id: this.userInfo.id
         },
         dataType: "json",
-        success: function(data) {
-          vm.ruleForm.data = data.data;
+        success: function(list) {
+          let data = list.data;
+          vm.ruleForm.data = data.info;
           //处理数据便于展示
           for (let i = 0; i < data.list.length; i++) {
             let tm = {
@@ -184,22 +185,23 @@ export default {
     },
     setCreated() {
       this.userInfo = this.$route.query;
-    },
+    }
   },
   filters: {
     date: function(value) {
       //考试时间转换
       return value
-        ? value.substr(0, 4) +
-            "-" +
-            value.substr(4, 2) +
-            "-" +
-            value.substr(6, 2) +
-            " " +
-            value.substr(8, 2) +
-            ":" +
-            value.substr(10, 2)
-        : "";
+        ? value.substr(0, 10)
+        : // ? value.substr(0, 4) +
+          //     "-" +
+          //     value.substr(4, 2) +
+          //     "-" +
+          //     value.substr(6, 2) +
+          //     " " +
+          //     value.substr(8, 2) +
+          //     ":" +
+          //     value.substr(10, 2)
+          "";
     }
   },
   components: {

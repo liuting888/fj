@@ -43,14 +43,18 @@
                       :disabled="isDisabled"
                       :placeholder="isDisabled?'':'请选择'"
                     >
-                      <el-option :value="'1'" label="单选题"></el-option>
-                      <el-option :value="'0'" label="单选题"></el-option>
+                      <el-option
+                        v-for="item in typeList"
+                        :key="item.itemid"
+                        :label="item.itemvalue"
+                        :value="item.itemid"
+                      ></el-option>
                     </el-select>
                   </el-form-item>
                 </el-col>
               </el-row>
               <el-row>
-                <el-col :span="12">
+                <!-- <el-col :span="12">
                   <el-form-item label="考试日期">
                     <el-date-picker
                       :disabled="isDisabled"
@@ -59,6 +63,15 @@
                       value-format="yyyyMMdd"
                       :placeholder="isDisabled?'':'请选择'"
                     ></el-date-picker>
+                  </el-form-item>
+                </el-col>-->
+                <el-col :span="12">
+                  <el-form-item class="noBR" label="考试时长">
+                    <el-input
+                      :placeholder="isDisabled?'':'请输入'"
+                      :disabled="isDisabled"
+                      v-model="ruleForm.data.tiem"
+                    ></el-input>
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
@@ -120,7 +133,7 @@
                   </el-form-item>
                 </el-col>
               </el-row>
-              <el-row>
+              <!-- <el-row>
                 <el-col :span="24">
                   <el-form-item class="noBR noBB" label="适用人员">
                     <el-input
@@ -131,7 +144,7 @@
                     ></el-input>
                   </el-form-item>
                 </el-col>
-              </el-row>
+              </el-row>-->
             </el-form>
           </div>
         </div>
@@ -227,7 +240,7 @@
       </div>
     </div>
     <!-- 适用人员弹出框 -->
-    <el-dialog
+    <!-- <el-dialog
       :visible.sync="checkDialogVisible"
       :append-to-body="false"
       :close-on-click-modal="false"
@@ -264,7 +277,7 @@
         @node-click="handleNodeClick"
         ref="tree"
       ></el-tree>
-    </div>
+    </div>-->
   </div>
 </template>
 <script>
@@ -294,6 +307,7 @@ export default {
       flag: false, //控制重复提交
       treePeople: "", //适用人员展示
       type: [], //题目类型
+      typeList: [], //考试类型
       ruleForm: {
         data: {
           id: "",
@@ -344,7 +358,8 @@ export default {
     this.setCreated();
     this.getDetailList();
     this.userInfo.state > 1 && this.searchAttendHistory();
-    this.getTreeData();
+    this.getDictListByType("TZLX", "typeList"); //题库类型
+    // this.getTreeData();
   },
   methods: {
     // 验证规则
@@ -408,8 +423,8 @@ export default {
       let list = this.$refs.tree.getCheckedNodes();
       this.ruleForm.data.people = "";
       this.treePeople = "";
-      let treeList=[];
-      let peopleList=[];
+      let treeList = [];
+      let peopleList = [];
       for (let index = 0; index < list.length; index++) {
         const element = list[index];
         if (element.children) {
@@ -417,15 +432,15 @@ export default {
           peopleList.push(element.label);
         }
       }
-      if (peopleList.length==0) {
+      if (peopleList.length == 0) {
         for (let index = 0; index < list.length; index++) {
           const element = list[index];
           treeList.push(element.id);
           peopleList.push(element.label);
         }
       }
-      this.ruleForm.data.people = treeList.join(',');
-      this.treePeople = peopleList.join(',');
+      this.ruleForm.data.people = treeList.join(",");
+      this.treePeople = peopleList.join(",");
       this.checkDialogVisible = false;
     },
     //删除考题
@@ -443,22 +458,48 @@ export default {
       console.log(data);
     },
     //获取适用人员数据
-    getTreeData() {
+    // getTreeData() {
+    //   var defer = $.Deferred();
+    //   var vm = this;
+    //   $.ajax({
+    //     url: fjPublic.ajaxUrlDNN + "/getTreeDeptData",
+    //     type: "POST",
+    //     data: {},
+    //     dataType: "json",
+    //     success: function(data) {
+    //       vm.treeData = data;
+    //       setTimeout(() => {
+    //         vm.treeAudit(); //回显适用人员
+    //       }, 100);
+    //     },
+    //     error: function(err) {}
+    //   });
+    // },
+    /**
+     * @description: 获取化题库字典
+     * @param {type} type 字典类型
+     * @param {list} list 数据List
+     * @return:
+     */
+    getDictListByType: function(type, list) {
       var defer = $.Deferred();
       var vm = this;
       $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/getTreeDeptData",
+        url: fjPublic.ajaxUrlDNN + "/getDictListByType",
         type: "POST",
-        data: {},
+        data: {
+          type: type
+        },
         dataType: "json",
         success: function(data) {
-          vm.treeData = data;
-          setTimeout(() => {
-            vm.treeAudit(); //回显适用人员
-          }, 100);
+          vm[list] = data.data;
+          defer.resolve();
         },
-        error: function(err) {}
+        error: function(err) {
+          defer.reject();
+        }
       });
+      return defer;
     },
     // 获取题库详情
     getDetailList: function() {
@@ -475,9 +516,10 @@ export default {
           id: this.userInfo.id
         },
         dataType: "json",
-        success: function(data) {
-          vm.ruleForm.data = data.data;
-          vm.type = data.data.type.split(",");
+        success: function(list) {
+          let data = list.data;
+          vm.ruleForm.data = data.info;
+          vm.type = data.info.type.split(",");
           for (let i = 0; i < data.list.length; i++) {
             let tm = {
               id: data.list[i].id,
@@ -518,10 +560,12 @@ export default {
         type: "POST",
         data: {
           question: vm.searchAttend,
-          type: vm.type.join(",")
+          type: vm.type.join(","),
+          examType:vm.ruleForm.data.examType
         },
         dataType: "json",
-        success: function(data) {
+        success: function(list) {
+          let data = list.data;
           vm.citiesList = data;
           vm.cities = [];
           vm.citiesId = [];
@@ -598,7 +642,6 @@ export default {
     checkedCities: {
       handler: function(val, oldval) {
         let vm = this;
-        // console.log(val, oldval);
         if (val.length >= oldval.length) {
           let index = val[val.length - 1].split(".")[0] - 1;
           let data = vm.citiesList[index];

@@ -21,7 +21,7 @@
           <div class="body-header">
             <div class="search-item">
               <span class="span-title">题库类型：</span>
-              <el-select v-model="ruleForm.data.type" :disabled="userInfo.state!=0" clearable>
+              <el-select v-model="ruleForm.data.examType" :placeholder="userInfo.state!=0?'':'请选择'" :disabled="userInfo.state!=0" clearable>
                 <!-- <el-option :value="'1'" label="单选题"></el-option>
                 <el-option :value="'2'" label="多选题"></el-option>-->
                 <el-option
@@ -34,7 +34,7 @@
             </div>
             <div class="search-item hidden-lg-and-down">
               <span class="span-title">题目类型：</span>
-              <el-select v-model="ruleForm.data.examPeople">
+              <el-select v-model="ruleForm.data.type">
                 <el-option
                   v-for="item in examPeopleList"
                   :key="item.itemid"
@@ -284,7 +284,7 @@ export default {
       if (!vm.ruleForm.data.id) {
         vm.addExam().then(res => {
           //这里可以执行下一步操作
-          addlist.warehouseId = res.id;
+          addlist.warehouseId = res.data.id;
           vm.addExamToWarehouse(addlist);
         });
       } else {
@@ -380,8 +380,9 @@ export default {
           id: this.userInfo.id
         },
         dataType: "json",
-        success: function(data) {
-          vm.ruleForm.data = data.data;
+        success: function(list) {
+          let data = list.data;
+          vm.ruleForm.data = data.info;
           for (let i = 0; i < data.list.length; i++) {
             let tm = {
               id: data.list[i].id,
@@ -412,6 +413,7 @@ export default {
           data: {
             title: vm.ruleForm.data.title,
             type: vm.ruleForm.data.type,
+            examType: vm.ruleForm.data.examType,
             content: vm.ruleForm.data.content,
             createUserid: $.parseJSON(fjPublic.getLocalData("userInfo")).userId,
             createUsername: $.parseJSON(fjPublic.getLocalData("userInfo"))
@@ -422,7 +424,7 @@ export default {
           },
           dataType: "json",
           success: function(data) {
-            vm.ruleForm.data.id = data.id;
+            vm.ruleForm.data.id = data.data.id;
             resolve(data);
           },
           error: function(err) {}
@@ -445,6 +447,7 @@ export default {
           id: vm.ruleForm.data.id,
           title: vm.ruleForm.data.title,
           type: vm.ruleForm.data.type,
+          examType: vm.ruleForm.data.examType,
           content: vm.ruleForm.data.content,
           examPeople: vm.ruleForm.data.examPeople,
           examList: arrList
