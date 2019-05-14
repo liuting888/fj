@@ -25,7 +25,7 @@
                 </el-col>
                 <el-col :span="8">
                   <el-form-item label="正确">
-                    <p>{{ruleForm.data.userName}}</p>
+                    <p>{{ruleForm.data.rightNumber}}</p>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -43,6 +43,23 @@
                 <el-col :span="8">
                   <el-form-item label="错误">
                     <p>{{ruleForm.data.wrongNumber}}</p>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col :span="8">
+                  <el-form-item label="多选得分">
+                    <p>{{ruleForm.data.choiceMore}}</p>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="漏选得分">
+                    <p>{{ruleForm.data.choiceFew}}</p>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="错选得分">
+                    <p>{{ruleForm.data.choiceError}}</p>
                   </el-form-item>
                 </el-col>
               </el-row>

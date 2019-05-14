@@ -356,46 +356,8 @@
                 ></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="考试分局：">
-              <el-select
-                @change="changeKSFJ"
-                multiple
-                clearable
-                filterable
-                v-model="ruleForm.fj"
-                size="small"
-                :disabled="isDisabled"
-                :placeholder="isDisabled?'':'请输入'"
-              >
-                <el-option
-                  v-for="item in supDeptIds"
-                  :key="item.deptId"
-                  :label="item.deptName"
-                  :value="item.deptId"
-                ></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="考试派出所：">
-              <el-select
-                @change="changeKSPCS"
-                multiple
-                clearable
-                filterable
-                v-model="ruleForm.pcs"
-                size="small"
-                :disabled="isDisabled"
-                :placeholder="isDisabled?'':'请输入'"
-              >
-                <el-option
-                  v-for="item in deptIds"
-                  :key="item.deptId"
-                  :label="item.deptName"
-                  :value="item.deptId"
-                ></el-option>
-              </el-select>
-            </el-form-item>
             <el-form-item label="考试人员：">
-              <el-select
+              <!-- <el-select
                 clearable
                 filterable
                 v-model="ruleForm.people"
@@ -409,7 +371,18 @@
                   :label="item.label"
                   :value="item.value"
                 ></el-option>
-              </el-select>
+              </el-select>-->
+              <div>
+                <el-tree
+                  :data="treeData"
+                  show-checkbox
+                  node-key="id"
+                  :props="defaultProps"
+                  :current-node-key="currentNode"
+                  @node-click="handleNodeClick"
+                  ref="tree"
+                ></el-tree>
+              </div>
             </el-form-item>
           </el-form>
         </div>
@@ -439,6 +412,9 @@ export default {
       checkDialogVisible: false,
       checkDialogVisibleModal: false,
       isDisabled: false,
+      treeData: {}, //考试发布适用人员
+      currentNode: {},
+      treePeople:"",
       ruleForm: {}, //考试发布信息
       deptIds: null, //派出所下拉框数据
       supDeptIds: null, //分局下拉框数据
@@ -538,6 +514,7 @@ export default {
       this.ruleForm.fj = [];
       this.checkDialogVisible = true;
       this.getPaperIdList();
+      this.getTreeData();
       state == 1 ? (this.isDisabled = true) : (this.isDisabled = false);
       if (id) {
         this.getExamPublishInfo(id);
@@ -586,37 +563,86 @@ export default {
     //提交发布考试数据
     postRelease() {
       let vm = this;
-      if (vm.isDisabled) {
-        vm.checkDialogVisible = false;
-        return;
-      }
-      let defer = $.Deferred();
-      let url = vm.ruleForm.id ? "/updExamPaper" : "/addExamPublish";
+      vm.treeAudit();
+      // if (vm.isDisabled) {
+      //   vm.checkDialogVisible = false;
+      //   return;
+      // }
+      // let defer = $.Deferred();
+      // let url = vm.ruleForm.id ? "/updExamPaper" : "/addExamPublish";
+      // $.ajax({
+      //   url: fjPublic.ajaxUrlDNN + url,
+      //   type: "POST",
+      //   data: vm.ruleForm,
+      //   dataType: "json",
+      //   success: function(data) {
+      //     if (data.errorCode == 0) {
+      //       vm.$message({
+      //         type: "success",
+      //         message: data.errorMsg
+      //       });
+      //     } else {
+      //       vm.$message({
+      //         type: "error",
+      //         message: data.errorMsg
+      //       });
+      //     }
+      //     defer.resolve();
+      //   },
+      //   error: function(err) {
+      //     defer.reject();
+      //   }
+      // });
+      // vm.checkDialogVisible = false;
+      // return defer;
+    },
+    //树形控件获取数据
+    handleNodeClick(data) {
+      console.log(data);
+    },
+    //获取考试人员数据
+    getTreeData() {
+      var defer = $.Deferred();
+      var vm = this;
       $.ajax({
-        url: fjPublic.ajaxUrlDNN + url,
+        url: fjPublic.ajaxUrlDNN + "/getTreeDeptData",
         type: "POST",
-        data: vm.ruleForm,
+        data: {},
         dataType: "json",
         success: function(data) {
-          if (data.errorCode == 0) {
-            vm.$message({
-              type: "success",
-              message: data.errorMsg
-            });
-          } else {
-            vm.$message({
-              type: "error",
-              message: data.errorMsg
-            });
-          }
-          defer.resolve();
+          vm.treeData = data;
+          setTimeout(() => {
+            vm.treeAudit(); //回显适用人员
+          }, 100);
         },
-        error: function(err) {
-          defer.reject();
-        }
+        error: function(err) {}
       });
-      vm.checkDialogVisible = false;
-      return defer;
+    },
+    treeAudit(i) {
+      let list = this.$refs.tree.getCheckedNodes();
+      console.log(list);
+      this.ruleForm.people = "";
+      this.treePeople = "";
+      let treeList = [];
+      let peopleList = [];
+      for (let index = 0; index < list.length; index++) {
+        const element = list[index];
+        if (element.children) {
+          treeList.push(element.id);
+          peopleList.push(element.label);
+        }
+      }
+      if (peopleList.length == 0) {
+        for (let index = 0; index < list.length; index++) {
+          const element = list[index];
+          treeList.push(element.id);
+          peopleList.push(element.label);
+        }
+      }
+      this.ruleForm.people = treeList.join(",");
+      this.treePeople = peopleList.join(",");
+      console.log(this.treePeople);
+      // this.checkDialogVisible = false;
     },
     //签订
     review() {
@@ -713,12 +739,12 @@ export default {
       });
       return defer;
     },
-    //发布考试获取派出所
-    changeKSPCS: function() {},
-    //发布考试获取分局
-    changeKSFJ: function() {
-      this.initDeptIds(this.ruleForm.fj);
-    },
+    // //发布考试获取派出所
+    // changeKSPCS: function() {},
+    // //发布考试获取分局
+    // changeKSFJ: function() {
+    //   this.initDeptIds(this.ruleForm.fj);
+    // },
     // 更新题库
     updExam: function(id, state) {
       var defer = $.Deferred();

@@ -319,10 +319,10 @@ export default {
           people: "",
           // state:状态，0启用，1停用，-1删除，默认1
           examList: "",
-          selectRules: "1",
+          selectRules: "",
           place: "考试地点",
           content: "",
-          examType: "1",
+          examType: "",
           examTime: ""
         },
         list: [
@@ -699,7 +699,7 @@ export default {
       handler: function(val) {
         let vm = this;
         if (!val) {
-          vm.treeAudit();
+          // vm.treeAudit();
         }
       }
     }
