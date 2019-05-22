@@ -84,25 +84,25 @@
                     <ul>
                       <li>
                         <i
-                          :class="(item.rightOptions.indexOf('0')!=-1)?'el-icon-success':(item.myChoice.indexOf('0')!=-1)?'el-icon-error':'el-icon-info'"
+                          :class="item.myChoice=='-1'?'el-icon-info':(item.rightOptions.indexOf('0')!=-1)?'el-icon-success':(item.myChoice.indexOf('0')!=-1)?'el-icon-error':'el-icon-info'"
                         ></i>A:
                         <span>{{item.A}}</span>
                       </li>
                       <li>
                         <i
-                          :class="(item.rightOptions.indexOf('1')!=-1)?'el-icon-success':(item.myChoice.indexOf('1')!=-1)?'el-icon-error':'el-icon-info'"
+                          :class="item.myChoice=='-1'?'el-icon-info':(item.rightOptions.indexOf('1')!=-1)?'el-icon-success':(item.myChoice.indexOf('1')!=-1)?'el-icon-error':'el-icon-info'"
                         ></i>B:
                         <span>{{item.B}}</span>
                       </li>
                       <li>
                         <i
-                          :class="(item.rightOptions.indexOf('2')!=-1)?'el-icon-success':(item.myChoice.indexOf('2')!=-1)?'el-icon-error':'el-icon-info'"
+                          :class="item.myChoice=='-1'?'el-icon-info':(item.rightOptions.indexOf('2')!=-1)?'el-icon-success':(item.myChoice.indexOf('2')!=-1)?'el-icon-error':'el-icon-info'"
                         ></i>C:
                         <span>{{item.C}}</span>
                       </li>
                       <li>
                         <i
-                          :class="(item.rightOptions.indexOf('3')!=-1)?'el-icon-success':(item.myChoice.indexOf('3')!=-1)?'el-icon-error':'el-icon-info'"
+                          :class="item.myChoice=='-1'?'el-icon-info':(item.rightOptions.indexOf('3')!=-1)?'el-icon-success':(item.myChoice.indexOf('3')!=-1)?'el-icon-error':'el-icon-info'"
                         ></i>D:
                         <span>{{item.D}}</span>
                       </li>

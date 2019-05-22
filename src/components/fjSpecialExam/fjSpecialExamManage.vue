@@ -39,7 +39,8 @@
                 <el-col :span="12">
                   <el-form-item class="noBR" label="考试类型">
                     <el-select
-                      v-model="ruleForm.data.examType"
+                      multiple
+                      v-model="examType"
                       :disabled="isDisabled"
                       :placeholder="isDisabled?'':'请选择'"
                     >
@@ -54,44 +55,25 @@
                 </el-col>
               </el-row>
               <el-row>
-                <!-- <el-col :span="12">
-                  <el-form-item label="考试日期">
-                    <el-date-picker
-                      :disabled="isDisabled"
-                      v-model="ruleForm.data.examTime"
-                      type="date"
-                      value-format="yyyyMMdd"
-                      :placeholder="isDisabled?'':'请选择'"
-                    ></el-date-picker>
-                  </el-form-item>
-                </el-col>-->
                 <el-col :span="12">
                   <el-form-item class="noBR" label="考试时长">
                     <el-input
+                      type="number"
                       :placeholder="isDisabled?'':'请输入'"
                       :disabled="isDisabled"
-                      v-model="ruleForm.data.tiem"
+                      v-model="ruleForm.data.time"
                     ></el-input>
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
                   <el-form-item label="题目分数">
                     <el-input
+                      type="number"
                       v-model="ruleForm.data.oneScore"
                       :disabled="isDisabled"
                       :placeholder="isDisabled?'':'请输入'"
                       @blur="communityChange"
                     ></el-input>
-                    <!-- <el-select
-                      v-model="ruleForm.data.oneScore"
-                      :disabled="isDisabled"
-                      :placeholder="isDisabled?'':'请选择（必选）'"
-                      @change="communityChange"
-                    >
-                      <el-option :value="4" label="4"></el-option>
-                      <el-option :value="5" label="5"></el-option>
-                      <el-option :value="10" label="10"></el-option>
-                    </el-select>-->
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -99,26 +81,56 @@
                 <el-col :span="12">
                   <el-form-item label="题目数量">
                     <el-input
+                      type="number"
                       v-model="ruleForm.data.amount"
                       :disabled="isDisabled"
                       :placeholder="isDisabled?'':'请输入'"
                       @blur="amountChange"
                     ></el-input>
-                    <!-- <el-select
-                      v-model="ruleForm.data.amount"
-                      :disabled="isDisabled"
-                      :placeholder="isDisabled?'':'请选择（必选）'"
-                      @change="amountChange"
-                    >
-                      <el-option :value="10" label="10"></el-option>
-                      <el-option :value="20" label="20"></el-option>
-                      <el-option :value="25" label="25"></el-option>
-                    </el-select>-->
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
                   <el-form-item class="noBR" label="试卷分数">
                     <el-input v-model="ruleForm.data.score" disabled></el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col :span="12">
+                  <el-form-item label="多选得分">
+                    <el-input
+                      type="number"
+                      v-model="ruleForm.data.choiceMore"
+                      :disabled="isDisabled"
+                      :placeholder="isDisabled?'':'请输入'"
+                    ></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item class="noBR" label="少选得分">
+                    <el-input
+                      type="number"
+                      v-model="ruleForm.data.choiceFew"
+                      :disabled="isDisabled"
+                      :placeholder="isDisabled?'':'请输入'"
+                    ></el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col :span="12">
+                  <el-form-item label="错选得分">
+                    <el-input
+                      type="number"
+                      v-model="ruleForm.data.choiceError"
+                      :disabled="isDisabled"
+                      :placeholder="isDisabled?'':'请输入'"
+                    ></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item class="noBR" label>
+                    <!-- <el-input v-model="ruleForm.data.score" disabled></el-input> -->
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -133,18 +145,6 @@
                   </el-form-item>
                 </el-col>
               </el-row>
-              <!-- <el-row>
-                <el-col :span="24">
-                  <el-form-item class="noBR noBB" label="适用人员">
-                    <el-input
-                      :placeholder="isDisabled?'':'请选择'"
-                      :disabled="isDisabled"
-                      v-model="treePeople"
-                      @focus="(checkDialogVisible=true,checkDialogShow=true)"
-                    ></el-input>
-                  </el-form-item>
-                </el-col>
-              </el-row>-->
             </el-form>
           </div>
         </div>
@@ -159,7 +159,16 @@
           <div class="foot-body">
             <el-container>
               <el-aside width="300px" v-if="userInfo.state != 1">
-                <div class="head">题库/行政法规</div>
+                <div class="head">
+                  <el-select clearable v-model="examType">
+                    <el-option
+                      v-for="item in typeList"
+                      :key="item.itemid"
+                      :label="item.itemvalue"
+                      :value="item.itemid"
+                    ></el-option>
+                  </el-select>
+                </div>
                 <div class="search">
                   <el-input
                     v-model="searchAttend"
@@ -227,6 +236,10 @@
                         D:
                         <el-input type="text" :disabled="true" v-model="item.D"></el-input>
                       </li>
+                      <li>
+                        <span style="color:#409EFF">题目解析</span>
+                        : {{item.analysis?item.analysis:'无'}}
+                      </li>
                       <div class="right-revise" v-if="item.editIcon&&userInfo.state != 1">
                         <img src="static/images/fj-exam-del.png" alt="删除" @click="delTopic(index)">
                       </div>
@@ -239,45 +252,6 @@
         </div>
       </div>
     </div>
-    <!-- 适用人员弹出框 -->
-    <!-- <el-dialog
-      :visible.sync="checkDialogVisible"
-      :append-to-body="false"
-      :close-on-click-modal="false"
-      :modal-append-to-body="false"
-      style="position: absolute"
-      width="680px"
-      class="check-dialogs"
-    >
-      <div>
-        <el-tree
-          :data="treeData"
-          show-checkbox
-          node-key="id"
-          :default-checked-keys="ruleForm.data.people.split(',')"
-          :props="defaultProps"
-          :current-node-key="currentNode"
-          @node-click="handleNodeClick"
-          ref="tree"
-        ></el-tree>
-      </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="treeAudit(1)">确 定</el-button>
-        <el-button @click="treeAudit(2)">取 消</el-button>
-      </div>
-    </el-dialog>
-    <div v-show="false">
-      <el-tree
-        :data="treeData"
-        show-checkbox
-        node-key="id"
-        :default-checked-keys="ruleForm.data.people.split(',')"
-        :props="defaultProps"
-        :current-node-key="currentNode"
-        @node-click="handleNodeClick"
-        ref="tree"
-      ></el-tree>
-    </div>-->
   </div>
 </template>
 <script>
@@ -299,7 +273,6 @@ export default {
       ],
       userInfo: {},
       searchAttend: "", //题库搜索框
-      checkDialogVisible: false,
       isCreatePaperShow: false,
       isTitleDisabled: true,
       isDisabled: false,
@@ -308,6 +281,7 @@ export default {
       treePeople: "", //适用人员展示
       type: [], //题目类型
       typeList: [], //考试类型
+      examType: [], //考试类型选中
       ruleForm: {
         data: {
           id: "",
@@ -317,6 +291,9 @@ export default {
           time: "",
           oneScore: "",
           people: "",
+          choiceMore: 0,
+          choiceFew: 0,
+          choiceError: 0,
           // state:状态，0启用，1停用，-1删除，默认1
           examList: "",
           selectRules: "",
@@ -351,15 +328,11 @@ export default {
       rules: {}
     };
   },
-  // created() {
-  //   this.setCreated();
-  // },
   mounted() {
     this.setCreated();
     this.getDetailList();
     this.userInfo.state > 1 && this.searchAttendHistory();
     this.getDictListByType("TZLX", "typeList"); //题库类型
-    // this.getTreeData();
   },
   methods: {
     // 验证规则
@@ -408,12 +381,12 @@ export default {
     },
     //生成试卷
     createPaper() {
-      if (!this.ruleForm.data.score || !this.type.length > 0) {
-        return this.$message({
-          message: "请完整填写试卷信息",
-          type: "warning"
-        });
-      }
+      // if (!this.ruleForm.data.score || !this.type.length > 0) {
+      //   return this.$message({
+      //     message: "请完整填写试卷信息",
+      //     type: "warning"
+      //   });
+      // }
       this.isCreatePaperShow = true;
       this.ruleForm.list = [];
       this.checkedCities = [];
@@ -441,7 +414,6 @@ export default {
       }
       this.ruleForm.data.people = treeList.join(",");
       this.treePeople = peopleList.join(",");
-      this.checkDialogVisible = false;
     },
     //删除考题
     delTopic(index) {
@@ -453,30 +425,8 @@ export default {
         }
       });
     },
-    //树形控件获取数据
-    handleNodeClick(data) {
-      console.log(data);
-    },
-    //获取适用人员数据
-    // getTreeData() {
-    //   var defer = $.Deferred();
-    //   var vm = this;
-    //   $.ajax({
-    //     url: fjPublic.ajaxUrlDNN + "/getTreeDeptData",
-    //     type: "POST",
-    //     data: {},
-    //     dataType: "json",
-    //     success: function(data) {
-    //       vm.treeData = data;
-    //       setTimeout(() => {
-    //         vm.treeAudit(); //回显适用人员
-    //       }, 100);
-    //     },
-    //     error: function(err) {}
-    //   });
-    // },
     /**
-     * @description: 获取化题库字典
+     * @description: 获取题库字典
      * @param {type} type 字典类型
      * @param {list} list 数据List
      * @return:
@@ -520,6 +470,7 @@ export default {
           let data = list.data;
           vm.ruleForm.data = data.info;
           vm.type = data.info.type.split(",");
+          vm.examType = data.info.examType.split(",");
           for (let i = 0; i < data.list.length; i++) {
             let tm = {
               id: data.list[i].id,
@@ -529,6 +480,7 @@ export default {
               C: data.list[i].options.split("&GXCF&")[2],
               D: data.list[i].options.split("&GXCF&")[3],
               rightOptions: data.list[i].rightOptions.split("|"),
+              analysis: data.list[i].analysis,
               editIcon: false //用来判断是否展示侧边栏图标
             };
             vm.ruleForm.list.unshift(tm);
@@ -561,7 +513,7 @@ export default {
         data: {
           question: vm.searchAttend,
           type: vm.type.join(","),
-          examType:vm.ruleForm.data.examType
+          examType: vm.examType.join(",")
         },
         dataType: "json",
         success: function(list) {
@@ -585,16 +537,16 @@ export default {
     // 提交或者编辑试卷
     postRuleForm: function() {
       let vm = this;
-      if (vm.flag) {
-        return;
-      }
-      vm.flag = true;
       if (vm.ruleForm.list.length != vm.ruleForm.data.amount) {
         return this.$message({
           message: "请确认题目总数",
           type: "warning"
         });
       }
+      if (vm.flag) {
+        return;
+      }
+      vm.flag = true;
       if (vm.userInfo.id) {
         vm.ruleForm.data.id = vm.userInfo.id;
       }
@@ -602,12 +554,13 @@ export default {
       if (vm.userInfo.state == 0 || vm.userInfo.state == 3) {
         url = "/addExamPaper";
         vm.ruleForm.data.id = "";
-        vm.ruleForm.data.state = "1"; //复用和新建的试卷状态都暂时未待发布(0：发布，-1删除)
+        vm.ruleForm.data.state = "1"; //复用和新建的试卷状态都暂时未待发布(0已启用，1未启用)
         vm.ruleForm.data.createUserId = $.parseJSON(
           fjPublic.getLocalData("userInfo")
         ).userId; //添加人
       }
       vm.ruleForm.data.type = vm.type.join(",");
+      vm.ruleForm.data.examType = vm.examType.join(",");
       let idList = [];
       for (let i = 0; i < vm.ruleForm.list.length; i++) {
         idList.push(vm.ruleForm.list[i].id);
@@ -618,15 +571,21 @@ export default {
         type: "POST",
         data: vm.ruleForm.data,
         dataType: "json",
-        success: function(data) {},
-        error: function(err) {
+        success: function(data) {
           vm.flag = false;
-          if (err.responseText == "success") {
+          if (data.errorCode == 0) {
             vm.$router.push({
               path: "/special-exam"
             });
           } else {
+            vm.$message({
+              message: data.errorMsg,
+              type: "warning"
+            });
           }
+        },
+        error: function(err) {
+          vm.flag = false;
         }
       });
     },
@@ -693,15 +652,6 @@ export default {
           val[i].rightOptions.length > 1 && (vm.headInfo.selection += 1);
         }
       }
-    },
-    //适用人员
-    checkDialogVisible: {
-      handler: function(val) {
-        let vm = this;
-        if (!val) {
-          // vm.treeAudit();
-        }
-      }
     }
   },
   components: {
@@ -743,10 +693,19 @@ export default {
         color: rgba(0, 0, 0, 1);
         opacity: 1;
         border-bottom: 1px solid rgba(232, 232, 232, 1);
+        .el-select {
+          width: 120px;
+          .el-input__inner {
+            text-align: center;
+            font-size: 16px;
+            border: none;
+          }
+        }
       }
       .search {
         height: 54px;
-        line-height: 54px;
+        padding: 4px 0;
+        line-height: 44px;
         text-align: center;
         border-bottom: 1px solid rgba(232, 232, 232, 1);
         .search-input {

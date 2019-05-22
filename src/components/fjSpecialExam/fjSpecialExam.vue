@@ -22,7 +22,7 @@
                     @change="changeDeptId"
                     clearable
                     filterable
-                    v-model="searchForm.deptId"
+                    v-model="searchForm.examType"
                     size="small"
                   >
                     <el-option
@@ -54,11 +54,11 @@
                     @change="changeSupDeptId"
                     clearable
                     filterable
-                    v-model="searchForm.supDeptId"
+                    v-model="searchForm.deptPid"
                     size="small"
                   >
                     <el-option
-                      v-for="item in supDeptIds"
+                      v-for="item in deptPids"
                       :key="item.deptId"
                       :label="item.deptName"
                       :value="item.deptId"
@@ -101,18 +101,31 @@
                     @click="goQuestions(0)"
                     v-if="activeIndex==0"
                   >新增题库</el-button>
-                  <el-button
-                    type="primary"
-                    class="tj-btn"
-                    @click="exportExcl"
-                    v-if="activeIndex==3"
-                  >导出</el-button>
+                </el-form-item>
+              </el-col>
+              <el-col :lg="6" :xl="5" v-if="activeIndex==3">
+                <el-form-item label="考试标题：">
+                  <el-select
+                    @change="changeDeptId"
+                    clearable
+                    filterable
+                    v-model="searchForm.title"
+                    size="small"
+                  >
+                    <el-option
+                      v-for="item in titleList"
+                      :key="item.index"
+                      :label="item.title"
+                      :value="item.title"
+                    ></el-option>
+                  </el-select>
+                  <el-button type="primary" class="tj-btn" @click="exportExcl">导出</el-button>
                 </el-form-item>
               </el-col>
               <el-col :lg="6" :xl="6" v-if="activeIndex==1">
                 <el-form-item label="输入查询：">
                   <el-input
-                    v-model="searchForm.user"
+                    v-model="searchForm.title"
                     clearable
                     placeholder="请输入试卷标题"
                     size="small"
@@ -146,12 +159,7 @@
           <el-table-column prop="title" label="标题" :key="Math.random()"></el-table-column>
           <!-- <el-table-column prop="content" label="考试类型" :key="Math.random()"></el-table-column> -->
           <el-table-column prop="createUsername" label="创建人" :key="Math.random()"></el-table-column>
-          <el-table-column
-            prop="instime"
-            label="创建时间"
-            :formatter="timeFormatter"
-            :key="Math.random()"
-          ></el-table-column>
+          <el-table-column prop="insTime" label="创建时间" :key="Math.random()"></el-table-column>
           <el-table-column prop="examNumber" label="题目数量" :key="Math.random()"></el-table-column>
           <el-table-column label="状态" width="100px" :key="Math.random()">
             <template slot-scope="scope">
@@ -176,30 +184,21 @@
         <!-- 试卷管理 -->
         <el-table v-if="activeIndex==1" :data="tableDataList" style="width: 100%">
           <el-table-column prop="title" label="试卷标题" show-overflow-tooltip :key="Math.random()"></el-table-column>
-          <el-table-column
-            prop="sigtypenTime"
-            label="试卷内容"
-            show-overflow-tooltip
-            :key="Math.random()"
-          ></el-table-column>
+          <el-table-column prop="examType" label="考试类型" show-overflow-tooltip :key="Math.random()"></el-table-column>
           <el-table-column prop="score" label="总分" :key="Math.random()"></el-table-column>
           <el-table-column prop="createUserName" label="创建人" :key="Math.random()"></el-table-column>
-          <el-table-column prop="instime" label="发布时间" :key="Math.random()"></el-table-column>
+          <el-table-column prop="insTime" label="创建时间" :key="Math.random()"></el-table-column>
           <el-table-column label="状态" width="100px" :key="Math.random()">
             <template slot-scope="scope">
               <span
                 class="circle-status"
-                :class="scope.row.state == 0 ? 'green' : scope.row.state == 1 ?  'grey': scope.row.state == 2 ?  'grey':'red'"
-              >
-                {{parseInt( scope.row.state) === 0 ? '已发布' : parseInt( scope.row.state) === 1 ?'未发布' : parseInt( scope.row.state) === 2 ?'已结束'
-                : '已删除'}}
-              </span>
+                :class="scope.row.state == 0 ? 'green' : 'grey'"
+              >{{parseInt( scope.row.state) === 0 ? '已启用' :'未启用'}}</span>
             </template>
           </el-table-column>
           <el-table-column label="题目数量" prop="amount" :key="Math.random()"></el-table-column>
           <el-table-column label="操作" :key="Math.random()">
             <template slot-scope="scope">
-              <!-- <span class="ope-txt" v-if="scope.row.state != 0">--</span> -->
               <span class="ope-txt" v-if="scope.row.state == 2" @click="goManage(3,scope.row.id)">复用</span>
               <span class="ope-txt" v-if="scope.row.state != 1" @click="goManage(1,scope.row.id)">查看</span>
               <span
@@ -207,11 +206,7 @@
                 v-if="scope.row.state == 1"
                 @click="setManageState(scope.row.id, 0)"
               >发布</span>
-              <span
-                class="ope-txt"
-                v-if="scope.row.state == 1"
-                @click="goManage( 2,scope.row.id)"
-              >编辑</span>
+              <span class="ope-txt" @click="goManage( 2,scope.row.id)">编辑</span>
               <span
                 class="ope-txt"
                 v-if="scope.row.state >= 0"
@@ -235,7 +230,7 @@
             show-overflow-tooltip
             :key="Math.random()"
           ></el-table-column>
-          <el-table-column prop="time" label="发布时间" :key="Math.random()"></el-table-column>
+          <el-table-column prop="examTime" label="考试时间" :key="Math.random()"></el-table-column>
           <el-table-column label="状态" width="100px" :key="Math.random()">
             <template slot-scope="scope">
               <span
@@ -246,8 +241,6 @@
           </el-table-column>
           <el-table-column label="操作" :key="Math.random()">
             <template slot-scope="scope">
-              <!-- <span class="ope-txt" v-if="scope.row.state != 0">--</span> -->
-              <!-- <span class="ope-txt" v-if="scope.row.state == 2" @click="goManage(3,scope.row.id)">复用</span> -->
               <span
                 class="ope-txt"
                 v-if="scope.row.state != 1"
@@ -256,7 +249,7 @@
               <span
                 class="ope-txt"
                 v-if="scope.row.state == 1"
-                @click="setReleaseState(scope.row.id, 0)"
+                @click="updExamPublish(scope.row.id, 0)"
               >发布</span>
               <span
                 class="ope-txt"
@@ -266,7 +259,7 @@
               <span
                 class="ope-txt"
                 v-if="scope.row.state >= 0"
-                @click="setReleaseState(scope.row.id, -1)"
+                @click="updExamPublish(scope.row.id, -1)"
               >删除</span>
             </template>
           </el-table-column>
@@ -279,10 +272,10 @@
           @selection-change="handleSelectionChange"
         >
           <el-table-column type="selection" width="30" :key="Math.random()"></el-table-column>
-          <el-table-column prop="title" label="试卷标题" :key="Math.random()"></el-table-column>
+          <el-table-column prop="title" label="考试标题" :key="Math.random()"></el-table-column>
           <el-table-column prop="userName" label="姓名" :key="Math.random()"></el-table-column>
           <el-table-column prop="score" label="分数" :key="Math.random()"></el-table-column>
-          <el-table-column prop="time" :formatter="timeFormatter" label="考试日期" :key="Math.random()"></el-table-column>
+          <el-table-column prop="time" label="考试日期" :key="Math.random()"></el-table-column>
           <el-table-column prop="userAccount" label="警号" :key="Math.random()"></el-table-column>
           <el-table-column prop="deptName" label="单位" :key="Math.random()"></el-table-column>
           <el-table-column prop="useTime" label="用时" :key="Math.random()"></el-table-column>
@@ -335,7 +328,7 @@
                 :disabled="isDisabled"
                 v-model="ruleForm.time"
                 type="date"
-                value-format="yyyyMMdd"
+                value-format="yyyy-MM-dd"
                 :placeholder="isDisabled?'':'请选择'"
               ></el-date-picker>
             </el-form-item>
@@ -357,29 +350,15 @@
               </el-select>
             </el-form-item>
             <el-form-item label="考试人员：">
-              <!-- <el-select
-                clearable
-                filterable
-                v-model="ruleForm.people"
-                size="small"
-                :disabled="isDisabled"
-                :placeholder="isDisabled?'':'请输入'"
-              >
-                <el-option
-                  v-for="item in missionStates"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                ></el-option>
-              </el-select>-->
-              <div>
+              <div class="tree-box">
                 <el-tree
+                  :class="isDisabled?'is-disabled':''"
                   :data="treeData"
                   show-checkbox
+                  accordion
                   node-key="id"
                   :props="defaultProps"
                   :current-node-key="currentNode"
-                  @node-click="handleNodeClick"
                   ref="tree"
                 ></el-tree>
               </div>
@@ -412,33 +391,26 @@ export default {
       checkDialogVisible: false,
       checkDialogVisibleModal: false,
       isDisabled: false,
+      defaultProps: {
+        children: "children",
+        label: "label"
+      },
       treeData: {}, //考试发布适用人员
       currentNode: {},
-      treePeople:"",
       ruleForm: {}, //考试发布信息
       deptIds: null, //派出所下拉框数据
-      supDeptIds: null, //分局下拉框数据
+      deptPids: null, //分局下拉框数据
+      titleList: [], //考试标题下拉框数据
       // 状态下拉框
       subjectList: [],
       // 考试试卷下拉框
       paperIdList: [],
-      // 状态下拉框
-      missionStates: [
-        {
-          value: "1001",
-          label: "岗前培训"
-        },
-        {
-          value: "1002",
-          label: "夜校培训"
-        }
-      ],
       // 列表查询参数
       searchTime: "", // 查询时间
       searchForm: {
         nameOrAccount: "", // 警号或负责人名称
         deptId: "", // 派出所
-        supDeptId: "", // 公安局
+        deptPid: "", // 公安局
         status: "", // 状态
         endTime: "",
         startTime: ""
@@ -451,9 +423,9 @@ export default {
     // 初始化列表
     this.searchList();
     this.initSupDeptIds();
+    this.initExamTitle();
     this.initDeptIds();
     this.getDictListByType();
-    return;
   },
   beforeRouteEnter(to, from, next) {
     next(function(vm) {
@@ -478,20 +450,37 @@ export default {
     //获取被选中的标签 tab 实例
     changeSwitch(id, state) {},
     // 修改分局下拉框查询
-    changeSupDeptId: function(supDeptId) {
-      this.searchForm["supDeptId"] = supDeptId;
+    changeSupDeptId: function(deptPid) {
+      this.searchForm["deptPid"] = deptPid;
+      this.searchForm["deptId"] = "";
+      this.initDeptIds(deptPid);
       this.searchList();
     },
     // 修改派出所下拉框查询
-    changeDeptId: function(deptId) {
-      this.searchForm["deptId"] = deptId;
+    changeDeptId: function() {
       this.searchList();
     },
     // 标题或负责人名称查询
     searchAttendLeave: function() {
       this.searchList();
     },
-
+    // 查询时间
+    changeSearchTime: function(searchTime) {
+      if (searchTime) {
+        this.searchForm["startTime"] = fjPublic.dateFormatYYMMDD(searchTime[0]);
+        this.searchForm["endTime"] = fjPublic.dateFormatYYMMDD(searchTime[1]);
+      } else {
+        this.searchForm["startTime"] = "";
+        this.searchForm["endTime"] = "";
+      }
+      this.searchList();
+      if (this.activeIndex == 3) {
+        this.initExamTitle(
+          this.searchForm["startTime"],
+          this.searchForm["endTime"]
+        );
+      }
+    },
     exportExcl: function() {
       let vm = this;
       window.open(
@@ -510,15 +499,14 @@ export default {
     },
     // 新增发布考试
     goRelease: function(state, id) {
+      state == 1 ? (this.isDisabled = true) : (this.isDisabled = false);
       this.ruleForm = {};
       this.ruleForm.fj = [];
       this.checkDialogVisible = true;
-      this.getPaperIdList();
-      this.getTreeData();
-      state == 1 ? (this.isDisabled = true) : (this.isDisabled = false);
       if (id) {
         this.getExamPublishInfo(id);
       }
+      this.$refs.tree.setCheckedKeys([]);
     },
     //获取发布考试详情
     getExamPublishInfo(id) {
@@ -533,6 +521,35 @@ export default {
         dataType: "json",
         success: function(data) {
           vm.ruleForm = data.data;
+          vm.ruleForm.people &&
+            vm.$refs.tree.setCheckedKeys(vm.ruleForm.people.split(","));
+          defer.resolve();
+        },
+        error: function(err) {
+          defer.reject();
+        }
+      });
+      return defer;
+    },
+    /**
+     * @description: 修改考试发布状态
+     * @param {type} state 发布0,删除-1
+     * @return:
+     */
+    updExamPublish(id, state) {
+      var defer = $.Deferred();
+      var vm = this;
+      var url = state == 0 ? "/announceExam" : "/updExamPublish";
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + url,
+        type: "POST",
+        data: {
+          id: id,
+          state: state
+        },
+        dataType: "json",
+        success: function(data) {
+          vm.searchList();
           defer.resolve();
         },
         error: function(err) {
@@ -564,120 +581,66 @@ export default {
     postRelease() {
       let vm = this;
       vm.treeAudit();
-      // if (vm.isDisabled) {
-      //   vm.checkDialogVisible = false;
-      //   return;
-      // }
-      // let defer = $.Deferred();
-      // let url = vm.ruleForm.id ? "/updExamPaper" : "/addExamPublish";
-      // $.ajax({
-      //   url: fjPublic.ajaxUrlDNN + url,
-      //   type: "POST",
-      //   data: vm.ruleForm,
-      //   dataType: "json",
-      //   success: function(data) {
-      //     if (data.errorCode == 0) {
-      //       vm.$message({
-      //         type: "success",
-      //         message: data.errorMsg
-      //       });
-      //     } else {
-      //       vm.$message({
-      //         type: "error",
-      //         message: data.errorMsg
-      //       });
-      //     }
-      //     defer.resolve();
-      //   },
-      //   error: function(err) {
-      //     defer.reject();
-      //   }
-      // });
-      // vm.checkDialogVisible = false;
-      // return defer;
-    },
-    //树形控件获取数据
-    handleNodeClick(data) {
-      console.log(data);
+      if (vm.isDisabled) {
+        vm.checkDialogVisible = false;
+        return;
+      }
+      let defer = $.Deferred();
+      let url = vm.ruleForm.id ? "/updExamPublish" : "/addExamPublish";
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + url,
+        type: "POST",
+        data: vm.ruleForm,
+        dataType: "json",
+        success: function(data) {
+          if (data.errorCode == 0) {
+            vm.searchList();
+            vm.$message({
+              type: "success",
+              message: data.errorMsg
+            });
+          } else {
+            vm.$message({
+              type: "error",
+              message: data.errorMsg
+            });
+          }
+          defer.resolve();
+        },
+        error: function(err) {
+          defer.reject();
+        }
+      });
+      vm.checkDialogVisible = false;
+      return defer;
     },
     //获取考试人员数据
     getTreeData() {
       var defer = $.Deferred();
       var vm = this;
+      let userInfo = $.parseJSON(fjPublic.getLocalData("userInfo"));
       $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/getTreeDeptData",
+        url: fjPublic.ajaxUrlDNN + "/getUserTreeByRole",
         type: "POST",
-        data: {},
+        data: {
+          userId: userInfo.userId,
+          deptId: userInfo.deptId,
+          role: userInfo.userRole
+        },
         dataType: "json",
         success: function(data) {
-          vm.treeData = data;
-          setTimeout(() => {
-            vm.treeAudit(); //回显适用人员
-          }, 100);
+          vm.treeData = data.data;
         },
         error: function(err) {}
       });
     },
     treeAudit(i) {
-      let list = this.$refs.tree.getCheckedNodes();
-      console.log(list);
+      // let list = this.$refs.tree.getCheckedNodes();
+      let treeList = this.$refs.tree.getCheckedKeys();
       this.ruleForm.people = "";
-      this.treePeople = "";
-      let treeList = [];
-      let peopleList = [];
-      for (let index = 0; index < list.length; index++) {
-        const element = list[index];
-        if (element.children) {
-          treeList.push(element.id);
-          peopleList.push(element.label);
-        }
-      }
-      if (peopleList.length == 0) {
-        for (let index = 0; index < list.length; index++) {
-          const element = list[index];
-          treeList.push(element.id);
-          peopleList.push(element.label);
-        }
-      }
       this.ruleForm.people = treeList.join(",");
-      this.treePeople = peopleList.join(",");
-      console.log(this.treePeople);
-      // this.checkDialogVisible = false;
     },
-    //签订
-    review() {
-      // var defer = $.Deferred();
-      // var vm = this;
-      // $.ajax({
-      //   url: fjPublic.ajaxUrlDNN + "/signContract",
-      //   type: "POST",
-      //   data: {
-      //     id: vm.userInfo.id,
-      //     year: vm.radio
-      //   },
-      //   dataType: "json",
-      //   success: function(data) {
-      //     if (data.errorCode == 0) {
-      //       vm.$message({
-      //         type: "success",
-      //         message: data.errorMsg
-      //       });
-      //       vm.userInfo.state = 1;
-      //     } else {
-      //       vm.$message({
-      //         type: "error",
-      //         message: data.errorMsg
-      //       });
-      //     }
-      //     defer.resolve();
-      //   },
-      //   error: function(err) {
-      //     defer.reject();
-      //   }
-      // });
-      // vm.checkDialogVisible = false;
-      // return defer;
-    },
+
     // 初始化分局
     initSupDeptIds: function() {
       var defer = $.Deferred();
@@ -688,7 +651,29 @@ export default {
         data: {},
         dataType: "json",
         success: function(data) {
-          vm.supDeptIds = data.list;
+          vm.deptPids = data.list;
+          defer.resolve();
+        },
+        error: function(err) {
+          defer.reject();
+        }
+      });
+      return defer;
+    },
+    // 初始化考试标题
+    initExamTitle: function(start, end) {
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/getExamTitleByTime",
+        type: "POST",
+        data: {
+          startTime: start,
+          endTime: end
+        },
+        dataType: "json",
+        success: function(data) {
+          vm.titleList = data.data;
           defer.resolve();
         },
         error: function(err) {
@@ -739,12 +724,7 @@ export default {
       });
       return defer;
     },
-    // //发布考试获取派出所
-    // changeKSPCS: function() {},
-    // //发布考试获取分局
-    // changeKSFJ: function() {
-    //   this.initDeptIds(this.ruleForm.fj);
-    // },
+
     // 更新题库
     updExam: function(id, state) {
       var defer = $.Deferred();
@@ -758,11 +738,9 @@ export default {
         },
         dataType: "json",
         success: function(data) {
-          // console.log(data);
-        },
-        error: function(err) {
           vm.searchList();
-        }
+        },
+        error: function(err) {}
       });
     },
     // 修改试卷状态
@@ -778,11 +756,9 @@ export default {
         },
         dataType: "json",
         success: function(data) {
-          // console.log(data);
-        },
-        error: function(err) {
           vm.searchList();
-        }
+        },
+        error: function(err) {}
       });
     },
     // 设置获取列表参数
@@ -797,6 +773,10 @@ export default {
           ? "/getExamPublishList"
           : "/getExamResultList";
       // 参数
+      if (vm.activeIndex == 2) {
+        vm.getTreeData();
+        vm.getPaperIdList();
+      }
       vm.searchForm["pageNumber"] = vm.currentPage;
       vm.searchForm["pageSize"] = vm.pageSize;
     },
@@ -853,29 +833,7 @@ export default {
         path: "/special-exam-fraction",
         query: { state: state, id: id }
       });
-    },
-    // 时间格式化
-    timeFormatter(row, type) {
-      let dateStr = row[type.property];
-      if (!dateStr) {
-        return "";
-      }
-      return (
-        dateStr.substr(0, 4) +
-        "/" +
-        dateStr.substr(4, 2) +
-        "/" +
-        dateStr.substr(6, 2)
-        // +
-        // ":" +
-        // dateStr.substr(14, 2)
-      );
     }
-  },
-  filters: {
-    // getSignType: function(value) {
-    //   return value == "1" ? "上班未签到" : value == 2 ? "下班未签退" : "";
-    // }
   },
   components: {
     fjBreadNav
@@ -977,6 +935,27 @@ export default {
       }
       .el-select__caret {
         display: none;
+      }
+    }
+    .tree-box {
+      margin-left: 100px;
+      margin-top: 6px;
+      .el-tree.is-disabled {
+        .el-checkbox {
+          pointer-events: none;
+          cursor: not-allowed;
+        }
+        .el-checkbox__inner {
+          background-color: #edf2fc;
+          border-color: #dcdfe6;
+        }
+        .is-checked,
+        .is-indeterminate {
+          .el-checkbox__inner {
+            background-color: #409eff;
+            border-color: #409eff;
+          }
+        }
       }
     }
   }
