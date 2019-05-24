@@ -27,9 +27,13 @@ window.fjSideNav = {
     //设置事件
     this.setEvents();
     //设置初始状态
-    this.setInitState();
+    //this.setInitState();
     //导航最外层的offset-top值
     this.parentPt = this.boxParent.offset().top;
+    this.st = 0;
+    this.bph = this.boxParent.innerHeight(); //sider初始高度
+    //console.log(this.box.innerHeight());
+    //console.log(this.boxParent.innerHeight());
   },
   setFirstList: function() {
     _.each(
@@ -129,7 +133,7 @@ window.fjSideNav = {
           .slideDown();
       }
       this.slider.hide().css({
-        transform: "translateY(" + (pos.top - this.parentPt) + "px)"
+        transform: "translateY(" + ((pos.top - this.parentPt)+this.st) + "px)"
       });
     }
     //点击没有二级菜单的一级菜单项
@@ -160,7 +164,10 @@ window.fjSideNav = {
       _.bind(function() {
         this.slider.hide();
       }, this)
-    );
+    ).on("scroll",_.debounce(_.bind(function(){
+      this.st = this.boxParent.scrollTop();
+      this.st>0?this.boxParent.height((this.bph+this.st)+'px'):this.boxParent.height(this.bph+'px');
+    },this),200));
     //展开收起菜单
     this.firstItems.on({
       click: _.bind(this.firstItemsClickEvent, this),
@@ -201,7 +208,7 @@ window.fjSideNav = {
         var pos = $this.offset();
         if ($this.hasClass("is-opened")) return false;
         this.slider.show().css({
-          transform: "translateY(" + (pos.top - this.parentPt) + "px)"
+          transform: "translateY(" + ((pos.top - this.parentPt)+this.st) + "px)"
         });
       }, this)
     });
@@ -449,7 +456,15 @@ export default {
             },
             {
               title: "考勤申诉",
-              route: "/fjAttend-appeal"
+              route: "/fjAttend-appeal"  
+            },
+            {
+              title: "考勤配置",
+              route: "/fjAttend-configure"
+            },
+            {
+              title: "排班管理",
+              route: "/fjAttend-work-manage"
             }
           ]
         },
@@ -599,16 +614,20 @@ export default {
       userInfo: null, //用户信息
       operateNavDatas: {
         [fjPublic.userRoles.pcs]: function() {
+          var special = this.navData[6];//添加专题考试
+          special.children.splice(0, 2);//只留下教培管理->专题考试
           //派出所
           this.navData = this.navData.slice(0, 4);
           this.navData[this.navData.length - 1].children.splice(0, 2); //去掉考核管理->单位考核、地区考核
+          this.navData.push(special);
           return this.navData;
         },
         [fjPublic.userRoles.qj]: function() {
           //区级
-          this.navData.splice(5, 2);
+          this.navData.splice(5, 1);
           this.navData[3].children.splice(0, 1); //去掉考核管理->单位考核
-          this.navData[5].children.splice(1, 1); //去掉考核管理->单位考核
+          this.navData[5].children.splice(0, 2); //只留下教培管理->专题考试
+          this.navData[6].children.splice(1, 1); //去掉考核管理->单位考核
           this.navData.splice(4, 1); //去掉数据中心
           return this.navData;
         },
@@ -690,6 +709,9 @@ export default {
 </script>
 <style>
 /* 左侧导航 */
+.fj-sider {z-index:3;}
+.fj-sider::-webkit-scrollbar {width:0;}
+.fj-sider > .sider-bg {max-width:100%;max-height:100%;}
 .fj-sider > .fj-sider-menu {
   padding: 58px 10px 0px;
 }

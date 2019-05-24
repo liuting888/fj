@@ -75,7 +75,7 @@
                       <el-button type="default" plain @click="setBatchTransferSuper" v-show="userInfo.userRole!=userRolePcs"><!-- <i class="el-icon-edit"></i> --><span>批量上级</span></el-button>
                         <!-- <el-button type="default" plain icon="el-icon-refresh">刷新</el-button> -->
                     </div>
-                    <div class="depts-select-info" v-show="userInfo.userRole!=userRolePcs">
+                    <div class="depts-select-info" v-show="userInfo.userRole!=userRolePcs&&selectedLines>0">
                         <i class="el-icon-info"></i>
                         <span class="selected">已选择<span v-text="selectedLines"></span>项</span>
                         <span class="dept-name"><span v-text="selectedDeptData.deptName"></span>:</span><span class="count"><span v-text="selectedLines"></span>人</span>
@@ -89,7 +89,7 @@
                         <el-table-column prop="userStateName" label="状态"></el-table-column>
                         <el-table-column prop="deptname" label="办案单位" show-overflow-tooltip></el-table-column>
                         <el-table-column prop="superiorUserName" label="上级"></el-table-column>
-                        <el-table-column label="操作">
+                        <el-table-column :width="sizeSet.czColumnSize" label="操作">
                             <template slot-scope="slot">
                                 <!-- <span class="ope-txt" @click="showUserInfo(slot.row)">查看</span> -->
                                 <span class="ope-txt" @click="showWorkInfo(slot.row)">工作信息</span>
@@ -569,6 +569,11 @@ export default {
             }
         };
         return {
+            //----0508新增-->表格列的宽度调整
+            sizeSet:{
+                czColumnSize:""  //列->操作
+            },
+            //----
             headImgUrl:fjPublic.ajaxUrlDNN+'/getAvatarByUserId?userId=',
             breadData:[  //面包屑导航
                 {name:'当前位置:',path:''},
@@ -1139,7 +1144,7 @@ export default {
         };
     },
     computed:{
-
+        
     },
     created:function(){
         //获取当前登录的用户信息
@@ -1148,6 +1153,8 @@ export default {
         //
     },
     mounted:function(){
+        //调整表格列的宽度
+        this.setTableColumnSize();
         fjPublic.wrapperRemoveScroll();
         //向 后台请求数据
         var vm = this;
@@ -1167,6 +1174,13 @@ export default {
         next();
     },
     methods:{
+        setTableColumnSize(){ //设置表格列的宽度
+            if($(window).innerWidth()<=1366){
+                this.$set(this.sizeSet,"czColumnSize","180px");
+            }else{
+                this.$set(this.sizeSet,"czColumnSize","");
+            }
+        },
         clearSUData:function(){ //清空上级数据
             this.tmpDeptIdOfSU = '';
             this.isHasSuperiors = true;
@@ -2788,13 +2802,14 @@ export default {
 .fj-content_view.zzjg .fj-depts-tree > .depts-tree-main > .title {margin-right:12px;color:rgba(0,0,0,1);cursor:pointer;}
 /*  */
 .fj-content_view.zzjg .fj-depts-info {flex:1 0 auto;max-width:calc(100% - 250px);padding:20px 0px 0px 20px;}
+.fj-content_view.zzjg .fj-depts-info > .depts-btn-area {margin-bottom:16px;}
 .fj-content_view.zzjg .depts-basic-info {padding:20px 0px 23px;font-size:16px;}
 .fj-content_view.zzjg .depts-basic-info > .dept {margin-right:30px;color:rgba(0,0,0,1);}
 .fj-content_view.zzjg .depts-basic-info > .count {margin-right:30px;}
 /*  */
 .fj-content_view.zzjg .depts-btn-area > .el-button {padding:8px 20px;}
 /*  */
-.fj-content_view.zzjg .depts-select-info {height:40px;line-height:40px;margin-top:16px;padding-left:16px;background:#E6F7FF;border:1px solid #BAE7FF;}
+.fj-content_view.zzjg .depts-select-info {height:40px;line-height:40px;padding-left:16px;background:#E6F7FF;border:1px solid #BAE7FF;}
 .fj-content_view.zzjg .depts-select-info > .el-icon-info {margin-right:3px;color:#1890FF;}
 .fj-content_view.zzjg .depts-select-info > span {margin-right:10px;}
 .fj-content_view.zzjg .depts-select-info > .selected > span {padding:0px 4px;}
@@ -2824,10 +2839,14 @@ export default {
 .fj-content_view.zzjg #DeptPop .el-form-item__label {width:120px;}
 .fj-content_view.zzjg #DeptPop #deptMap {height:380px;margin-top:4px;}
 .fj-content_view.zzjg #DeptPop .el-dialog__footer {padding:20px 20px;}
-.fj-content_view.zzjg .el-table td .ope-txt:last-of-type {display:block;margin-left:0px;}
+/* .fj-content_view.zzjg .el-table td .ope-txt:last-of-type {display:block;margin-left:0px;} */
+.fj-content_view.zzjg .el-table td .ope-txt {position:relative;}
+.fj-content_view.zzjg .el-table td .ope-txt:after {content:"|";position:absolute;top:-4px;right:-7px;}
+.fj-content_view.zzjg .el-table td .ope-txt:last-of-type:after {content:"";}
 /*  */
 @media screen and (min-width:1367px) {
     .fj-content_view.zzjg .el-dialog {width:1080px;max-width:1080px;}
     .fj-content_view.zzjg .el-table td .ope-txt:last-of-type {display:inline;margin-left:6px;}
+    
 }
 </style>

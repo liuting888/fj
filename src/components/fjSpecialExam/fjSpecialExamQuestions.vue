@@ -68,27 +68,34 @@
           <div class="body-body">
             <ul>
               <li class="add-topic back-hover" v-if="isAddTopic">
-                <el-checkbox-group
-                  v-if="ruleForm.data.type!='1'"
-                  v-model="addTopicList.rightOptions"
-                  :min="1"
-                >
-                  <el-checkbox label="0"></el-checkbox>
-                  <el-checkbox label="1"></el-checkbox>
-                  <el-checkbox label="2"></el-checkbox>
-                  <el-checkbox label="3"></el-checkbox>
-                </el-checkbox-group>
-                <el-radio-group v-if="ruleForm.data.type=='1'" v-model="addTopicList.rightOptions">
-                  <el-radio label="0"></el-radio>
-                  <el-radio label="1"></el-radio>
-                  <el-radio label="2"></el-radio>
-                  <el-radio label="3"></el-radio>
-                </el-radio-group>
                 <div class="topic">
                   题目:
-                  <el-input type="text" v-model="addTopicList.question"></el-input>
+                  <el-input
+                    type="textarea"
+                    :autosize="{ minRows: 1, maxRows: 2}"
+                    v-model="addTopicList.question"
+                  ></el-input>
                 </div>
                 <ul>
+                  <el-checkbox-group
+                    v-if="ruleForm.data.type!='1'"
+                    v-model="addTopicList.rightOptions"
+                    :min="1"
+                  >
+                    <el-checkbox label="0"></el-checkbox>
+                    <el-checkbox label="1"></el-checkbox>
+                    <el-checkbox label="2"></el-checkbox>
+                    <el-checkbox label="3"></el-checkbox>
+                  </el-checkbox-group>
+                  <el-radio-group
+                    v-if="ruleForm.data.type=='1'"
+                    v-model="addTopicList.rightOptions"
+                  >
+                    <el-radio label="0"></el-radio>
+                    <el-radio label="1"></el-radio>
+                    <el-radio label="2"></el-radio>
+                    <el-radio label="3"></el-radio>
+                  </el-radio-group>
                   <li>
                     A:
                     <el-input type="text" v-model="addTopicList.A"></el-input>
@@ -116,6 +123,7 @@
                       :autosize="{ minRows: 2, maxRows: 4}"
                       placeholder="请输入解析"
                       v-model="addTopicList.analysis"
+                      maxlength="200"
                     ></el-input>
                   </li>
                 </ul>
@@ -129,7 +137,12 @@
               >
                 <div class="topic">
                   {{ruleForm.list.length-index}}.
-                  <el-input type="text" :disabled="item.edit" v-model="item.question"></el-input>
+                  <el-input
+                    type="textarea"
+                    :autosize="{ minRows: 1, maxRows: 2}"
+                    :disabled="item.edit"
+                    v-model="item.question"
+                  ></el-input>
                 </div>
                 <ul>
                   <el-radio-group v-if="item.type == '1'" v-model="item.rightOptions">
@@ -158,7 +171,7 @@
                   </el-checkbox-group>
                   <li>
                     A:
-                    <el-input :disabled="item.edit" type="text" v-model="item.A"></el-input>
+                    <el-input type="text" :disabled="item.edit" v-model="item.A"></el-input>
                   </li>
                   <li>
                     B:
@@ -179,6 +192,7 @@
                       :autosize="{ minRows: 2, maxRows: 4}"
                       :disabled="item.edit"
                       v-model="item.analysis"
+                      maxlength="200"
                     ></el-input>
                   </li>
                   <div class="edt-topic-btn" v-if="!item.edit">
@@ -189,7 +203,11 @@
                     <img src="static/images/fj-exam-edt.png" alt="修改" @click="edtTopic(index)">
                     <img src="static/images/fj-exam-up.png" alt="上移" @click="upTopic(index)">
                     <img src="static/images/fj-exam-down.png" alt="下移" @click="downTopic(index)">
-                    <img src="static/images/fj-exam-del.png" alt="删除" @click="delTopic(index,item.id)">
+                    <img
+                      src="static/images/fj-exam-del.png"
+                      alt="删除"
+                      @click="delTopic(index,item.id)"
+                    >
                   </div>
                 </ul>
               </li>
@@ -411,7 +429,7 @@ export default {
       }
     },
     //删除考题
-    delTopic(index,id) {
+    delTopic(index, id) {
       this.ruleForm.list.splice(index, 1);
       var defer = $.Deferred();
       var vm = this;
@@ -419,7 +437,7 @@ export default {
         url: fjPublic.ajaxUrlDNN + "/removeExamFromWarehouse",
         type: "POST",
         data: {
-          id:id
+          id: id
         },
         dataType: "json",
         success: function(data) {
@@ -696,7 +714,7 @@ export default {
           .el-checkbox-group {
             position: absolute;
             margin-left: 500px;
-            margin-top: 46px;
+            margin-top: -14px;
             width: 20px;
             .el-checkbox {
               margin-top: 24px;
@@ -709,7 +727,7 @@ export default {
           .el-radio-group {
             position: absolute;
             margin-left: 500px;
-            margin-top: 46px;
+            margin-top: -14px;
             width: 20px;
             .el-radio {
               margin-top: 25px;
@@ -721,8 +739,15 @@ export default {
           }
           .topic {
             margin: 15px 0;
-            input {
-              width: 680px;
+            .el-textarea {
+              display: inline-block;
+              width: 650px;
+              vertical-align: middle;
+              textarea {
+                min-height: 32px !important;
+                // height: 32px !important;
+                padding: 4px 15px;
+              }
             }
           }
           li {
@@ -773,12 +798,12 @@ export default {
           }
           .right-revise {
             width: 60px;
-            height: 260px;
+            height: 100%;
             position: absolute;
             top: 0;
             right: 0;
             background-color: #f0f0f0;
-            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-left: 1px solid rgba(0, 0, 0, 0.2);
             img {
               width: 24px;
               height: 24px;
@@ -804,8 +829,18 @@ export default {
           }
           .topic {
             margin: 15px 0;
-            input {
-              width: 680px;
+            // input {
+            //   width: 800px;
+            // }
+            .el-textarea {
+              display: inline-block;
+              width: 660px;
+              vertical-align: middle;
+              textarea {
+                min-height: 32px !important;
+                // height: auto !important;
+                padding: 4px 15px;
+              }
             }
           }
           li {
@@ -823,10 +858,33 @@ export default {
       }
     }
   }
+  ::-webkit-scrollbar-track-piece {
+    //滚动条凹槽的颜色，还可以设置边框属性
+    background-color: #f8f8f8;
+  }
+
+  ::-webkit-scrollbar {
+    //滚动条的宽度
+    width: 6px;
+    height: 9px;
+  }
+  ::-webkit-scrollbar-thumb {
+    //滚动条的设置
+    background-color: #dddddd;
+    background-clip: padding-box;
+    min-height: 28px;
+    border-radius: 6px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #bbb;
+  }
 }
 .add-type-button {
   padding: 10px 180px;
   text-align: left;
+}
+.el-textarea__inner {
+  padding: 2px 15px;
 }
 .back-hover {
   background: rgba(250, 250, 250, 1);

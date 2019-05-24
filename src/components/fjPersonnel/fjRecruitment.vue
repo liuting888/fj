@@ -10,7 +10,7 @@
       <div class="fj-block-body">
         <div class="fj-search-inline">
           <el-row>
-            <el-form inline label-position="left">
+            <el-form label-width="85px" inline label-position="left">
               <el-col :lg="6" :xl="6">
                 <el-form-item label="分局：">
                   <el-select
@@ -61,7 +61,7 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item>
+                <el-form-item label="输入查询：">
                   <el-input
                     v-model="searchForm.nameOrPhone"
                     clearable
@@ -71,6 +71,31 @@
                   >
                     <el-button slot="append" @click="searchList">搜索</el-button>
                   </el-input>
+                  <div class="search-btn">
+                    <form
+                      style="display:none;"
+                      name="exportForm"
+                      :action="ajaxUrlDNN + '/exportRecruits?nowUser=' + nowUser + '&endTime=' + searchForm.endTime + '&deptId=' + searchForm.deptId + '&startTime=' + searchForm.startTime + '&page=' + currentPage + '&nameOrPhone=' + searchForm.nameOrPhone + '&rows=' + pageSize"
+                      method="post"
+                      enctype="multipart/form-data"
+                    ></form>
+                    <el-button type="primary" @click="openMFSpopMultiple">
+                      <span>{{multipleSelection.length>1?'批量审核':'审核'}}</span>
+                    </el-button>
+                    <el-button plain @click="exportExcl">
+                      <!-- <i class="el-icon-upload2"></i> -->
+                      <span>导出</span>
+                    </el-button>
+                    <el-tooltip effect="light">
+                      <el-button>招聘二维码</el-button>
+                      <div slot="content">
+                        <img
+                          style="width: 250px;height: 250px;"
+                          :src="ajaxUrlDNN + '/readRecruitQTCode'"
+                        >
+                      </div>
+                    </el-tooltip>
+                  </div>
                 </el-form-item>
               </el-col>
               <el-col :lg="8" :xl="8" class="time-item">
@@ -84,28 +109,6 @@
                     @change="changeSearchTime"
                     size="small"
                   ></el-date-picker>
-                </el-form-item>
-                <el-form-item>
-                  <form
-                    style="display:none;"
-                    name="exportForm"
-                    :action="ajaxUrlDNN + '/exportRecruits?nowUser=' + nowUser + '&endTime=' + searchForm.endTime + '&deptId=' + searchForm.deptId + '&startTime=' + searchForm.startTime + '&page=' + currentPage + '&nameOrPhone=' + searchForm.nameOrPhone + '&rows=' + pageSize"
-                    method="post"
-                    enctype="multipart/form-data"
-                  ></form>
-                  <el-button type="primary" @click="openMFSpopMultiple">
-                    <span>{{multipleSelection.length>1?'批量审核':'审核'}}</span>
-                  </el-button>
-                  <el-button plain @click="exportExcl">
-                    <!-- <i class="el-icon-upload2"></i> -->
-                    <span>导出</span>
-                  </el-button>
-                  <el-tooltip effect="light">
-                    <el-button>招聘二维码</el-button>
-                    <div slot="content">
-                      <img style="width: 250px;height: 250px;" :src="ajaxUrlDNN + '/readRecruitQTCode'"/>
-                    </div>
-                  </el-tooltip>
                 </el-form-item>
               </el-col>
             </el-form>
@@ -267,8 +270,9 @@ export default {
     this.searchList();
     return;
   },
-  beforeRouteEnter:function(to,from,next){ //路由
-    next(function(vm){
+  beforeRouteEnter: function(to, from, next) {
+    //路由
+    next(function(vm) {
       vm.searchList();
     });
   },
@@ -496,7 +500,7 @@ export default {
         path: "/personnel-recruitment-detail",
         query: { id: data.id, step: data.step, state: state }
       });
-    },
+    }
   },
   computed: {},
   beforeDestroy() {},
@@ -544,6 +548,12 @@ export default {
           }
         }
       }
+    }
+    .search-btn{
+      position: absolute;
+      top:0;
+      right: -370px;
+      width: 300px;
     }
   }
   .el-tables {

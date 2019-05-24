@@ -438,7 +438,7 @@ export default {
 				//获取用户在线时间
 				this.remarkUserOnlineTime();
         //获取待办事项
-        // this.refreshBackLog();
+        this.refreshBackLog();
       } else {
         clearInterval(this.timer);
         clearInterval(this.timer2);
@@ -485,8 +485,8 @@ export default {
     },
     refreshBackLog: function() { //获取待办事项
       //清空待办事项
-      // var defer = $.Deferred();
-      // var vm = this;
+      var defer = $.Deferred();
+      var vm = this;
       // clearInterval(this.timer3);
       // this.timer3 = setInterval(function() {
       //   $.ajax({
@@ -588,35 +588,35 @@ export default {
       //获取待办事项
       var defer = $.Deferred();
       var vm = this;
-      // $.ajax({
-      //   //
-      //   url: fjPublic.ajaxUrlDNN + "/getNewBacklog",
-      //   type: "POST",
-      //   data: {
-      //     nowUser: $.cookie(fjPublic.loginCookieKey)
-      //   },
-      //   dataType: "json",
-      //   success: function(data) {
-      //     //console.log(data);
-      //     if (data.list && data.list.length > 0) {
-      //       vm.waitInfoData = null;
-      //       _.each(data.list, function(item) {
-      //         var tmpObj = vm.waitTypes[item.type];
-      //         if (tmpObj) {
-      //           _.each(tmpObj, function(v, k) {
-      //             vm.$set(item, k, v);
-      //           });
-      //         }
-      //       });
-      //       vm.waitInfoData = data.list;
-      //     }
-      //     defer.resolve();
-      //   },
-      //   error: function(err) {
-      //     vm.$message({ type: "warning", message: "获取待办事项失败！" });
-      //     defer.reject();
-      //   }
-      // });
+      $.ajax({
+        //
+        url: fjPublic.ajaxUrlDNN + "/getNewBacklog",
+        type: "POST",
+        data: {
+          nowUser: $.cookie(fjPublic.loginCookieKey)
+        },
+        dataType: "json",
+        success: function(data) {
+          //console.log(data);
+          if (data.list && data.list.length > 0) {
+            vm.waitInfoData = null;
+            _.each(data.list, function(item) {
+              var tmpObj = vm.waitTypes[item.type];
+              if (tmpObj) {
+                _.each(tmpObj, function(v, k) {
+                  vm.$set(item, k, v);
+                });
+              }
+            });
+            vm.waitInfoData = data.list;
+          }
+          defer.resolve();
+        },
+        error: function(err) {
+          vm.$message({ type: "warning", message: "获取待办事项失败！" });
+          defer.reject();
+        }
+      });
       return defer;
     },
     toggleNav: function(ev) {

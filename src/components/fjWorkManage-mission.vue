@@ -188,7 +188,7 @@
     <el-dialog
       :title="dialogTitle"
       :visible.sync="dialogVisible"
-      :append-to-body=true
+      :append-to-body="true"
       :close-on-click-modal="false"
       style="position: absolute"
       @close="closeDialog"
@@ -238,7 +238,8 @@
               ></el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="12" 
+              >
             <el-form-item
               label="任务负责人"
               :label-width="formLabelWidth"
@@ -249,30 +250,41 @@
                 type="primary"
                 @click="openChooseDialog"
                 :disabled="chooseButtonDisabled"
+
+                v-if=" dialogForm.missionState == 0 || dialogForm.missionState == 1 "
+                v-if=" dialogForm.missionState == 2 || dialogForm.missionState == 3"
+                :disable-branch-nodes="true"
               >选择</el-button>-->
               <treeselect
+                v-if="loadTreeSelect"
                 placeholder="请选择任务负责人"
                 :disabled="chooseButtonDisabled"
-                v-model="dialogForm.leadPerson_id"
+                :multiple="isMultiple"
+                no-children-text="暂无"
+                loading-text="加载中..."
+                v-model="selectedMisUserIds"
                 :options="fromData"
-                :disable-branch-nodes="true"
-                value-consists-of="LEAF_PRIORITY"
                 size="small"
+                @input="filterDeptIds"
                 @select="selectLeadPerson"
-                v-if=" dialogForm.missionState == 0 || dialogForm.missionState == 1 "
+                :load-options="loadOptions"
+                value-consists-of="LEAF_PRIORITY"
+                :disable-branch-nodes="true"
               >
                 <div
                   slot="value-label"
                   slot-scope="{ node,labelClassName }"
                   :class="labelClassName"
-                >{{ node.raw.label || '无数据' }}</div>
+                >{{ node.raw.label || '请选择' }}</div>
               </treeselect>
               <el-input
+                v-else
                 autocomplete="off"
                 placeholder="请选择任务负责人"
+                :readonly="true"
                 :disabled="chooseButtonDisabled"
                 v-model="dialogForm.leadPerson_name"
-                v-if=" dialogForm.missionState == 2 || dialogForm.missionState == 3"
+                @click.native="reSelectMisUserSingle"
               >
                 ></el-input>
             </el-form-item>
@@ -425,7 +437,10 @@
               label="图片："
               :label-width="formLabelWidth"
             >
-              <ul class="fj-mis-imgWrap" id="fj-mis-imgWrap">
+              <ul
+                class="fj-mis-imgWrap"
+                id="fj-mis-imgWrap"
+              >
                 <li
                   class="item"
                   v-for="(item1, index) in dialogForm.pictureList"
@@ -436,6 +451,7 @@
                     :data-original="ajaxUrlDNN + '/appgetmedia?fn=' + item1.fileName"
                     :src="ajaxUrlDNN + '/appgetmedia?fn=' + item1.fileName"
                   >
+                  <i class="el-icon-error" v-show="isLeadPerson" @click="deleteLPuploadFile(item1)"></i>
                 </li>
               </ul>
             </el-form-item>
@@ -456,8 +472,10 @@
                 >
                   <video
                     :src="ajaxUrlDNN + '/appgetmedia?fn=' + item2.fileName"
+                    :poster="ajaxUrlDNN + '/appgetmedia?fn=' + item2.frameName"
                     controls
                   />
+                  <i class="el-icon-error" v-show="isLeadPerson" @click="deleteLPuploadFile(item2)"></i>
                 </li>
               </ul>
             </el-form-item>
@@ -481,6 +499,56 @@
                 :disabled="auditInputDisabled"
                 placeholder
                 v-model="dialogForm.auditor_opinion"
+              ></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <!-- 负责人上传图片视频以及完成描述 -->
+        <el-row v-if="isLeadPerson">
+          <el-col>
+            <el-form-item
+              label="上传图片"
+              :label-width="formLabelWidth"
+              class="fj-mis-upload0508"
+            >
+              <!-- 
+                multiple
+               -->
+              <el-upload
+                :action="LPuploadUrl"
+                :before-upload="LPuploadImgBefore"
+                :on-change="LPuploadImgAjax"
+                >
+                <el-button size="small" type="primary">点击上传图片</el-button>
+                <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+              </el-upload>
+            </el-form-item>
+          </el-col>
+          <el-col>
+            <el-form-item
+              label="上传视频"
+              :label-width="formLabelWidth"
+              class="fj-mis-upload0508"
+            >
+              <el-upload
+                :action="LPuploadUrl"
+                :before-upload="LPuploadVideoBefore"
+                :on-change="LPuploadVideoAjax">
+                <el-button size="small" type="primary">点击上传视频</el-button>
+                <div slot="tip" class="el-upload__tip">只能上传mp4文件</div>
+              </el-upload>
+            </el-form-item>
+          </el-col>
+          <el-col>
+            <el-form-item
+              label="完成情况"
+              :label-width="formLabelWidth"
+            >
+              <el-input
+                type="textarea"
+                :rows="3"
+                placeholder="请填写"
+                v-model="dialogForm.execResult"
               ></el-input>
             </el-form-item>
           </el-col>
@@ -524,13 +592,13 @@
         >{{ returnButtonValue }}</el-button>
       </div>
     </el-dialog>
-
   </div>
 </template>
 <script>
 import "element-ui/lib/theme-chalk/display.css";
 import fjBreadNav from "@/components/fjBreadNav";
 import Treeselect from "@riophae/vue-treeselect";
+import { LOAD_CHILDREN_OPTIONS } from '@riophae/vue-treeselect';
 // import the styles
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 export default {
@@ -559,7 +627,17 @@ export default {
       }
     };
     return {
-      iv:null, //viewer
+      //------------------0508
+      LPuploadUrl:fjPublic.ajaxUrlDNN + "/webUpdmedia", //上传图片和视频的地址
+      LPuploadData:null, //要上传的数据
+      isLeadPerson:false,  //是不是任务负责人
+      loadTreeSelect:false,  //是否渲染任务负责人下拉选择框
+      isMultiple:true,  //下拉框是否多选
+      isPublisher:false, //是不是任务发布人
+      selectedMisUserIds:[], //所选的任务负责人id
+      misUserData:[], //加载出来任务负责人数据  
+      //------------------
+      iv: null, //viewer
       ajaxUrlDNN: fjPublic.ajaxUrlDNN,
       breadData: [
         { name: "当前位置:", path: "" },
@@ -652,7 +730,8 @@ export default {
         value: null,
         userId: "",
         pictureList: [],
-        videoList: []
+        videoList: [],
+        
       },
       currentWorkFlow: null,
 
@@ -762,6 +841,8 @@ export default {
   mounted: function() {
     // 初始化任务列表
     this.searchMissionListByCnd();
+    //
+    //this.getFLdeptDataBySearch();
     return;
   },
   filters: {
@@ -782,29 +863,334 @@ export default {
     }
   },
   methods: {
-    clearViewer(){ //清空viewer
-      if(this.iv){
+    getFileType(fileName, symbol) { //获取文件后缀
+      return fileName.substring(fileName.lastIndexOf(symbol) + 1).toLowerCase();
+    },
+    LPsendFile(file){ //发送文件到后台
+      this.LPuploadData = null;
+      this.LPuploadData = new FormData();
+      this.LPuploadData.append("nowUser",$.cookie(fjPublic.loginCookieKey));
+      this.LPuploadData.append("missionId",this.dialogForm.missionId);
+      this.LPuploadData.append("file",file);
+      var vm = this;
+      return $.Deferred((defer)=>{
+        $.ajax({
+          url: fjPublic.ajaxUrlDNN + "/webUpdmedia",
+          type: "POST",
+          contentType:false,
+          processData:false,
+          data:this.LPuploadData,
+          success(data){
+            defer.resolve(data);
+          },
+          error(err){
+            vm.$message({type:"warning",message:data.errorMsg});
+          }
+        });
+      }).promise();
+    },
+    deleteLPuploadFile(info){ //删除已上传的文件
+      this.LPuploadData = null;
+      this.LPuploadData = {};
+      this.LPuploadData["nowUser"] = $.cookie(fjPublic.loginCookieKey);
+      this.LPuploadData["missionId"] = this.dialogForm.missionId;
+      this.LPuploadData["fileName"] = info.fileName;
+      var vm = this;
+      //console.log(this.LPuploadData);
+      //return;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/webDeldmedia",
+        type: "POST",
+        data:this.LPuploadData,
+        success(data){
+          //console.log(data);
+          if(data.errorCode==0){
+            var tmpIndex;
+            if(info.hasOwnProperty("frameName")){
+              _.find(vm.dialogForm.videoList,(item,i)=>{
+                if(item.fileName==info.fileName){
+                  tmpIndex = i;
+                  return true;
+                }
+              });
+              if(_.isNumber(tmpIndex)){
+                vm.dialogForm.videoList.splice(tmpIndex,1);
+                vm.$message({type:"success",message:data.errorMsg});
+              }else{
+                vm.$message({type:"warning",message:"删除视频失败"});
+              }
+            }else{
+              _.find(vm.dialogForm.pictureList,(item,i)=>{
+                if(item.fileName==info.fileName){
+                  tmpIndex = i;
+                  return true;
+                }
+              });
+              if(_.isNumber(tmpIndex)){
+                vm.dialogForm.pictureList.splice(tmpIndex,1);
+                vm.$message({type:"success",message:data.errorMsg});
+              }else{
+                vm.$message({type:"warning",message:"删除图片失败"});
+              }
+            }
+            
+          }else{
+            vm.$message({type:"warning",message:data.errorMsg});
+          }
+        },
+        error(err){
+          vm.$message({type:"warning",message:data.errorMsg});
+        }
+      });
+    },
+    //------------责任人上传图片-------
+    LPuploadImgBefore(){
+      return false;
+    },
+    LPuploadImgAjax(file){ //向后台上传图片
+      //console.log(file.raw);
+      //fjPublic.openLoad("正在上传图片...");
+      var imgType = this.getFileType(file.raw.name,".");
+      var imgTypes = ["jpg","jpeg","png"];
+      if(!_.contains(imgTypes,imgType)){
+        this.$message({type:"warning",message:"请上传对应格式的图片"});
+        return;
+      }
+      //size 500K
+      if(Math.round(file.raw.size/1024)>500){
+        this.$message({type:"warning",message:"上传的图片不能大于500KB"});
+        return;
+      }
+      fjPublic.openLoad("正在上传图片...","body",true);
+      this.LPsendFile(file.raw).then((data)=>{
+        fjPublic.closeLoad();
+        if(data.errorCode==0){
+          this.$message({type:"success",message:data.errorMsg});
+          this.dialogForm.pictureList.push({
+            fileName:data.fileName
+          });
+          //
+          this.clearViewer();
+          this.setViewer(".el-dialog__wrapper.mission-dialogs #fj-mis-imgWrap");
+        }else{
+          this.$message({type:"warning",message:data.errorMsg});
+        }
+      },()=>{
+        fjPublic.closeLoad();
+      });
+    },
+    //------------责任人上传视频----------------
+    LPuploadVideoBefore(){
+      return false;
+    },
+    LPuploadVideoAjax(file){ //向后台上传视频
+      var videoType = this.getFileType(file.raw.name,".");
+      var videoTypes = ["mp4","mov"];
+      if(!_.contains(videoTypes,videoType)){
+        this.$message({type:"warning",message:"请上传对应格式的视频(mp4,mov)"});
+        return;
+      }
+      //size 50M
+      if(Math.round(file.raw.size/(Math.pow(1024,2)))>50){
+        this.$message({type:"warning",message:"上传的视频不能大于50M"});
+        return;
+      }
+      fjPublic.openLoad("正在上传视频...","body",true);
+      this.LPsendFile(file.raw).then((data)=>{
+        console.log(data);
+        fjPublic.closeLoad();
+        if(data.errorCode==0){
+          this.$message({type:"success",message:data.errorMsg});
+          this.dialogForm.videoList.push({
+            fileName:data.fileName,
+            frameName:data.frameName
+          });
+        }else{
+          this.$message({type:"warning",message:data.errorMsg});
+        }
+      },()=>{
+        fjPublic.closeLoad();
+      });
+    },
+    //--------延迟加载任务负责人数据---------0507 
+    reSelectMisUserSingle(){ //重新选择任务负责人->单选
+      if(!this.isPublisher)return;
+      this.selectedMisUserIds = null;
+      this.selectedMisUserIds = "";
+      this.isMultiple = false;
+      this.loadTreeSelect = true;
+    },
+    filterDeptIds(value){
+      console.log(value);
+      //console.log(this.selectedMisUserIds);
+      if(this.isMultiple){
+        //多选
+        var tmpNamesArr = [];
+        _.each(this.selectedMisUserIds,(v)=>{
+          var tmpObj = _.find(this.misUserData,(item)=>{
+            return item.id == v;
+          });
+          if(tmpObj){
+            tmpNamesArr.push(tmpObj.label);
+          }
+        },this);
+        //leadPerson_id赋值
+        this.$set(this.dialogForm,"leadPerson_id",this.selectedMisUserIds.join(","));
+        //leadPerson_name赋值
+        this.$set(this.dialogForm,"leadPerson_name",tmpNamesArr.join(","));
+        console.log(this.dialogForm.leadPerson_id);
+        console.log(this.dialogForm.leadPerson_name);
+      }else{
+        //单选
+        var tmpObj = _.find(this.misUserData,(item)=>{
+          return this.selectedMisUserIds == item.id
+        },this);
+        //leadPerson_id赋值
+        this.$set(this.dialogForm,"leadPerson_id",this.selectedMisUserIds);
+        //leadPerson_name赋值
+        this.$set(this.dialogForm,"leadPerson_name",tmpObj.label);
+        console.log(this.dialogForm.leadPerson_id);
+        console.log(this.dialogForm.leadPerson_name);
+      }
+    },
+    clearMisUserIds(){ //清空组件已选择的任务负责人id
+      if(_.isArray(this.selectedMisUserIds)){
+        this.selectedMisUserIds.splice(0,this.selectedMisUserIds.length);
+      }else{
+        this.selectedMisUserIds = "";
+      }
+    },
+    loadOptions({ action,parentNode,callback }){
+      if(action===LOAD_CHILDREN_OPTIONS){
+        //console.log(parentNode.id);
+        //为人员时，不请求数据
+        if(parentNode.isUser=="1")return;
+        this.getMisDeptMacthedData(parentNode.isUser,parentNode.id).then((data)=>{
+          //处理返回的数据
+          this.operateChildren(data[0].children);
+          //节点赋值
+          parentNode.children = data[0].children;
+          callback();
+        });
+      }
+    },
+    operateChildren(data){ //处理data[0].children
+      if(!data.length)return;
+      //存数据
+      _.each(data,(item)=>{
+        if(item.isUser=="1"){
+          var tmpObj= {};
+          tmpObj.id=item.id;
+          tmpObj.label = item.label
+          this.misUserData.push(tmpObj);
+        }
+      },this);
+      if(this.isAllDept(data)){ //全为部门
+        this.initLoadOptionDeptData(data);
+      }else if(this.isAllUser(data)){ //全为用户
+        //
+      }else{ //有用户又有部门
+        _.each(data,(item)=>{
+          if(item.isUser=="0"){
+            item.children = null;
+          }
+        });
+        // //部门
+        // var tmpDeptData = {};
+        // tmpDeptData.id="depts"+this.loadCount;
+        // tmpDeptData.label="所辖单位";
+        // tmpDeptData.children = [];
+        // //人员
+        // var tmpPersonData = {};
+        // tmpPersonData.id="users"+this.loadCount;
+        // tmpPersonData.label="人员";
+        // tmpPersonData.children = [];
+        // _.each(data,(item)=>{
+        //   var tmpObj = _.extend({},item,true);
+        //   if(item.isUser=="0"){
+        //     tmpDeptData.children.push(tmpObj);
+        //   }else if(item.isUser=="1"){
+        //     tmpPersonData.children.push(tmpObj);
+        //   }
+        // });
+        // //部门数据的children=null->加载数据
+        // this.initLoadOptionDeptData(tmpDeptData.children);
+        // //
+        // data.splice(0,data.length);
+        // data.push(tmpDeptData);
+        // data.push(tmpPersonData);
+      }
+      this.loadCount++;
+    },
+    isAllDept(data){ //全为部门的时候
+      return _.every(data,(item)=>{
+        return item.isUser=="0";
+      });
+    },
+    isAllUser(data){ //是否全为user
+      return _.every(data,(item)=>{
+        return item.isUser=="1";
+      });
+    },
+    initLoadOptionDeptData(arr){ //初始化部门的children=null
+      _.each(arr,(item)=>{
+        item.children = null;
+      });
+    },
+    getMisDeptMacthedData(type,deptId){  //点击树节点加载对应部门数据
+      var url =fjPublic.ajaxUrlDNN +  "/getMissionDeptUserSelect";
+      // 初始化下拉列表
+      return $.Deferred((defer)=>{
+        $.ajax({
+          url: url,
+          type: "POST",
+          data: {
+            type:type,
+            deptId:deptId||"",
+            nowUser: $.cookie(fjPublic.loginCookieKey)
+          },
+          dataType: "json",
+          success: function(data) {
+            fjPublic.closeLoad();
+            console.log(data);
+            //
+            defer.resolve(data);
+          },
+          error: function(err) {
+            fjPublic.closeLoad();
+            defer.reject();
+          }
+        });
+      }).promise();
+      
+    },
+    //-----------------
+    clearViewer() {
+      //清空viewer
+      if (this.iv) {
         this.iv.destroy();
         this.iv = null;
       }
     },
-    setViewer(str){ //设置viewer
-      this.$nextTick(()=>{
-        if(!this.iv){
-          this.iv = new viewer($(str).get(0),{
-              url: "data-original",
-              title: false,
-              navbar: true,
-              toolbar: false
+    setViewer(str) {
+      //设置viewer
+      this.$nextTick(() => {
+        if (!this.iv) {
+          this.iv = new viewer($(str).get(0), {
+            url: "data-original",
+            title: false,
+            navbar: true,
+            toolbar: false
           });
         }
       });
     },
     selectLeadPerson: function(node) {
+      //console.log(node);
       //选择任务负责人---单选  0316
       //console.log(node);
-      this.$set(this.dialogForm, "leadPerson_id", node.id);
-      this.$set(this.dialogForm, "leadPerson_name", node.label);
+      //this.$set(this.dialogForm, "leadPerson_id", node.id);
+      //this.$set(this.dialogForm, "leadPerson_name", node.label);
       //console.log(this.dialogForm);
     },
     currentPageChange: function(pageNum) {
@@ -955,8 +1341,14 @@ export default {
       this.returnButtonValue = "";
       this.currentWorkFlow = null;
       //
-      if (mission) {
+      this.clearMisUserIds();
+      if (mission) { //点击详情
+        //禁用下拉选择框
+        this.isLeadPerson = false; //是否任务执行人
+        this.isPublisher = false; //是否任务发布人
+        this.loadTreeSelect = false;
         var vm = this;
+        fjPublic.openLoad("获取详情...");
         $.ajax({
           url: fjPublic.ajaxUrlDNN + "/searchMissionByMissionId",
           type: "POST",
@@ -971,19 +1363,26 @@ export default {
               vm.dialogForm["userId"] = data.userId;
               mission = data.missions;
               vm.currentWorkFlow = mission.workFlow;
+              fjPublic.closeLoad();
+              //console.log(mission);
             } else {
             }
           },
           error: function(err) {
+            fjPublic.closeLoad();
             defer.reject();
           }
         });
-        if (
+        //------------------------0508
+        this.dialogForm["leadPerson_name"] = mission.leadPerson_name;
+        mission.leadPerson_id&&(this.dialogForm["leadPerson_id"] = mission.leadPerson_id);
+        /* if (
           this.dialogForm["userId"] &&
           this.dialogForm["userId"] != mission.publishUserId
         ) {
           this.openChooseDialog(2);
-        }
+        } */
+        //-------------------------
         // this.dialogForm["missionType"] = mission.missionType;
         // this.dialogForm["missionTitle"] = mission.title;
         // mission.userId  && (this.dialogForm["leadPerson_id"] = mission.userId.split(','))
@@ -994,8 +1393,8 @@ export default {
         // this.dialogForm["missionState"] = mission.status;
         this.dialogForm["missionType"] = mission.missionType;
         this.dialogForm["missionTitle"] = mission.missionTitle;
-        mission.leadPerson_id &&
-          (this.dialogForm["leadPerson_id"] = mission.leadPerson_id.split(","));
+        // mission.leadPerson_id &&
+        //   (this.dialogForm["leadPerson_id"] = mission.leadPerson_id.split(","));
         // mission.acceptUserId && (this.dialogForm["createPerson_name"] = mission.acceptUserId.split(','))
         this.dialogForm["planStart"] = mission.planStart;
         this.dialogForm["planEnd"] = mission.planEnd;
@@ -1017,6 +1416,7 @@ export default {
           ) {
             //发起人可修改
             this.submitButtonValue = "修 改";
+            this.isPublisher = true;
           } else if (
             this.dialogForm["userId"] &&
             this.dialogForm["userId"] == mission.leadPerson_id
@@ -1040,6 +1440,7 @@ export default {
             this.chooseButtonDisabled = false;
             this.hiddenButton = true;
             this.submitButtonValue = "修 改";
+            this.isPublisher = true;
           } else if (
             this.dialogForm["userId"] &&
             this.dialogForm["userId"] == mission.leadPerson_id
@@ -1047,6 +1448,8 @@ export default {
             //责任人完成
             this.hiddenButton = true;
             this.completeButtonValue = "完 成";
+            //是责任人
+            this.isLeadPerson = true;
           } else {
             this.hiddenButton = false;
           }
@@ -1087,7 +1490,12 @@ export default {
           this.auditInputHidden = false;
           this.auditInputDisabled = true;
         }
-      } else {
+      } else { //点击派发任务
+        //启用下拉选择框
+        this.selectedMisUserIds = [];
+        this.isMultiple = true; //多选
+        this.loadTreeSelect = true;
+        //
         this.dialogForm["missionType"] = "0";
         this.dialogForm["missionTitle"] = "";
         this.dialogForm["leadPerson_id"] = null;
@@ -1095,8 +1503,8 @@ export default {
         this.dialogForm["planStart"] = "";
         this.dialogForm["planEnd"] = "";
         this.dialogForm["description"] = "";
-        this.dialogForm["pictureList"]=[];
-        this.dialogForm["videoList"]=[];
+        this.dialogForm["pictureList"] = [];
+        this.dialogForm["videoList"] = [];
         this.dialogForm.missionState = "";
         this.dialogTitle = "派发任务";
         this.dialogForm.missionId = "";
@@ -1111,11 +1519,12 @@ export default {
       var vm = this;
       vm.filterText = "";
       fjPublic.openLoad("正在加载数据请稍后");
-      var url = fjPublic.ajaxUrlDNN + "/getTreeDeptPersonUserData"; //获取部门树数据
-      if (type == 2) {
-        //查看他人发起任务获取所有的
-        url = fjPublic.ajaxUrlDNN + "/getTreeDeptPersonData";
-      }
+      // var url = fjPublic.ajaxUrlDNN + "/getTreeDeptPersonUserData"; //获取部门树数据
+      // if (type == 2) {
+      //   //查看他人发起任务获取所有的
+      //   url = fjPublic.ajaxUrlDNN + "/getTreeDeptPersonData";
+      // }
+      var url =fjPublic.ajaxUrlDNN +  "/getMissionDeptUserSelect";
       // 初始化下拉列表
       $.ajax({
         url: url,
@@ -1127,12 +1536,15 @@ export default {
         dataType: "json",
         success: function(data) {
           fjPublic.closeLoad();
-          //console.log(data);
+          console.log(data);
+          //每次初始化treeselect先清空之前存的人员数据
+          vm.misUserData.splice(0,vm.misUserData.length);
+          vm.operateChildren(data[0].children);
           vm.chooseForm.data = data;
           vm.fromData = data;
           vm.dialogVisible = true;
           //
-          vm.setViewer('.el-dialog__wrapper.mission-dialogs #fj-mis-imgWrap');
+          vm.setViewer(".el-dialog__wrapper.mission-dialogs #fj-mis-imgWrap");
           defer.resolve();
         },
         error: function(err) {
@@ -1196,7 +1608,6 @@ export default {
             );
           }
           //vm.dialogForm.leadPerson_name = vm.dialogForm.leadPerson_id
-
           if (
             Object.prototype.toString.call(vm.dialogForm.createPerson_name) ===
             "[object Array]"
@@ -1205,6 +1616,8 @@ export default {
               ","
             );
           }
+          //console.log(vm.dialogForm);
+          //return;
           if (vm.dialogForm.missionId) {
             $.ajax({
               url: fjPublic.ajaxUrlDNN + "/updateMission",
@@ -1268,6 +1681,10 @@ export default {
     },
     // 完成工作任务
     completeMission: function(formName) {
+      if(!this.dialogForm.execResult){
+        this.$message({type:"warning",message:"请填写任务完成情况"});
+        return;
+      }
       this.operationMission("1", "");
     },
     // 通过工作任务
@@ -1480,11 +1897,12 @@ export default {
   display: flex;
   flex-flow: row wrap;
   align-items: flex-start;
-  margin-bottom:-11px;
-  &>.item {
+  margin-bottom: -11px;
+  & > .item {
     position: relative;
     flex: 0 0 auto;
-    margin-right:11px;margin-bottom:11px;
+    margin-right: 11px;
+    margin-bottom: 11px;
     background: rgba(0, 0, 0, 0.5);
   }
 }
@@ -1492,7 +1910,7 @@ export default {
   & > .item {
     width: 141px;
     height: 179px;
-    overflow: hidden;
+    /* overflow: hidden; */
     &:nth-child(6n) {
       margin-right: 0px;
     }
@@ -1507,6 +1925,7 @@ export default {
       max-width: 100%;
       max-height: 100%;
     }
+    
   }
 }
 
@@ -1514,11 +1933,60 @@ export default {
   & > .item {
     width: 293px;
     height: 200px;
-    &:nth-child(3n) {margin-right:0px;}
-    &:nth-child(3n) ~ .item {margin-bottom:0px;}
-    & > video {
-      position:absolute;top:0;left:0;width:100%;height:100%;
+    &:nth-child(3n) {
+      margin-right: 0px;
     }
+    &:nth-child(3n) ~ .item {
+      margin-bottom: 0px;
+    }
+    & > video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+.fj-mis-imgWrap,.fj-mis-videoWrap {
+  & > .item {
+    &>.el-icon-error {
+      position:absolute;top:-10px;right:-10px;font-size:22px;
+      background:rgba(255,255,255,0.6);border-radius:50%;cursor:pointer;
+    }
+  }
+}
+/* 0508修改 */
+//.fj-content_view.work-mis {
+.fj-mis-upload0508 {
+  .el-form-item__content {
+    position:relative;
+  }
+  .el-upload__tip {
+    position:absolute;left:138px;top:0px;
+    margin-top:0px;font-size:14px;
+    color:rgba(0,0,0,.85);
+  }
+  .el-upload-list {
+    width:600px;
+  }
+  .el-upload-list__item {
+    color:rgba(0,0,0,.65);
+  }
+  .el-upload-list__item-name {
+    max-width:460px;
+  }
+}
+//}
+/* 0507修改 */
+.fj-content_view.work-mis {
+  .el-date-editor .el-range-separator {padding:0px;}
+}
+/* 0506修改 */
+.misOwnerPop20190506 {
+  &.el-dialog__wrapper {
+    .el-checkbox {width:20%;line-height:40px;}
+    .el-checkbox+.el-checkbox {margin-left:0px;}
   }
 }
 </style>

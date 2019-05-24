@@ -27,18 +27,12 @@
                 </el-col>
               </el-row>
               <el-row>
-                <el-col :span="12">
-                  <el-form-item label="题目类型">
-                    <el-checkbox-group v-model="type" :disabled="isDisabled">
-                      <el-checkbox label="1">单选</el-checkbox>
-                      <el-checkbox label="2">多选</el-checkbox>
-                      <el-checkbox label="0">其他</el-checkbox>
-                    </el-checkbox-group>
-                  </el-form-item>
-                </el-col>
-                <el-col :span="12">
+                <el-col :span="24">
                   <el-form-item class="noBR" label="考试类型">
                     <el-select
+                      @change="changeType"
+                      clearable
+                      filterable
                       multiple
                       v-model="examType"
                       :disabled="isDisabled"
@@ -56,23 +50,21 @@
               </el-row>
               <el-row>
                 <el-col :span="12">
+                  <el-form-item label="题目类型">
+                    <el-checkbox-group v-model="type" :disabled="isDisabled">
+                      <el-checkbox label="1">单选</el-checkbox>
+                      <el-checkbox label="2">多选</el-checkbox>
+                      <el-checkbox label="0">其他</el-checkbox>
+                    </el-checkbox-group>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
                   <el-form-item class="noBR" label="考试时长">
                     <el-input
                       type="number"
                       :placeholder="isDisabled?'':'请输入'"
                       :disabled="isDisabled"
                       v-model="ruleForm.data.time"
-                    ></el-input>
-                  </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                  <el-form-item label="题目分数">
-                    <el-input
-                      type="number"
-                      v-model="ruleForm.data.oneScore"
-                      :disabled="isDisabled"
-                      :placeholder="isDisabled?'':'请输入'"
-                      @blur="communityChange"
                     ></el-input>
                   </el-form-item>
                 </el-col>
@@ -90,8 +82,31 @@
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
+                  <el-form-item label="题目分数">
+                    <el-input
+                      type="number"
+                      v-model="ruleForm.data.oneScore"
+                      :disabled="isDisabled"
+                      :placeholder="isDisabled?'':'请输入'"
+                      @blur="communityChange"
+                    ></el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col :span="12">
                   <el-form-item class="noBR" label="试卷分数">
                     <el-input v-model="ruleForm.data.score" disabled></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="错选得分">
+                    <el-input
+                      type="number"
+                      v-model="ruleForm.data.choiceError"
+                      :disabled="isDisabled"
+                      :placeholder="isDisabled?'':'请输入'"
+                    ></el-input>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -114,23 +129,6 @@
                       :disabled="isDisabled"
                       :placeholder="isDisabled?'':'请输入'"
                     ></el-input>
-                  </el-form-item>
-                </el-col>
-              </el-row>
-              <el-row>
-                <el-col :span="12">
-                  <el-form-item label="错选得分">
-                    <el-input
-                      type="number"
-                      v-model="ruleForm.data.choiceError"
-                      :disabled="isDisabled"
-                      :placeholder="isDisabled?'':'请输入'"
-                    ></el-input>
-                  </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                  <el-form-item class="noBR" label>
-                    <!-- <el-input v-model="ruleForm.data.score" disabled></el-input> -->
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -160,9 +158,10 @@
             <el-container>
               <el-aside width="300px" v-if="userInfo.state != 1">
                 <div class="head">
-                  <el-select clearable v-model="examType">
+                  <el-select clearable v-model="examTypes" @change="changeExamType">
+                    <el-option label="题库" value></el-option>
                     <el-option
-                      v-for="item in typeList"
+                      v-for="item in examTypeList"
                       :key="item.itemid"
                       :label="item.itemvalue"
                       :value="item.itemid"
@@ -199,43 +198,55 @@
                 </div>
                 <div class="body">
                   <div
-                    class="check-topic"
+                    :class="['check-topic','back-pid',item.editIcon&&userInfo.state != 1?'back-hover':'back-color']"
                     v-for="(item, index) in ruleForm.list"
                     @mouseover="item.editIcon=true"
                     @mouseleave="item.editIcon=false"
                     :key="index"
                   >
-                    <div class="topic">
-                      {{index+1}}.
-                      <el-input type="text" :disabled="true" v-model="item.question"></el-input>
-                    </div>
+                    <div class="topic">{{index+1}}. {{item.question}}</div>
                     <ul>
+                      <el-radio-group v-if="item.type == '1'" v-model="item.rightOptions">
+                        <el-radio
+                          label="0"
+                          :disabled="(item.rightOptions.indexOf('0')==-1)"
+                        >A: {{item.A}}</el-radio>
+                        <el-radio
+                          label="1"
+                          :disabled="(item.rightOptions.indexOf('1')==-1)"
+                        >B: {{item.B}}</el-radio>
+                        <el-radio
+                          label="2"
+                          :disabled="(item.rightOptions.indexOf('2')==-1)"
+                        >C: {{item.C}}</el-radio>
+                        <el-radio
+                          label="3"
+                          :disabled="(item.rightOptions.indexOf('3')==-1)"
+                        >D: {{item.D}}</el-radio>
+                      </el-radio-group>
                       <el-checkbox-group
+                        v-else
                         v-model="item.rightOptions"
                         :min="item.rightOptions.length"
                         :max="item.rightOptions.length"
                       >
-                        <el-checkbox label="0" :disabled="(item.rightOptions.indexOf('0')==-1)"></el-checkbox>
-                        <el-checkbox label="1" :disabled="(item.rightOptions.indexOf('1')==-1)"></el-checkbox>
-                        <el-checkbox label="2" :disabled="(item.rightOptions.indexOf('2')==-1)"></el-checkbox>
-                        <el-checkbox label="3" :disabled="(item.rightOptions.indexOf('3')==-1)"></el-checkbox>
+                        <el-checkbox
+                          label="0"
+                          :disabled="(item.rightOptions.indexOf('0')==-1)"
+                        >A: {{item.A}}</el-checkbox>
+                        <el-checkbox
+                          label="1"
+                          :disabled="(item.rightOptions.indexOf('1')==-1)"
+                        >B: {{item.B}}</el-checkbox>
+                        <el-checkbox
+                          label="2"
+                          :disabled="(item.rightOptions.indexOf('2')==-1)"
+                        >C: {{item.C}}</el-checkbox>
+                        <el-checkbox
+                          label="3"
+                          :disabled="(item.rightOptions.indexOf('3')==-1)"
+                        >D: {{item.D}}</el-checkbox>
                       </el-checkbox-group>
-                      <li>
-                        A:
-                        <el-input :disabled="true" type="text" v-model="item.A"></el-input>
-                      </li>
-                      <li>
-                        B:
-                        <el-input type="text" :disabled="true" v-model="item.B"></el-input>
-                      </li>
-                      <li>
-                        C:
-                        <el-input type="text" :disabled="true" v-model="item.C"></el-input>
-                      </li>
-                      <li>
-                        D:
-                        <el-input type="text" :disabled="true" v-model="item.D"></el-input>
-                      </li>
                       <li>
                         <span style="color:#409EFF">题目解析</span>
                         : {{item.analysis?item.analysis:'无'}}
@@ -282,6 +293,8 @@ export default {
       type: [], //题目类型
       typeList: [], //考试类型
       examType: [], //考试类型选中
+      examTypes: "", //题库类型
+      examTypeList: [], //题库类型下拉框
       ruleForm: {
         data: {
           id: "",
@@ -348,6 +361,22 @@ export default {
           return false;
         }
       });
+    },
+    //考试类型下拉框change
+    changeType(val) {
+      let vm = this;
+      vm.examTypeList = [];
+      for (let i = 0; i < val.length; i++) {
+        for (let j = 0; j < vm.typeList.length; j++) {
+          if (vm.typeList[j].itemid == val[i]) {
+            vm.examTypeList.push(vm.typeList[j]);
+          }
+        }
+      }
+    },
+    //题库下拉框change
+    changeExamType(val) {
+      this.searchAttendHistory(false, val);
     },
     //题目数量变化对于改变题目分数
     amountChange(val) {
@@ -479,8 +508,12 @@ export default {
               B: data.list[i].options.split("&GXCF&")[1],
               C: data.list[i].options.split("&GXCF&")[2],
               D: data.list[i].options.split("&GXCF&")[3],
-              rightOptions: data.list[i].rightOptions.split("|"),
+              rightOptions:
+                data.list[i].type == 1
+                  ? data.list[i].type
+                  : data.list[i].rightOptions.split("|"),
               analysis: data.list[i].analysis,
+              type: data.list[i].type,
               editIcon: false //用来判断是否展示侧边栏图标
             };
             vm.ruleForm.list.unshift(tm);
@@ -503,8 +536,12 @@ export default {
         }, 1000);
       }
     },
-    // 获取题库列表数据
-    searchAttendHistory: function(add) {
+    /**
+     * @description: 获取题库列表数据
+     * @param {type} 题库类型
+     * @return:
+     */
+    searchAttendHistory: function(add, type) {
       var defer = $.Deferred();
       var vm = this;
       $.ajax({
@@ -513,7 +550,7 @@ export default {
         data: {
           question: vm.searchAttend,
           type: vm.type.join(","),
-          examType: vm.examType.join(",")
+          examType: type ? type : vm.examType.join(",")
         },
         dataType: "json",
         success: function(list) {
@@ -619,7 +656,9 @@ export default {
             B: data.options.split("&GXCF&")[1],
             C: data.options.split("&GXCF&")[2],
             D: data.options.split("&GXCF&")[3],
-            rightOptions: data.rightOptions.split("|"),
+            rightOptions:
+              data.type == 1 ? data.rightOptions : data.rightOptions.split("|"),
+            type: data.type,
             editIcon: false //用来判断是否展示侧边栏图标
           };
           vm.ruleForm.list.unshift(tm);
@@ -648,8 +687,9 @@ export default {
         vm.headInfo.radio = 0;
         vm.headInfo.selection = 0;
         for (let i = 0; i < val.length; i++) {
-          val[i].rightOptions.length == 1 && (vm.headInfo.radio += 1);
-          val[i].rightOptions.length > 1 && (vm.headInfo.selection += 1);
+          val[i].rightOptions.length > 1
+            ? (vm.headInfo.selection += 1)
+            : (vm.headInfo.radio += 1);
         }
       }
     }
@@ -755,42 +795,66 @@ export default {
       .body {
         .check-topic {
           position: relative;
+          overflow: hidden;
           .el-checkbox-group {
-            position: absolute;
             margin-top: -16px;
             width: 20px;
+
             .el-checkbox {
               margin-top: 24px;
               margin-left: 0;
+              cursor: auto;
             }
-            .el-checkbox__label {
-              display: none;
+            .is-disabled + span.el-checkbox__label {
+              cursor: auto;
+              color: rgba(0, 0, 0, 0.65);
+            }
+            .is-checked + .el-checkbox__label {
+              color: rgba(0, 0, 0, 0.65);
             }
           }
           .el-checkbox__input.is-disabled .el-checkbox__inner {
             cursor: auto;
           }
+          .el-radio-group {
+            margin-top: -18px;
+            width: 20px;
+
+            .el-radio {
+              margin-top: 26px;
+              margin-left: 0;
+              cursor: auto;
+            }
+            .is-disabled + span.el-radio__label {
+              cursor: auto;
+              color: rgba(0, 0, 0, 0.65);
+            }
+            .is-checked + .el-radio__label {
+              color: rgba(0, 0, 0, 0.65);
+            }
+          }
+          .el-radio__input.is-disabled .el-radio__inner {
+            cursor: auto;
+          }
           .right-revise {
             width: 60px;
             height: 100%;
+            line-height: 100%;
             position: absolute;
             top: 0;
             right: 0;
             background-color: #f0f0f0;
-            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-left: 1px solid rgba(0, 0, 0, 0.2);
             img {
               width: 24px;
               height: 24px;
-              margin-top: 86px;
+              margin-top: 100px;
               margin-left: 17px;
               cursor: pointer;
             }
           }
           .el-radio {
             margin-right: 4px;
-            .el-radio__label {
-              display: none;
-            }
           }
           .el-input.is-disabled .el-input__inner {
             background-color: #fff;
@@ -804,7 +868,7 @@ export default {
           .topic {
             margin: 15px 0;
             input {
-              width: 680px;
+              width: 650px;
             }
           }
           li {
@@ -813,6 +877,17 @@ export default {
               width: 480px;
             }
           }
+        }
+        .back-hover {
+          background: rgba(250, 250, 250, 1);
+          border: 1px solid rgba(0, 0, 0, 0.2);
+        }
+        .back-color {
+          border: 1px solid #fff;
+        }
+        .back-pid {
+          padding-left: 10px;
+          padding-right: 70px;
         }
       }
     }

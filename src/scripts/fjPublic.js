@@ -1,8 +1,8 @@
 (function(){
 var commonData = {
-    // ajaxUrlDNN:'http://172.16.10.27:8082/Auxpolice1.0',//本地
     // ajaxUrlDNN:'http://172.16.10.27:8080/Auxpolice1.0',//本地
     ajaxUrlDNN:'http://172.16.10.59:8080/Auxpolice1.0',//本地
+    // ajaxUrlDNN:'http://172.16.10.59:8280/Auxpolice1.0',//本地
     // ajaxUrlDNN:getRealPath(),//请求地址 -> DNN
     loginCookieKey:'', //登录成功后的cookie名 'AUXPOLICE10'
     userRoles:{ //用户角色字段
@@ -21,16 +21,18 @@ var commonData = {
         initZoomDc:''     //数据中心初始比例  //地区中心经纬度
     },
     waitLoadObj:null,
-    openLoad:function(txt){
+    openLoad:function(txt,wrap,bg){
         if(!$.cookie(this.loginCookieKey))return;
         this.closeLoad();
         var loadingTxt = txt || 'loading...';
+        var wrapc = wrap?wrap:'.fj-body';
+        var bgc = bg?'rgba(0, 0, 0, 0.1)':'rgba(0, 0, 0, 0.7)';
         this.waitLoadObj = Vue.prototype.$loading({
             lock: true,
             text: loadingTxt,
             spinner: 'el-icon-loading',
-            background: 'rgba(0, 0, 0, 0.7)',
-            target:'.fj-body'
+            background: bgc,
+            target:wrapc
         });
     },
     closeLoad:function(){
