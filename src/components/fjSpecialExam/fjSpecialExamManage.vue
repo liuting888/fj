@@ -8,7 +8,7 @@
         <div class="fj-block-head kaohe">
           <p class="title" @mouseover="isTitleDisabled=false" @mouseout="isTitleDisabled=true">
             <!-- <el-input :disabled="isTitleDisabled" type="text" v-model="ruleForm.data.title"></el-input> -->
-            <el-button type="primary" @click="createPaper()" v-if="userInfo.state == 0">生成试卷</el-button>
+            <el-button type="primary" @click="createPaper('add')" v-if="userInfo.state == 0">生成试卷</el-button>
           </p>
         </div>
         <div class="fj-block-body">
@@ -150,7 +150,7 @@
           <div class="fj-block-head kaohe">
             <p class="title">
               <span>试卷内容</span>
-              <el-button @click="createPaper()" v-if="userInfo.state != 1">重新生成试卷</el-button>
+              <el-button @click="createPaper('add')" v-if="userInfo.state != 1">重新生成试卷</el-button>
               <el-button type="primary" @click="postRuleForm()" v-if="userInfo.state != 1">保存试卷</el-button>
             </p>
           </div>
@@ -158,7 +158,7 @@
             <el-container>
               <el-aside width="300px" v-if="userInfo.state != 1">
                 <div class="head">
-                  <el-select clearable v-model="examTypes" @change="changeExamType">
+                  <el-select clearable v-model="examTypes">
                     <el-option label="题库" value></el-option>
                     <el-option
                       v-for="item in examTypeList"
@@ -180,7 +180,12 @@
                   </el-input>
                 </div>
                 <el-checkbox-group v-model="checkedCities" :max="ruleForm.data.amount">
-                  <el-checkbox v-for="city in cities" :label="city" :key="city">{{city}}</el-checkbox>
+                  <!-- <el-checkbox v-for="city in cities" :label="city" :key="city">{{city}}</el-checkbox> -->
+                  <el-checkbox
+                    v-for="(city, index) in citiesList"
+                    :label="city.id"
+                    :key="city.id"
+                  >{{index+1}}.{{city.question}}</el-checkbox>
                 </el-checkbox-group>
               </el-aside>
               <el-main :class="isDisabled?'aside-left':''">
@@ -374,10 +379,6 @@ export default {
         }
       }
     },
-    //题库下拉框change
-    changeExamType(val) {
-      this.searchAttendHistory(false, val);
-    },
     //题目数量变化对于改变题目分数
     amountChange(val) {
       let vm = this;
@@ -409,17 +410,21 @@ export default {
       }
     },
     //生成试卷
-    createPaper() {
-      // if (!this.ruleForm.data.score || !this.type.length > 0) {
-      //   return this.$message({
-      //     message: "请完整填写试卷信息",
-      //     type: "warning"
-      //   });
-      // }
+    createPaper(add) {
+      if (
+        !this.ruleForm.data.score ||
+        !this.type.length > 0 ||
+        !this.examType.length > 0
+      ) {
+        return this.$message({
+          message: "请完整填写试卷信息",
+          type: "warning"
+        });
+      }
       this.isCreatePaperShow = true;
       this.ruleForm.list = [];
       this.checkedCities = [];
-      this.searchAttendHistory(true);
+      add == "add" && this.searchAttendHistory(add);
     },
     treeAudit(i) {
       let list = this.$refs.tree.getCheckedNodes();
@@ -446,10 +451,10 @@ export default {
     },
     //删除考题
     delTopic(index) {
-      let title = this.ruleForm.list[index].question;
+      let id = this.ruleForm.list[index].id;
       this.ruleForm.list.splice(index, 1);
       this.checkedCities.forEach((item, i) => {
-        if (item.slice(item.indexOf(".") + 1) == title) {
+        if (item == id) {
           this.checkedCities.splice(i, 1);
         }
       });
@@ -516,7 +521,8 @@ export default {
               type: data.list[i].type,
               editIcon: false //用来判断是否展示侧边栏图标
             };
-            vm.ruleForm.list.unshift(tm);
+            vm.ruleForm.list.push(tm);
+            vm.$set(vm.checkedCities, i, tm.id);
           }
         },
         error: function(err) {}
@@ -524,17 +530,28 @@ export default {
     },
     // 生成试卷根据题目数量自动生成题目
     setAmountlist: function() {
-      let vm = this;
-      // vm.checkedCities.push("1.问题一");
-      let originalArray = JSON.parse(JSON.stringify(vm.cities)); //原数组
-      originalArray.sort(function() {
-        return 0.5 - Math.random();
+      var defer = $.Deferred();
+      var vm = this;
+      $.ajax({
+        url: fjPublic.ajaxUrlDNN + "/getRandomExam",
+        type: "POST",
+        data: {
+          number: vm.ruleForm.data.amount,
+          type: vm.type.join(","),
+          examType: vm.examType.join(",")
+        },
+        dataType: "json",
+        success: function(list) {
+          vm.checkedCities = [];
+          for (let i = 0; i < list.data.length; i++) {
+            setTimeout(() => {
+              vm.addExam(list.data[i]);
+              vm.$set(vm.checkedCities, i, list.data[i]);
+            }, 0);
+          }
+        },
+        error: function(err) {}
       });
-      for (let i = 0; i < vm.ruleForm.data.amount; i++) {
-        setTimeout(() => {
-          vm.$set(vm.checkedCities, i, originalArray[i]);
-        }, 1000);
-      }
     },
     /**
      * @description: 获取题库列表数据
@@ -562,7 +579,7 @@ export default {
             vm.cities.push(i + 1 + "." + data[i].question);
             vm.citiesId.push(data[i].id);
           }
-          if (add) {
+          if (add == "add") {
             setTimeout(() => {
               vm.setAmountlist();
             }, 0);
@@ -626,6 +643,30 @@ export default {
         }
       });
     },
+    //添加试题
+    addExam(id) {
+      let vm = this;
+      let data = "";
+      for (let i = 0; i < vm.citiesList.length; i++) {
+        if (vm.citiesList[i].id == id) {
+          data = vm.citiesList[i];
+          break;
+        }
+      }
+      let tm = {
+        id: data.id,
+        question: data.question,
+        A: data.options.split("&GXCF&")[0],
+        B: data.options.split("&GXCF&")[1],
+        C: data.options.split("&GXCF&")[2],
+        D: data.options.split("&GXCF&")[3],
+        rightOptions:
+          data.type == 1 ? data.rightOptions : data.rightOptions.split("|"),
+        type: data.type,
+        editIcon: false //用来判断是否展示侧边栏图标
+      };
+      vm.ruleForm.list.unshift(tm);
+    },
     setCreated() {
       this.userInfo = this.$route.query;
       this.userInfo.state != 0 && (this.isCreatePaperShow = true);
@@ -638,30 +679,8 @@ export default {
     checkedCities: {
       handler: function(val, oldval) {
         let vm = this;
-        if (val.length >= oldval.length) {
-          let index = val[val.length - 1].split(".")[0] - 1;
-          let data = vm.citiesList[index];
-          for (let i = 0; i < vm.ruleForm.list.length; i++) {
-            if (vm.ruleForm.list[i].id == data.id) {
-              return this.$message({
-                message: "试题已存在",
-                type: "warning"
-              });
-            }
-          }
-          let tm = {
-            id: data.id,
-            question: data.question,
-            A: data.options.split("&GXCF&")[0],
-            B: data.options.split("&GXCF&")[1],
-            C: data.options.split("&GXCF&")[2],
-            D: data.options.split("&GXCF&")[3],
-            rightOptions:
-              data.type == 1 ? data.rightOptions : data.rightOptions.split("|"),
-            type: data.type,
-            editIcon: false //用来判断是否展示侧边栏图标
-          };
-          vm.ruleForm.list.unshift(tm);
+        if (val.length > oldval.length) {
+          vm.addExam(val[val.length - 1]);
         } else {
           //对比取出2个数组之间不同的元素
           function getArrDifference(arr1, arr2) {
@@ -670,13 +689,12 @@ export default {
             });
           }
           let tm = getArrDifference(val, oldval)[0];
-          this.ruleForm.list.forEach((item, i) => {
-            for (const key in item) {
-              if (item[key] == vm.citiesId[tm.split(".")[0] - 1]) {
-                this.ruleForm.list.splice(i, 1);
-              }
+          for (let i = 0; i < vm.ruleForm.list.length; i++) {
+            if (vm.ruleForm.list.id == tm.id) {
+              vm.ruleForm.list.splice(i, 1);
+              break;
             }
-          });
+          }
         }
       }
     },
@@ -761,7 +779,7 @@ export default {
         max-height: 800px;
       }
       .el-checkbox {
-        width: 100%;
+        min-width: 100%;
         height: 50px;
         line-height: 50px;
         padding-left: 10px;
