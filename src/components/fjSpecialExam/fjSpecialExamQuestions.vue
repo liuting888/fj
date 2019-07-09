@@ -72,7 +72,7 @@
                   题目:
                   <el-input
                     type="textarea"
-                    :autosize="{ minRows: 1, maxRows: 2}"
+                    :autosize="{ minRows: 1, maxRows: 3}"
                     v-model="addTopicList.question"
                   ></el-input>
                 </div>
@@ -139,7 +139,7 @@
                   {{ruleForm.list.length-index}}.
                   <el-input
                     type="textarea"
-                    :autosize="{ minRows: 1, maxRows: 2}"
+                    :autosize="{ minRows: 1, maxRows: 3}"
                     :disabled="item.edit"
                     v-model="item.question"
                   ></el-input>
@@ -396,6 +396,7 @@ export default {
           type: vm.ruleForm.list[index].type,
           analysis: vm.ruleForm.list[index].analysis
         };
+        edtlist["nowUser"] = $.cookie(fjPublic.loginCookieKey);
         $.ajax({
           url: fjPublic.ajaxUrlDNN + "/updExamInfo",
           type: "POST",
@@ -437,6 +438,7 @@ export default {
         url: fjPublic.ajaxUrlDNN + "/removeExamFromWarehouse",
         type: "POST",
         data: {
+          nowUser: $.cookie(fjPublic.loginCookieKey),
           id: id
         },
         dataType: "json",
@@ -513,6 +515,7 @@ export default {
           url: fjPublic.ajaxUrlDNN + "/addExamWarehouse",
           type: "POST",
           data: {
+            nowUser: $.cookie(fjPublic.loginCookieKey),
             title: vm.ruleForm.data.title,
             type: vm.ruleForm.data.type,
             examType: vm.ruleForm.data.examType,
@@ -546,6 +549,7 @@ export default {
         url: fjPublic.ajaxUrlDNN + "/updExamWarehouse",
         type: "POST",
         data: {
+          nowUser: $.cookie(fjPublic.loginCookieKey),
           id: vm.ruleForm.data.id,
           title: vm.ruleForm.data.title,
           type: vm.ruleForm.data.type,
@@ -565,6 +569,7 @@ export default {
     addExamToWarehouse: function(list) {
       var defer = $.Deferred();
       var vm = this;
+      list["nowUser"] = $.cookie(fjPublic.loginCookieKey);
       $.ajax({
         url: fjPublic.ajaxUrlDNN + "/addExamToWarehouse",
         type: "POST",
@@ -829,17 +834,13 @@ export default {
           }
           .topic {
             margin: 15px 0;
-            // input {
-            //   width: 800px;
-            // }
             .el-textarea {
               display: inline-block;
-              width: 660px;
+              width: 95%;
               vertical-align: middle;
               textarea {
                 min-height: 32px !important;
-                // height: auto !important;
-                padding: 4px 15px;
+                padding: 5px 15px;
               }
             }
           }

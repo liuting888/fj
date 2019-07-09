@@ -255,7 +255,7 @@ UE.I18N['zh-cn'] = {
     //===============dialog i18N=======================
     'insertimage':{
         'static':{
-            'lang_tab_remote':"插入图片", //节点
+            'lang_tab_remote':"", //节点
             'lang_tab_upload':"本地上传",
             'lang_tab_online':"在线管理",
             'lang_tab_search':"图片搜索",

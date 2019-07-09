@@ -37,12 +37,13 @@
       top="25vh"
       class="check-dialog"
     >
-      <div>请选择需要签订的年数</div>
+      <div>请选择需要签订的年数:</div>
       <div>
         <el-radio v-model="radio" label="1">1年</el-radio>
         <el-radio v-model="radio" label="2">2年</el-radio>
         <el-radio v-model="radio" label="3">3年</el-radio>
       </div>
+      <div>警号:<el-input v-model="userAccount" placeholder="请输入警号"></el-input></div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="checkDialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="review">确 定</el-button>
@@ -68,6 +69,7 @@ export default {
         name: ""
       },
       iframeSrc: "",
+      userAccount: "",
       // 审核弹出框数据
       checkDialogVisible: false,
       checkDialogVisibleModal: false,
@@ -102,7 +104,8 @@ export default {
         type: "POST",
         data: {
           id: vm.userInfo.id,
-          year: vm.radio
+          year: vm.radio,
+          userAccount:vm.userAccount
         },
         dataType: "json",
         success: function(data) {
@@ -139,7 +142,8 @@ export default {
         },
         dataType: "json",
         success: function(data) {
-          vm.iframeSrc = fjPublic.ajaxUrlDNN + "/" + data.data;
+          vm.iframeSrc = fjPublic.ajaxUrlDNN + "/" + data.data.fileName;
+          vm.userAccount = data.data.useraccount;
           defer.resolve();
         },
         error: function(err) {
@@ -184,6 +188,10 @@ export default {
   .el-dialog__body {
     div {
       margin: 20px;
+    }
+    .el-input{
+      margin: 0;
+      margin-left:10px; 
     }
   }
 }

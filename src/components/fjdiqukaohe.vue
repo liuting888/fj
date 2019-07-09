@@ -36,7 +36,7 @@
                 <el-option v-for="item in options" :key="item.deptId" :label="item.deptName" :value="item.deptId">
                 </el-option>
               </el-select>
-              <span class="title fj-fl" style="margin-left:30px;">派出所：</span>
+              <span class="title fj-fl">派出所：</span>
               <el-input class="fj-fl search" suffix-icon="el-icon-search" clearable v-model="deptName" @clear="changeRTdataByPCSname"
               @input="changeRTdataByPCSname"  placeholder="请输入派出所名称"></el-input>
               <span class="title fj-fl">月份：</span>
@@ -44,7 +44,7 @@
                 placeholder="请选择月份">
               </el-date-picker>
             </div>
-            <div class="item fj-fl mj-zz">
+            <div class="item fj-fl">
               <el-button plain @click="allEdit" :class="{'is-disabled':!isCurMonth}">批量操作</el-button>
               <!--<el-button plain @click="getALog">记录查询</el-button>-->
               <el-button plain @click="exportData">导出</el-button>
@@ -1422,4 +1422,11 @@
   /* 0301修改 score-minus */
   .fj-content_view.dqkh .el-table td .score-plus {color:green;}
   .fj-content_view.dqkh .el-table td .score-minus {color:red;}
+  /* 0514修改 */
+  @media screen and (max-width:1366px) {
+    .fj-content_view.dqkh .fj-block-body > .filterOpe-area {padding-left:0px;}
+    .fj-content_view.dqkh .fj-block-body > .filterOpe-area .item {font-size:0;margin-right:10px;}
+    .fj-content_view.dqkh .fj-block-body > .filterOpe-area .item > .title {font-size:14px;}
+    .fj-content_view.dqkh .fj-block-body > .filterOpe-area .item:last-of-type {margin-right:0px;}
+  }
 </style>

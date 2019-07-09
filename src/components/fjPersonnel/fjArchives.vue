@@ -98,25 +98,19 @@
                     type="primary"
                     @click="exportExcl"
                   >{{multipleSelection.length>1?'批量导出':'导出'}}</el-button>
-                </el-form-item> -->
+                </el-form-item>-->
               </el-col>
             </el-form>
           </el-row>
         </div>
         <el-table :data="tableDataList" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="55"></el-table-column>
+          <!-- <el-table-column type="selection" width="55"></el-table-column> -->
           <el-table-column prop="deptName" label="所在区域" width="100px" show-overflow-tooltip></el-table-column>
           <el-table-column prop="userName" label="姓名" width="80px"></el-table-column>
           <el-table-column prop="userAccount" label="警号"></el-table-column>
           <el-table-column prop="job" label="职位"></el-table-column>
-          <el-table-column
-            label="入职日期"
-            show-overflow-tooltip
-            prop="entryTime"
-          ></el-table-column>
-          <el-table-column label="工龄（月）" prop="month" width="120px">
-            
-          </el-table-column>
+          <el-table-column label="入职日期" show-overflow-tooltip prop="entryTime"></el-table-column>
+          <el-table-column label="工龄（月）" prop="month" width="120px"></el-table-column>
           <el-table-column label="在职状态" prop="leave_state" width="120px">
             <template slot-scope="scope">
               <span
@@ -124,16 +118,13 @@
                 :class="scope.row.state == 0 ? 'green' : scope.row.state == 1 ? 'grey' : 'red'"
               >
                 {{parseInt( scope.row.state) === 0 ? '在职' : parseInt( scope.row.state) === 1 ?'离职'
-                : '试用'}}
+                : parseInt( scope.row.state) === 2?'试用':'未签订'}}
               </span>
             </template>
           </el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
-              <span
-                class="ope-txt"
-                @click="goDetails(scope.row.id)"
-              >详情</span>
+              <span class="ope-txt" @click="goDetails(scope.row.id)">详情</span>
             </template>
           </el-table-column>
         </el-table>
@@ -292,11 +283,12 @@ export default {
     },
     // 设置获取列表参数
     setSearchList: function() {
+      let userInfo = $.parseJSON(fjPublic.getLocalData("userInfo"));
+      this.searchForm["userId"] = userInfo.userId;
       this.searchForm["pageNumber"] = this.currentPage;
       this.searchForm["pageSize"] = this.pageSize;
       // 传入当前用户信息
       this.searchForm["nowUser"] = this.nowUser;
-
     },
     /**
      * 查看，编辑，新建
@@ -305,7 +297,7 @@ export default {
     goDetails(id) {
       this.$router.push({
         path: "/personnel-archives-detail",
-        query: { 'id': id }
+        query: { id: id }
       });
       //设置缓存，到编辑回显
       // state != 0 && fjPublic.setLocalData("ybssItem", JSON.stringify(item));

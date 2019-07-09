@@ -46,7 +46,7 @@
             <div class="fj-block-body">
                 <!-- 筛选操作区域 -->
                 <div class="filterOpe-area fj-clear">
-                    <div class="select-box">
+                    <div class="select-box fj-fl">
                         <span class="title fj-fl">单位筛选：</span>
                         <el-select class="fj-fl" :disabled="isFJrole" v-model="rankFenjvId" @change="getPCSdataById" clearable  placeholder="请选择区县分局">
                             <el-option v-for="item in FLdeptsData" :key="item.deptId" :label="item.deptName" :value="item.deptId"></el-option>
@@ -56,7 +56,7 @@
                         </el-select>
                         <el-input class="fj-fl search" v-model="userNameOrAccount" suffix-icon="el-icon-search" clearable placeholder="请输入姓名或警号" @input="changeRnakListDataNA" @clear="changeRnakListDataNA"></el-input>
                     </div>
-                    <div class="btn-box">
+                    <div class="btn-box fj-fl">
                         <form style="display:none;" name="exportRankForm" :action="exportFileUrl+'/exportUserReportList?deptId='+rankPcsId+'&month='+selectedRankMonth+'&page='+currentPage+'&userNameOrAccount='+userNameOrAccount+'&rows='+pageSize + '&pageOrNot=1'"
                             method="post" enctype="multipart/form-data"></form>
                         <el-button :class="{'is-disabled':notCurMonthTime}" type="primary" @click="openMFSpopMultiple"><!-- <i class="el-icon-edit"></i> --><span>批量考核</span></el-button>
@@ -1127,9 +1127,8 @@ export default {
 .fj-content_view.grkh > .fj-block.rank .details > .el-date-editor {margin-top:1px;margin-right:10px;}
 .fj-content_view.grkh .fj-block-head > .details > .el-button {margin-top:8px;}
 /*  */
-.fj-content_view.grkh .fj-block-body > .filterOpe-area > .select-box {margin-bottom:16px;}
 .fj-content_view.grkh .fj-block-body > .filterOpe-area > .select-box > .el-select {margin-right:30px;}
-.fj-content_view.grkh .fj-block-body > .filterOpe-area > .select-box > .el-button {margin-left:30px;}
+.fj-content_view.grkh .fj-block-body > .filterOpe-area > .btn-box > .el-button {margin-left:30px;}
 .fj-content_view.grkh .fj-block-body > .filterOpe-area > .btn-box {font-size:0px;}
 /*  */
 .fj-content_view.grkh .depts-select-info {height:40px;line-height:40px;padding-left:16px;margin-bottom:16px;background:#E6F7FF;border:1px solid #BAE7FF;}
@@ -1153,8 +1152,8 @@ export default {
 .fj-content_view.grkh .el-table .el-table__row.show {background:#f5f7fa;}
 /* @media */
 @media screen and (min-width:1592px) {
-    .fj-content_view.grkh .fj-block-body > .filterOpe-area > .select-box {float:left;margin-bottom:0px;}
-    .fj-content_view.grkh .fj-block-body > .filterOpe-area > .btn-box {float:left;margin-left:10px;}
+    /* .fj-content_view.grkh .fj-block-body > .filterOpe-area > .select-box {float:left;margin-bottom:0px;}
+    .fj-content_view.grkh .fj-block-body > .filterOpe-area > .btn-box {float:left;margin-left:10px;} */
     /*  */
     .fj-content_view.grkh #MFUPop .el-dialog {width:683px;}
 }

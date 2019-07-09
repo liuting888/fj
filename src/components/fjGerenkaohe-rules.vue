@@ -14,8 +14,8 @@
                 <!-- <p class="add-rule">
                     <i class="el-icon-circle-plus"></i><span>添加规则</span>
                 </p> -->
-                <ul class="filterOpe-area">
-                    <li class="area-line fj-clear">
+                <ul class="filterOpe-area fj-clear">
+                    <li class="area-line fj-fl">
                         <div class="item fj-fl">
                             <span class="fj-fl title">单位筛选：</span>
                             <el-select class="fj-fl" :disabled="isFJrole" v-model="RFenjvId" @change="getPCSdataById" clearable  placeholder="请选择区县分局">
@@ -30,6 +30,8 @@
                           </el-select>
                             <el-checkbox style="margin-left: 10px;line-height:30px;" v-model="searchSystem" @change="changeSearchSystem">系统考核规则(市公安局)</el-checkbox>
                         </div>
+                    </li>
+                    <li class="area-line fj-fl">
                         <div class="item fj-fl">
                             <span class="fj-fl title">关键字：</span>
                             <el-input class="fj-fl search" v-model="userNameOrDes" suffix-icon="el-icon-search" placeholder="请输入规则内容或添加名称" clearable @clear="getRulesDataByNR"></el-input>

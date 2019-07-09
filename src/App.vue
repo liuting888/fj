@@ -1,26 +1,15 @@
 <template>
   <div id="app">
     <!-- 登录 -->
-    <div
-      class="fj-login-box"
-      v-show="toggleLoginArea"
-    >
+    <div class="fj-login-box" v-show="toggleLoginArea">
       <!-- 背景图片 -->
-      <img
-        class="login-bg"
-        src="@/assets/images/fj-login-bg2.png"
-        alt=""
-      >
+      <img class="login-bg" src="@/assets/images/fj-login-bg2.png" alt>
       <!-- 登录区域 -->
       <div class="fj-login-area">
         <!-- <img class="area-bg" src="static/images/fj-login-innerBg.png" alt=""> -->
         <div class="fj-login-inner">
           <div class="title-area">
-            <img
-              src="@/assets/images/fj-logo.png"
-              alt=""
-              class="logo"
-            >
+            <img src="@/assets/images/fj-logo.png" alt class="logo">
             <p class="title">{{cityName}}辅警工作管理系统</p>
             <ul class="kh-list">
               <li class="kh-list-item">满足辅警人员日常管理需要</li>
@@ -32,49 +21,23 @@
             </ul>
           </div>
           <div class="login-info">
-            <img
-              class="bg"
-              src="@/assets/images/fj-info-bg.png"
-              alt=""
-            >
+            <img class="bg" src="@/assets/images/fj-info-bg.png" alt>
             <div class="login-info-wrap fj-clear">
               <div class="fj-fl left">
                 <p class="title">用户登录</p>
                 <div class="insert-line">
-                  <el-input
-                    clearable
-                    placeholder="请输入登录账号"
-                    v-model="userName"
-                  ></el-input>
+                  <el-input clearable placeholder="请输入登录账号" v-model="userName"></el-input>
                 </div>
                 <div class="insert-line">
-                  <el-input
-                    type="password"
-                    clearable
-                    placeholder="请输入登录密码"
-                    v-model="userPass"
-                  ></el-input>
+                  <el-input type="password" clearable placeholder="请输入登录密码" v-model="userPass"></el-input>
                 </div>
-                <p
-                  class="login-btn"
-                  @click.stop="login"
-                >登录</p>
+                <p class="login-btn" @click.stop="login">登录</p>
               </div>
               <div class="fj-fr right">
-                <img
-                  class="qr-code"
-                  :src="qrCodeUrl"
-                  alt=""
-                >
+                <img class="qr-code" :src="qrCodeUrl" alt>
                 <div class="link-area">
-                  <a
-                    href="javascript:;"
-                    @click="appDownload"
-                  >APP下载</a>
-                  <a
-                    href="javascript:;"
-                    @click="useHelp"
-                  >使用帮助</a>
+                  <a href="javascript:;" @click="appDownload">APP下载</a>
+                  <a href="javascript:;" @click="useHelp">使用帮助</a>
                 </div>
               </div>
             </div>
@@ -83,42 +46,36 @@
       </div>
       <!-- 页脚信息 -->
       <div class="fj-login-foot">
-        <p class="authourize">{{cityName}}公安局 Copyright © 2014-2020 All Rights 本系统由长沙公信诚丰信息技术服务有限公司提供技术支持</p>
+        <p
+          class="authourize"
+        >{{cityName}}公安局 Copyright © 2014-2020 All Rights 本系统由长沙公信诚丰信息技术服务有限公司提供技术支持</p>
         <p class="advice">本系统使用建议：1280 X 800 以上分辨率显示器，支持 HTML5/CSS3的浏览器（谷歌-Chrome，火狐-FireFox）</p>
       </div>
     </div>
     <div class="fj-header fj-clear">
       <div class="logo-area fj-fl">
-        <a
-          class="logo-link fj-fl"
-          href=""
-        ><img
-            src="static/images/fj-logo.png"
-            alt=""
-          ></a>
+        <a class="logo-link fj-fl" href>
+          <img src="static/images/fj-logo.png" alt>
+        </a>
         <p class="logo-txt fj-fl">{{cityName}}辅警工作管理系统</p>
       </div>
       <div class="user-info fj-fr">
         <div class="ope-area fj-fl">
           <div class="ope-area-item userInfo fj-fl">
-            <span class="fj-fl">{{userInfo.userName}}</span><span class="fj-fl separator">|</span><span class="fj-fl">{{userInfo.deptname}}</span>
+            <span class="fj-fl">{{userInfo.userName}}</span>
+            <span class="fj-fl separator">|</span>
+            <span class="fj-fl">{{userInfo.deptname}}</span>
           </div>
           <div class="ope-area-item user-headImg fj-fl">
-            <img
-              class="headImg"
-              :src="headImgUrl+userId"
-              alt=""
-            >
+            <img class="headImg" :src="headImgUrl+userId" alt>
           </div>
-          <el-popover
-            popper-class="fjHeader"
-            placement="bottom-start"
-            width="336"
-            trigger="hover"
-          >
+          <el-popover popper-class="fjHeader" placement="bottom-start" width="336" trigger="hover">
             <div class="fj-block">
               <div class="fj-block-head fj-clear">
-                <p class="title fl">待办（<span>{{waitInfoData.length}}</span>）</p>
+                <p class="title fl">
+                  待办（
+                  <span>{{waitInfoData.length}}</span>）
+                </p>
               </div>
               <div class="fj-block-body waitInfo">
                 <ul v-show="waitInfoData.length">
@@ -129,10 +86,7 @@
                     @click="tabRouteView(item)"
                   >
                     <p class="title fj-clear">
-                      <span
-                        class="fj-fl"
-                        v-text="item.typeName"
-                      ></span>
+                      <span class="fj-fl" v-text="item.typeName"></span>
                       <el-button
                         class="fj-fr"
                         :type="item.status==0?'info':item.status==1?'primary':item.status==2?'danger':''"
@@ -140,78 +94,34 @@
                       >{{item.status==0?'待处理':item.status==1?'待审核':item.status==2?'进行中':''}}</el-button>
                     </p>
                     <p class="info-line fj-ellipsis">
-                      <span
-                        class="title"
-                        v-text="item.oneLineTitle"
-                      ></span>
-                      <span
-                        class="txt"
-                        v-text="item.oneLine"
-                      ></span>
+                      <span class="title" v-text="item.oneLineTitle"></span>
+                      <span class="txt" v-text="item.oneLine"></span>
                     </p>
                     <p class="info-line fj-ellipsis">
-                      <span
-                        class="title"
-                        v-text="item.twoLineTitle"
-                      ></span>
-                      <span
-                        class="txt"
-                        v-text="item.twoLine"
-                      ></span>
+                      <span class="title" v-text="item.twoLineTitle"></span>
+                      <span class="txt" v-text="item.twoLine"></span>
                     </p>
                     <p class="info-line fj-ellipsis">
-                      <span
-                        class="title"
-                        v-text="item.threeLineTitle"
-                      ></span>
-                      <span
-                        class="txt"
-                        v-text="item.threeLine"
-                      ></span>
+                      <span class="title" v-text="item.threeLineTitle"></span>
+                      <span class="txt" v-text="item.threeLine"></span>
                     </p>
                   </li>
                 </ul>
-                <div
-                  class="el-table__empty-block"
-                  v-show="!waitInfoData.length"
-                ><span class="el-table__empty-text">暂无数据</span></div>
+                <div class="el-table__empty-block" v-show="!waitInfoData.length">
+                  <span class="el-table__empty-text">暂无数据</span>
+                </div>
               </div>
-              <div
-                class="clear-btn-box"
-                style="text-align:center;"
-                v-show="waitInfoData.length"
-              >
-                <el-button
-                  type="text"
-                  class="clear-wait-info"
-                  @click="emptyBacklog"
-                >清空待办</el-button>
+              <div class="clear-btn-box" style="text-align:center;" v-show="waitInfoData.length">
+                <el-button type="text" class="clear-wait-info" @click="emptyBacklog">清空待办</el-button>
               </div>
             </div>
-            <div
-              class="ope-area-item fj-fl"
-              slot="reference"
-            >
-              <el-badge
-                :value="waitInfoData.length"
-                type="primary"
-              ></el-badge>
-              <img
-                class="fj-XY-center"
-                src="static/images/fj-header-icon_tz.png"
-                alt=""
-              >
+            <div class="ope-area-item fj-fl" slot="reference">
+              <el-badge :value="waitInfoData.length" type="primary"></el-badge>
+              <img class="fj-XY-center" src="static/images/fj-header-icon_tz.png" alt>
             </div>
           </el-popover>
-          <div
-            class="ope-area-item fj-fl last"
-            @click="exitSystem"
-          >
-            <img
-              class="fj-XY-center"
-              src="static/images/fj-header-icon_exit.png"
-              alt=""
-            >
+          <div class="ope-area-item fj-fl last" @click="exitSystem">
+            <img class="fj-XY-center" src="static/images/fj-header-icon_exit.png" alt>
           </div>
         </div>
         <!-- <el-popover
@@ -227,48 +137,29 @@
 				</div>
 			</div>
 			<div class="user-headImg fj-fl" slot="reference"><img class="headImg" :src="headImgUrl+userId" alt=""></div>
-		</el-popover> -->
+        </el-popover>-->
       </div>
     </div>
     <!-- 导航 -->
     <div class="fj-sider">
-      <img
-        class="sider-bg"
-        src="static/images/fj-sider-bg.png"
-        alt=""
-      >
-      <div
-        class="fj-sider-toggle"
-        @click="toggleNav($event)"
-      >
+      <img class="sider-bg" src="static/images/fj-sider-bg.png" alt>
+      <div class="fj-sider-toggle" @click="toggleNav($event)">
         <p></p>收起/展开
-        <img
-          src="static/images/fj-sider-toggle.png"
-          alt=""
-        >
+        <img src="static/images/fj-sider-toggle.png" alt>
       </div>
       <!-- 导航 -->
       <fj-nav></fj-nav>
     </div>
     <div class="fj-body">
-      <div
-        class="fj-content"
-        v-if="!toggleLoginArea"
-      >
+      <div class="fj-content" v-if="!toggleLoginArea">
         <!--切换-->
-        <dsTransition
-          enter-time="200"
-          leave-time="200"
-        >
+        <dsTransition enter-time="200" leave-time="200">
           <keep-alive>
             <router-view v-if="!$route.meta.noKeepAlive"></router-view>
           </keep-alive>
         </dsTransition>
         <!-- 专题考试详情页不用保存数据 -->
-        <dsTransition
-          enter-time="200"
-          leave-time="200"
-        >
+        <dsTransition enter-time="200" leave-time="200">
           <router-view v-if="$route.meta.noKeepAlive"></router-view>
         </dsTransition>
         <fj-footer></fj-footer>
@@ -335,8 +226,8 @@ export default {
           routeName: "/appraise-item"
         }
       },
-			timer: null,
-			timer2:null
+      timer: null,
+      timer2: null
     };
   },
   beforeCreate: function() {
@@ -393,12 +284,12 @@ export default {
     //路由切换时获取待办事项数据
     // if (this.$router) {
     //   this.$router.beforeEach(function(to, from, next) {
-        $.when(vm.getNewBacklog()).then(
-          function() {},
-          function() {
-            // vm.$message({ type: "warning", message: "获取待办事项数据失败！" });
-          }
-        );
+    $.when(vm.getNewBacklog()).then(
+      function() {},
+      function() {
+        // vm.$message({ type: "warning", message: "获取待办事项数据失败！" });
+      }
+    );
     //     next();
     //   });
     // }
@@ -434,9 +325,9 @@ export default {
           fjSideNav.setInitState();
         }, 100);
         //cookie是否失效
-				this.refreshLoginCookie();
-				//获取用户在线时间
-				this.remarkUserOnlineTime();
+        this.refreshLoginCookie();
+        //获取用户在线时间
+        this.remarkUserOnlineTime();
         //获取待办事项
         this.refreshBackLog();
       } else {
@@ -447,7 +338,8 @@ export default {
         this.$router.push("/");
       }
     },
-    refreshLoginCookie: function() { //检查cookie是否过期
+    refreshLoginCookie: function() {
+      //检查cookie是否过期
       var vm = this;
       clearInterval(this.timer);
       this.timer = setInterval(function() {
@@ -462,7 +354,8 @@ export default {
         }
       }, 60000);
     },
-    remarkUserOnlineTime: function() { //获取用户在线时间
+    remarkUserOnlineTime: function() {
+      //获取用户在线时间
       var vm = this;
       clearInterval(this.timer2);
       this.timer2 = setInterval(function() {
@@ -471,54 +364,53 @@ export default {
           url: fjPublic.ajaxUrlDNN + "/updatePositionTime",
           type: "POST",
           data: {
-						nowUser:$.cookie(fjPublic.loginCookieKey)
-					},
+            nowUser: $.cookie(fjPublic.loginCookieKey)
+          },
           dataType: "json",
           success: function(data) {
             console.log(data);
           },
-          error: function(err) {
-
-          }
+          error: function(err) {}
         });
-			}, 30*60*1000);
+      }, 30 * 60 * 1000);
     },
-    refreshBackLog: function() { //获取待办事项
+    refreshBackLog: function() {
+      //获取待办事项
       //清空待办事项
       var defer = $.Deferred();
       var vm = this;
-      // clearInterval(this.timer3);
-      // this.timer3 = setInterval(function() {
-      //   $.ajax({
-      //     //
-      //     url: fjPublic.ajaxUrlDNN + "/getNewBacklog",
-      //     type: "POST",
-      //     data: {
-      //       nowUser: $.cookie(fjPublic.loginCookieKey)
-      //     },
-      //     dataType: "json",
-      //     success: function(data) {
-      //       //console.log(data);
-      //       if (data.list && data.list.length > 0) {
-      //         vm.waitInfoData = null;
-      //         _.each(data.list, function(item) {
-      //           var tmpObj = vm.waitTypes[item.type];
-      //           if (tmpObj) {
-      //             _.each(tmpObj, function(v, k) {
-      //               vm.$set(item, k, v);
-      //             });
-      //           }
-      //         });
-      //         vm.waitInfoData = data.list;
-      //       }
-      //       defer.resolve();
-      //     },
-      //     error: function(err) {
-      //       // vm.$message({ type: "warning", message: "获取待办事项失败！" });
-      //       defer.reject();
-      //     }
-      //   });
-      // }, 10000);
+      clearInterval(this.timer3);
+      this.timer3 = setInterval(function() {
+        $.ajax({
+          //
+          url: fjPublic.ajaxUrlDNN + "/getNewBacklog",
+          type: "POST",
+          data: {
+            nowUser: $.cookie(fjPublic.loginCookieKey)
+          },
+          dataType: "json",
+          success: function(data) {
+            //console.log(data);
+            if (data.list && data.list.length > 0) {
+              vm.waitInfoData = null;
+              _.each(data.list, function(item) {
+                var tmpObj = vm.waitTypes[item.type];
+                if (tmpObj) {
+                  _.each(tmpObj, function(v, k) {
+                    vm.$set(item, k, v);
+                  });
+                }
+              });
+              vm.waitInfoData = data.list;
+            }
+            defer.resolve();
+          },
+          error: function(err) {
+            // vm.$message({ type: "warning", message: "获取待办事项失败！" });
+            defer.reject();
+          }
+        });
+      }, 10000);
     },
     getCityInfo: function() {
       //获取地区基本信息
@@ -628,9 +520,11 @@ export default {
       if (this.fjSider.hasClass("sider-toggle")) {
         //解绑导航一级菜单点击事件
         fjSideNav.unbindFirstItemsClickFn().siderOpen2Close();
+        fjSideNav.boxParent.css("z-index", 4);
       } else {
         //导航一级菜单绑定点击事件
         fjSideNav.bindFirstItemsClickFn().siderClose2Open();
+        fjSideNav.boxParent.css("z-index", 3);
       }
       //导航栏收起或展开的时候，触发页面resize事件
       $(window).triggerHandler("resize");
@@ -704,6 +598,10 @@ export default {
       if (routerName == "500" || routerName == "404" || routerName == "403") {
         routerName = "index";
       }
+      if ($.parseJSON(fjPublic.getLocalData("userInfo")).userRole == 1000) {
+        //湘潭辅警只展示一标三实
+        routerName = "fjWorkManage-YiBiaoSanShi";
+      }
       return routerName;
     },
     exitSystem: function() {
@@ -748,10 +646,15 @@ export default {
 </script>
 
 <style lang="less">
-@import './common/font.css';
-body {background-color:#F0F2F5;color:rgba(0,0,0,0.65);
-  font-family:"Helvetica Neue",Helvetica,PingFangSC,"Microsoft YaHei","微软雅黑",Arial,sans-serif;
-    font-size:14px;-webkit-font-smoothing:antialiased;}
+@import "./common/font.css";
+body {
+  background-color: #f0f2f5;
+  color: rgba(0, 0, 0, 0.65);
+  font-family: "Helvetica Neue", Helvetica, PingFangSC, "Microsoft YaHei",
+    "微软雅黑", Arial, sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
 #app {
   visibility: hidden;
   -webkit-font-smoothing: antialiased;
@@ -944,7 +847,7 @@ body {background-color:#F0F2F5;color:rgba(0,0,0,0.65);
   text-align: center;
 }
 .fj-login-foot > p {
-  color: #fff;
+  color: rgba(255, 255, 255, 0.7);
   line-height: 22px;
 }
 /*  */

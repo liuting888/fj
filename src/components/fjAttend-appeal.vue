@@ -1,5 +1,5 @@
 <template>
-  <div class="fj-content_view work-mis fj-appeal">
+  <div class="fj-content_view fj-appeal">
     <div class="fj-block title">
       <fj-breadNav :bread-data="breadData"></fj-breadNav>
     </div>
@@ -8,88 +8,115 @@
         <p class="title fj-fl">考勤申诉列表</p>
       </div>
       <div class="fj-block-body">
-        <div class="fj-search-inline">
+        <ul class="filterOpe-area fj-clear">
+          <li class="area-line fj-clear">
+            <!-- <div class="item fj-fl">
+              <span class="title fj-fl">区县分局：</span>
+              <el-select
+                @change="getPCSdataById"
+                clearable
+                filterable
+                v-model="searchForm.supDeptId"
+                size="small"
+              >
+                <el-option
+                  v-for="item in supDeptIds"
+                  :key="item.deptId"
+                  :label="item.deptName"
+                  :value="item.deptId"
+                ></el-option>
+              </el-select>
+            </div>
+            <div class="item fj-fl">
+              <span class="title fj-fl">派出所：</span>
+              <el-select
+                @change="changeDeptId"
+                clearable
+                filterable
+                v-model="searchForm.deptId"
+                size="small"
+              >
+                <el-option
+                  v-for="item in deptIds"
+                  :key="item.deptId"
+                  :label="item.deptName"
+                  :value="item.deptId"
+                ></el-option>
+              </el-select>
+            </div> -->
+            <fj-dept @change-pcs="changeDeptId"></fj-dept>
+            <div class="item fj-fl">
+              <span class="title fj-fl">申诉时间：</span>
+              <el-date-picker
+                v-model="searchForm.searchTime"
+                type="daterange"
+                range-separator="至"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+                @change="changeSearchTime"
+                size="small"
+              ></el-date-picker>
+            </div>
+          </li>
+          <li class="area-line fj-clear">
+            <div class="item fj-fl">
+              <span class="title fj-fl">处理结果：</span>
+              <el-select
+                @change="changeStatus"
+                clearable
+                v-model="searchForm.status"
+                size="small"
+              >
+                <el-option
+                  v-for="item in statuses"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
+            </div>
+            <div class="item fj-fl">
+              <span class="title fj-fl">输入查询：</span>
+              <el-input
+                v-model="searchForm.nameOrAccount"
+                clearable
+                placeholder="请输入名称或警号"
+                size="small"
+                class="search-input"
+              >
+                <el-button slot="append" @click="searchAttendLeave">搜索</el-button>
+              </el-input>
+            </div>
+          </li>
+        </ul>
+        <!-- <div class="fj-search-inline">
           <el-row>
             <el-form inline label-width="85px" label-position="left">
               <el-col :lg="8" :xl="7" class="time-item">
-                <el-form-item label="区县分局："> <!--changeSupDeptId -->
-                  <el-select
-                    @change="getPCSdataById"
-                    clearable
-                    filterable
-                    v-model="searchForm.supDeptId"
-                    size="small"
-                  >
-                    <el-option
-                      v-for="item in supDeptIds"
-                      :key="item.deptId"
-                      :label="item.deptName"
-                      :value="item.deptId"
-                    ></el-option>
-                  </el-select>
+                <el-form-item label="区县分局："> 
+                  
                 </el-form-item>
 
                 <el-form-item label="申诉时间：" class="datepicker">
-                  <el-date-picker
-                    v-model="searchForm.searchTime"
-                    type="daterange"
-                    range-separator="至"
-                    start-placeholder="开始日期"
-                    end-placeholder="结束日期"
-                    @change="changeSearchTime"
-                    size="small"
-                  ></el-date-picker>
+                  
                 </el-form-item>
               </el-col>
               <el-col :lg="6" :xl="5">
                 <el-form-item label="派出所：">
-                  <el-select
-                    @change="changeDeptId"
-                    clearable
-                    filterable
-                    v-model="searchForm.deptId"
-                    size="small"
-                  >
-                    <el-option
-                      v-for="item in deptIds"
-                      :key="item.deptId"
-                      :label="item.deptName"
-                      :value="item.deptId"
-                    ></el-option>
-                  </el-select>
+                  
                 </el-form-item>
                 <el-form-item label="处理结果：">
-                  <el-select
-                    @change="changeStatus"
-                    clearable
-                    v-model="searchForm.status"
-                    size="small"
-                  >
-                    <el-option
-                      v-for="item in statuses"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    ></el-option>
-                  </el-select>
+                  
                 </el-form-item>
               </el-col>
               <el-col :xs="8" :sm="12" :md="16" :lg="6" :xl="6">
                 <el-form-item label="输入查询：">
-                  <el-input
-                    v-model="searchForm.nameOrAccount"
-                    clearable
-                    placeholder="请输入名称或警号"
-                    size="small"
-                    class="search-input"
-                  >
-                    <el-button slot="append" @click="searchAttendLeave">搜索</el-button>
-                  </el-input>
+                  
                 </el-form-item>
               </el-col>
             </el-form>
           </el-row>
-        </div>
+        </div> -->
         <el-table :data="attendAppealData">
           <el-table-column prop="userName" label="姓名"></el-table-column>
           <el-table-column prop="userAccount" label="警号"></el-table-column>
@@ -196,6 +223,7 @@
 </template>
 <script>
   import fjBreadNav from '@/components/fjBreadNav';
+  import fjDept from "@/components/fjDept";
 
   export default {
     name: 'fjAttendHistory',
@@ -269,10 +297,6 @@
       };
     },
     mounted: function () {
-      // 初始化派出所下拉列表
-      //this.initDeptIds();
-      // 初始化派出所下拉列表
-      this.initSupDeptIds();
       // 初始化请假休假列表
       this.searchSign();
       // 初始化时间
@@ -403,20 +427,24 @@
       // 修改单位下拉框查询
       changeSupDeptId: function (supDeptId) {
         this.searchForm['supDeptId'] = supDeptId;
+        this.currentPage = 1;
         this.searchSign();
       },
       // 修改单位下拉框查询
       changeDeptId: function (deptId) {
         this.searchForm['deptId'] = deptId;
+        this.currentPage = 1;
         this.searchSign();
       },
       // 修改状态下拉框查询
       changeStatus: function(status) {
         this.searchForm['status'] = status;
+        this.currentPage = 1;
         this.searchSign();
       },
       // 标题或负责人名称查询
       searchAttendLeave: function () {
+        this.currentPage = 1;
         this.searchSign();
       },
       // 修改查询时间
@@ -428,36 +456,40 @@
           this.searchForm['startTime'] = '';
           this.searchForm['endTime'] = '';
         }
+        this.currentPage = 1;
         this.searchSign();
       },
       // 获取采集列表
       searchSign: function () {
-        var defer = $.Deferred();
-        var vm = this;
-        // 参数
-        this.searchForm['page'] = this.currentPage;
-        this.searchForm['rows'] = this.pageSize;
-        // 传入当前用户信息
-        this.searchForm['nowUser'] = this.nowUser;
-        $.ajax({
-          url: fjPublic.ajaxUrlDNN + '/searchSign',
-          type: 'POST',
-          data: vm.searchForm,
-          dataType: 'json',
-          success: function (data) {
-            vm.attendAppealData = null;
-            vm.attendAppealData = data.list;
-            vm.total = data.total;
-            _.each(vm.attendAppealData, function (item, i) {
-              vm.$set(item, 'rank', i + 1);
-            });
-            defer.resolve();
-          },
-          error: function (err) {
-            defer.reject();
-          }
+        fjPublic.openLoad("获取数据...");
+        return $.Deferred((defer)=>{
+          var vm = this;
+          // 参数
+          this.searchForm['page'] = this.currentPage;
+          this.searchForm['rows'] = this.pageSize;
+          // 传入当前用户信息
+          this.searchForm['nowUser'] = this.nowUser;
+          $.ajax({
+            url: fjPublic.ajaxUrlDNN + '/searchSign',
+            type: 'POST',
+            data: vm.searchForm,
+            dataType: 'json',
+            success: function (data) {
+              vm.attendAppealData = null;
+              vm.attendAppealData = data.list;
+              vm.total = data.total;
+              _.each(vm.attendAppealData, function (item, i) {
+                vm.$set(item, 'rank', i + 1);
+              });
+              defer.resolve();
+            },
+            error: function (err) {
+              defer.reject();
+            }
+          });
+        }).promise().always(()=>{
+          fjPublic.closeLoad();
         });
-        return defer;
       },
       // 确认批准直接询问并发请求
       checkUpdate(id, status) {
@@ -528,7 +560,8 @@
       },
     },
     components: {
-      fjBreadNav
+      fjBreadNav,
+      fjDept
     }
   }
 </script>
@@ -617,5 +650,25 @@
       }
     }
   }
+}
+/* 0514修改 */
+.fj-content_view.fj-appeal {
+  .fj-block-body > .filterOpe-area {
+    .el-input-group__append {
+      background-color: #1890ff;
+      border-color: #1890ff;
+      color: #fff;
+    }
+  }
+  @media screen and (max-width:1366px) {
+    .fj-block-body > .filterOpe-area {
+      .item {margin-right:20px;}
+    }
+  }
+  /* @media screen and (min-width:1920px) {
+    .fj-block-body > .filterOpe-area {
+      .area-line {float:left;margin-bottom:0px;}
+    }
+  } */
 }
 </style>

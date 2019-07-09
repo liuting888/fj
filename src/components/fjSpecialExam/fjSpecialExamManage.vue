@@ -367,13 +367,13 @@ export default {
         }
       });
     },
-    //考试类型下拉框change
+    //考试类型同步变更试卷内容搜索下拉框
     changeType(val) {
       let vm = this;
       vm.examTypeList = [];
-      for (let i = 0; i < val.length; i++) {
+      for (let i = 0; i < vm.examType.length; i++) {
         for (let j = 0; j < vm.typeList.length; j++) {
-          if (vm.typeList[j].itemid == val[i]) {
+          if (vm.typeList[j].itemid == vm.examType[i]) {
             vm.examTypeList.push(vm.typeList[j]);
           }
         }
@@ -505,6 +505,10 @@ export default {
           vm.ruleForm.data = data.info;
           vm.type = data.info.type.split(",");
           vm.examType = data.info.examType.split(",");
+          if (vm.userInfo.state == 2) {
+            //编辑的时候回显题库下拉框
+            vm.changeType();
+          }
           for (let i = 0; i < data.list.length; i++) {
             let tm = {
               id: data.list[i].id,
@@ -620,6 +624,7 @@ export default {
         idList.push(vm.ruleForm.list[i].id);
       }
       vm.ruleForm.data.examList = idList.join(",");
+      vm.ruleForm.data["nowUser"] = $.cookie(fjPublic.loginCookieKey);
       $.ajax({
         url: fjPublic.ajaxUrlDNN + url,
         type: "POST",

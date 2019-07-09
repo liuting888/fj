@@ -156,7 +156,7 @@
         <!-- 考试题库 -->
         <el-table v-if="activeIndex==0" :data="tableDataList" style="width: 100%">
           <el-table-column prop="examType" label="题库类型" :key="Math.random()"></el-table-column>
-          <el-table-column prop="title" label="标题" :key="Math.random()"></el-table-column>
+          <el-table-column prop="title" label="标题" show-overflow-tooltip :key="Math.random()"></el-table-column>
           <!-- <el-table-column prop="content" label="考试类型" :key="Math.random()"></el-table-column> -->
           <el-table-column prop="createUsername" label="创建人" :key="Math.random()"></el-table-column>
           <el-table-column prop="insTime" label="创建时间" :key="Math.random()"></el-table-column>
@@ -272,7 +272,7 @@
           @selection-change="handleSelectionChange"
         >
           <el-table-column type="selection" width="30" :key="Math.random()"></el-table-column>
-          <el-table-column prop="title" label="考试标题" :key="Math.random()"></el-table-column>
+          <el-table-column prop="title" label="考试标题" show-overflow-tooltip :key="Math.random()"></el-table-column>
           <el-table-column prop="userName" label="姓名" :key="Math.random()"></el-table-column>
           <el-table-column prop="score" label="分数" :key="Math.random()"></el-table-column>
           <el-table-column prop="time" label="考试日期" :key="Math.random()"></el-table-column>
@@ -544,6 +544,7 @@ export default {
         url: fjPublic.ajaxUrlDNN + url,
         type: "POST",
         data: {
+          nowUser: $.cookie(fjPublic.loginCookieKey),
           id: id,
           state: state
         },
@@ -587,6 +588,7 @@ export default {
       }
       let defer = $.Deferred();
       let url = vm.ruleForm.id ? "/updExamPublish" : "/addExamPublish";
+      vm.ruleForm["nowUser"] = $.cookie(fjPublic.loginCookieKey);
       $.ajax({
         url: fjPublic.ajaxUrlDNN + url,
         type: "POST",
@@ -733,6 +735,7 @@ export default {
         url: fjPublic.ajaxUrlDNN + "/updExamWarehouse",
         type: "POST",
         data: {
+          nowUser: $.cookie(fjPublic.loginCookieKey),
           id: id,
           state: state
         },
@@ -751,6 +754,7 @@ export default {
         url: fjPublic.ajaxUrlDNN + "/updExamPaper",
         type: "POST",
         data: {
+          nowUser: $.cookie(fjPublic.loginCookieKey),
           id: id,
           state: state
         },
@@ -764,6 +768,7 @@ export default {
     // 设置获取列表参数
     setSearchList: function() {
       let vm = this;
+      let userInfo = $.parseJSON(fjPublic.getLocalData("userInfo"));
       vm.searchListUrl =
         vm.activeIndex == 0
           ? "/getExamWarehouseList"
@@ -779,6 +784,7 @@ export default {
       }
       vm.searchForm["pageNumber"] = vm.currentPage;
       vm.searchForm["pageSize"] = vm.pageSize;
+      vm.searchForm["userId"] = userInfo.userId;
     },
     // 获取列表
     searchList: function() {
@@ -921,7 +927,7 @@ export default {
   }
 }
 .form-info {
-  padding-left: 40px;
+  // padding-left: 40px;
   .el-form-item {
     .el-input {
       width: 240px;

@@ -32,7 +32,65 @@
         </el-tabs>
       </div>
       <div class="fj-block-body">
-        <div class="fj-search-inline">
+        <ul class="filterOpe-area fj-clear">
+          <li class="area-line fj-fl">
+            <div class="item fj-fl">
+              <span class="title fj-fl">任务类型：</span>
+              <el-select
+                @change="changeMissionType"
+                clearable
+                v-model="searchForm.missionType"
+                size="small"
+              >
+                <el-option
+                  v-for="item in missionTypes"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
+            </div>
+            <div class="item fj-fl">
+              <span class="title fj-fl">起止日期：</span>
+              <el-date-picker
+                v-model="searchForm.searchTime"
+                type="daterange"
+                range-separator="至"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+                @change="changeSearchTime"
+                size="small"
+              ></el-date-picker>
+            </div>
+          </li>
+          <li class="area-line fj-fl">
+            <div class="item fj-fl">
+              <el-input
+                v-model="searchForm.titleOrName"
+                clearable
+                placeholder="请输入标题"
+                size="small"
+                class="search-input"
+              >
+                <el-button
+                  slot="append"
+                  @click="searchMission"
+                >搜索</el-button>
+              </el-input>
+            </div>
+            <div class="item fj-fl">
+              <el-button
+                type="primary"
+                @click="openAddOrDetailDialog()"
+                size="small"
+              >
+                <i class="el-icon-plus"></i>
+                <span>派发任务</span>
+              </el-button>
+            </div>
+          </li>
+        </ul>
+        <!-- <div class="fj-search-inline">
           <el-row>
             <el-form inline>
               <el-col
@@ -99,7 +157,7 @@
               </el-col>
             </el-form>
           </el-row>
-        </div>
+        </div> -->
         <el-table :data="misData">
           <el-table-column
             prop="title"
@@ -163,8 +221,8 @@
               >详情</span>
               <span
                 class="ope-txt"
-                v-if="scope.row.status==0||scope.row.status==1"
-                @click="isDeleteMission(scope.row.id)"
+                v-if="(scope.row.publishUserid==userInfo.userId)&&(scope.row.status==0||scope.row.status==1)"
+                @click="isDeleteMission(scope.row)"
               >删除</span>
             </template>
           </el-table-column>
@@ -628,6 +686,7 @@ export default {
     };
     return {
       //------------------0508
+      userInfo:null, //用户信息
       LPuploadUrl:fjPublic.ajaxUrlDNN + "/webUpdmedia", //上传图片和视频的地址
       LPuploadData:null, //要上传的数据
       isLeadPerson:false,  //是不是任务负责人
@@ -837,6 +896,9 @@ export default {
     filterText1(val) {
       this.$refs.tree1.filter(val);
     }
+  },
+  created(){
+    this.userInfo = $.parseJSON(fjPublic.getLocalData("userInfo")) || {};
   },
   mounted: function() {
     // 初始化任务列表
@@ -1283,28 +1345,33 @@ export default {
       return defer;
     },
     // 是否删除
-    isDeleteMission: function(id) {
+    isDeleteMission: function(info) {
+      //console.log(this.userInfo.userId);
+      //console.log(info);
       this.$confirm("此操作将删除该纪录, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
         center: true
       }).then(() => {
-        this.deleteMission(id);
+        this.deleteMission(info.id);
       });
     },
     // 删除任务
     deleteMission: function(id) {
       var defer = $.Deferred();
       var vm = this;
+      fjPublic.openLoad("删除中...","body");
       $.ajax({
         url: fjPublic.ajaxUrlDNN + "/deleteMission",
         type: "POST",
         data: {
+          nowUser:$.cookie(fjPublic.loginCookieKey),
           missionId: id
         },
         dataType: "json",
         success: function(data) {
+          console.log(data);
           if (data.errorCode == 0) {
             vm.$message({
               message: "删除成功",
@@ -1315,9 +1382,11 @@ export default {
             vm.$message.error(data.errorMsg);
           }
           defer.resolve();
+          fjPublic.closeLoad();
         },
         error: function(err) {
           defer.reject();
+          fjPublic.closeLoad();
         }
       });
     },
@@ -1618,6 +1687,7 @@ export default {
           }
           //console.log(vm.dialogForm);
           //return;
+          fjPublic.openLoad("处理中...","body");
           if (vm.dialogForm.missionId) {
             $.ajax({
               url: fjPublic.ajaxUrlDNN + "/updateMission",
@@ -1636,9 +1706,11 @@ export default {
                   vm.$message.error(data.errorMsg);
                 }
                 defer.resolve();
+                fjPublic.closeLoad();
               },
               error: function(err) {
                 defer.reject();
+                fjPublic.closeLoad();
               }
             });
           } else {
@@ -1659,10 +1731,12 @@ export default {
                   vm.$message.error(data.errorMsg);
                 }
                 defer.resolve();
+                fjPublic.closeLoad();
               },
               error: function(err) {
                 vm.$message.error("网络错误");
                 defer.reject();
+                fjPublic.closeLoad();
               }
             });
           }
@@ -1698,6 +1772,7 @@ export default {
     operationMission: function(operationType, auditor_state) {
       var defer = $.Deferred();
       var vm = this;
+      fjPublic.openLoad("处理中...","body");
       $.ajax({
         url: fjPublic.ajaxUrlDNN + "/operationMission",
         type: "POST",
@@ -1725,10 +1800,12 @@ export default {
               type: "error"
             });
           }
-          defer.resoolve();
+          defer.resolve();
+          fjPublic.closeLoad();
         },
         error: function(err) {
           defer.reject();
+          fjPublic.closeLoad();
         }
       });
     },
@@ -1774,22 +1851,17 @@ export default {
 <style scope lang="less">
 .mission {
   .fj-block-head {
-    /deep/ .el-tabs__item {
-      height: 51px;
-      line-height: 51px;
+    .el-tabs__item {
+      font-size:14px;
     }
-    /deep/ .el-tabs__active-bar {
-      height: 3px;
-    }
-    border-bottom: none;
   }
   .el-table {
-    .ope-txt {
+    /* .ope-txt {
       &:first-child {
         border-right: 1px solid #e9e9e9;
         padding-right: 12px;
       }
-    }
+    } */
     .textLeft {
       text-align: left;
     }
@@ -1981,6 +2053,21 @@ export default {
 /* 0507修改 */
 .fj-content_view.work-mis {
   .el-date-editor .el-range-separator {padding:0px;}
+  .fj-block-body > .filterOpe-area {
+    .el-input-group__append {
+      background-color: #1890ff;
+      border-color: #1890ff;
+      color: #fff;
+    }
+  }
+  @media screen and (max-width:1366px) {
+    .fj-block-body > .filterOpe-area {
+      .area-line {margin-bottom:0px;}
+      .item {margin-right:20px;}
+      .el-select {width:200px;}
+      .el-date-editor--daterange.el-input__inner {width:320px;}
+    }
+  }
 }
 /* 0506修改 */
 .misOwnerPop20190506 {

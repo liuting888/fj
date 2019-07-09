@@ -1,5 +1,5 @@
 <template>
-  <div class="fj-content_view work-mis workLog">
+  <div class="fj-content_view workLog">
     <div class="fj-block title">
       <fj-breadNav :bread-data="breadData"></fj-breadNav>
     </div>
@@ -8,7 +8,74 @@
         <p class="title fj-fl">日志列表</p>
       </div>
       <div class="fj-block-body">
-        <div class="fj-search-inline">
+        <ul class="filterOpe-area">
+          <li class="area-line fj-clear">
+            <!-- <div class="item fj-fl">
+              <span class="title fj-fl">派出所：</span>
+              <el-select
+                  @change="changeDeptId"
+                  clearable
+                  filterable
+                  v-model="searchForm.deptId"
+                  size="small"
+                  class="fj-fl"
+                >
+                  <el-option
+                    v-for="item in deptIds"
+                    :key="item.deptId"
+                    :label="item.deptName"
+                    :value="item.deptId"
+                  ></el-option>
+                </el-select>
+            </div> -->
+            <fj-dept @change-pcs="changeDeptId"></fj-dept>
+            <div class="item fj-fl">
+              <span class="title fj-fl">起止日期：</span>
+              <el-date-picker
+                  v-model="searchForm.searchTime"
+                  type="daterange"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  @change="changeSearchTime"
+                  size="small"
+                  class="fj-fl"
+                ></el-date-picker>  
+            </div>
+          </li>
+          <li class="area-line fj-clear">
+            <div class="item fj-fl">
+              <span class="title fj-fl">审核结果：</span>
+              <el-select
+                  @change="changeStatus"
+                  clearable
+                  v-model="searchForm.status"
+                  size="small"
+                  class="fj-fl"
+                >
+                  <el-option
+                    v-for="item in statuses"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  ></el-option>
+                </el-select>
+            </div>
+            <div class="item fj-fl">
+              <span class="title fj-fl">输入查询：</span>
+              <el-input
+                  v-model="searchForm.nameOrContentOrAccount"
+                  clearable
+                  placeholder="名称或内容"
+                  size="small"
+                  class="search-input"
+                >
+                  <el-button slot="append" @click="searchWorkLog">搜索</el-button>
+                </el-input>
+            </div>
+          </li>
+        </ul>
+        <!-- <div class="fj-search-inline">
             <el-row>
           <el-form inline label-width="85px" label-position="left">
             <el-col :lg="8" :xl="7" class="time-item">
@@ -28,7 +95,6 @@
                   ></el-option>
                 </el-select>
               </el-form-item>
-
               <el-form-item label="起止日期：" class="datepicker">
                 <el-date-picker
                   v-model="searchForm.searchTime"
@@ -71,7 +137,7 @@
             </el-col>
           </el-form>
         </el-row>
-        </div>
+        </div> -->
         <el-table :data="workLogData" class="el-tables">
           <el-table-column prop="userId" label="提交人" width="90px"></el-table-column>
           <el-table-column prop="deptId" label="所属单位" show-overflow-tooltip class-name="textLeft" width="120px"></el-table-column>
@@ -248,6 +314,7 @@
 </template>
 <script>
 import fjBreadNav from "@/components/fjBreadNav";
+import fjDept from "@/components/fjDept";
 export default {
   name: "fjWorkManageMis",
   data: function() {
@@ -342,8 +409,6 @@ export default {
     };
   },
   mounted: function() {
-    // 初始化派出所下拉列表
-    this.initDeptIds();
     // 初始化采集列表
     this.infoWorkLog();
     return;
@@ -442,15 +507,18 @@ export default {
     // 修改单位下拉框查询
     changeDeptId: function(deptId) {
       this.searchForm["deptId"] = deptId;
+      this.currentPage = 1;
       this.infoWorkLog();
     },
     // 修改状态下拉框查询
     changeStatus: function(status) {
       this.searchForm["status"] = status;
+      this.currentPage = 1;
       this.infoWorkLog();
     },
     // 标题或负责人名称查询
     searchWorkLog: function(missionState) {
+      this.currentPage = 1;
       this.infoWorkLog();
     },
     // 修改查询时间
@@ -462,6 +530,7 @@ export default {
         this.searchForm["startTime"] = "";
         this.searchForm["endTime"] = "";
       }
+      this.currentPage = 1;
       this.infoWorkLog();
     },
     // 导出工作日志
@@ -470,32 +539,35 @@ export default {
     },
     // 获取采集列表
     infoWorkLog: function() {
-      var defer = $.Deferred();
-      var vm = this;
-      // 参数
-      this.searchForm["page"] = this.currentPage;
-      this.searchForm["rows"] = this.pageSize;
-      // 传入当前用户信息
-      this.searchForm["nowUser"] = $.cookie(fjPublic.loginCookieKey);
-      $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/infoWorkLog",
-        type: "POST",
-        data: vm.searchForm,
-        dataType: "json",
-        success: function(data) {
-          vm.workLogData = null;
-          vm.workLogData = data.list;
-          vm.total = data.total;
-          _.each(vm.workLogData, function(item, i) {
-            vm.$set(item, "rank", i + 1);
-          });
-          defer.resolve();
-        },
-        error: function(err) {
-          defer.reject();
-        }
+      fjPublic.openLoad("获取数据...");
+      return $.Deferred((defer)=>{
+        var vm = this;
+        // 参数
+        this.searchForm["page"] = this.currentPage;
+        this.searchForm["rows"] = this.pageSize;
+        // 传入当前用户信息
+        this.searchForm["nowUser"] = $.cookie(fjPublic.loginCookieKey);
+        $.ajax({
+          url: fjPublic.ajaxUrlDNN + "/infoWorkLog",
+          type: "POST",
+          data: vm.searchForm,
+          dataType: "json",
+          success: function(data) {
+            vm.workLogData = null;
+            vm.workLogData = data.list;
+            vm.total = data.total;
+            _.each(vm.workLogData, function(item, i) {
+              vm.$set(item, "rank", i + 1);
+            });
+            defer.resolve();
+          },
+          error: function(err) {
+            defer.reject();
+          }
+        });
+      }).promise().always(()=>{
+        fjPublic.closeLoad();
       });
-      return defer;
     },
     // 打开添加或详情弹出框
     openAddOrDetailDialog: function(workLog) {
@@ -653,13 +725,14 @@ export default {
     }
   },
   beforeDestroy() {
-    if (vm.viewer) {
-      vm.viewer.showing = false
-      vm.viewer.destroy()
+    if (this.viewer) {
+      this.viewer.showing = false
+      this.viewer.destroy()
     }
   },
   components: {
-    fjBreadNav
+    fjBreadNav,
+    fjDept
   }
 };
 </script>
@@ -754,6 +827,28 @@ export default {
         }
       }
     }
+  }
+}
+.fj-content_view.workLog {
+  
+  .fj-block-body > .filterOpe-area .item {margin-right:20px;}
+  .filterOpe-area .search-input {
+    width: 260px;
+    .el-input-group__append {
+      background-color: #1890ff;
+      border-color: #1890ff;
+      color: #fff;
+    }
+  }
+  @media screen and (min-width:1920px) {
+    .fj-block-body > .filterOpe-area {
+      padding-left:0px;
+      .area-line {float:left;}
+    }
+    /* .fj-block-body > .filterOpe-area .item {margin-right:10px;}
+    .fj-block-body > .filterOpe-area .el-select {width:160px;}
+    .el-date-editor--daterange.el-input__inner {width:260px;}
+    .el-input.search-input {width:200px;} */
   }
 }
 </style>

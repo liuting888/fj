@@ -277,6 +277,10 @@ th {
   padding: 0
 }
 /* el样式调整 */
+.el-dialog__title {
+  color:rgba(0,0,0,.85);
+}
+.el-date-editor .el-range-separator {padding:0px;}
 /* $loading */
 #app .el-loading-mask {z-index:9999;}
 /* el-button */
@@ -418,11 +422,14 @@ th {
 }
 /* .el-table td {padding:7px 0px;} */
 .el-table td .ope-txt {
+  position:relative;
   color: #1890FF;
 }
 .el-table td .ope-txt+.ope-txt {
   margin-left: 6px;
 }
+.el-table td .ope-txt:after {content:"|";position:absolute;top:-4px;right:-7px;color:#E9E9E9;}
+.el-table td .ope-txt:last-of-type:after {content:"";}
 
 .el-table td .ope-txt:hover {
   color: #66b1ff;

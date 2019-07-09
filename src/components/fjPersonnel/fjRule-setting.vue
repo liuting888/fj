@@ -74,7 +74,6 @@
           <el-table-column
             label="创建时间"
             show-overflow-tooltip
-            :formatter="timeFormatter"
             prop="insTime"
             :key="Math.random()"
           ></el-table-column>
@@ -93,7 +92,12 @@
           ></el-table-column>
           <el-table-column label="操作" :key="Math.random()">
             <template slot-scope="scope">
-              <span class="ope-txt" v-if="scope.row.leave_state != 0">--</span>
+              <!-- <span class="ope-txt" v-if="scope.row.leave_state != 0">--</span> -->
+              <span
+                class="ope-txt"
+                v-if="scope.row.leave_state != 0"
+                @click="addContract(scope.row.id,2)"
+              >编辑</span>
               <!-- <span
                 class="ope-txt"
                 v-if="scope.row.leave_state != 0"
@@ -392,6 +396,9 @@ export default {
     setSearchList: function() {
       this.searchForm["pageNumber"] = this.currentPage;
       this.searchForm["pageSize"] = this.pageSize;
+      this.searchForm["userId"] = $.parseJSON(
+        fjPublic.getLocalData("userInfo")
+      ).userId;
     },
     // 打开工资配置弹框
     openWageDialog: function(id, status) {
@@ -422,6 +429,7 @@ export default {
         url: fjPublic.ajaxUrlDNN + "/updPayrollTemplate",
         type: "POST",
         data: {
+          nowUser: $.cookie(fjPublic.loginCookieKey),
           id: id,
           state: state
         },
@@ -466,6 +474,7 @@ export default {
     submitAudit: function() {
       var defer = $.Deferred();
       var vm = this;
+      vm.ruleForm["nowUser"] = $.cookie(fjPublic.loginCookieKey);
       $.ajax({
         url: fjPublic.ajaxUrlDNN + "/addPayrollTemplate",
         type: "POST",

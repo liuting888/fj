@@ -1,16 +1,24 @@
 (function(){
 var commonData = {
     // ajaxUrlDNN:'http://172.16.10.27:8080/Auxpolice1.0',//本地
-    ajaxUrlDNN:'http://172.16.10.59:8080/Auxpolice1.0',//本地
-    // ajaxUrlDNN:'http://172.16.10.59:8280/Auxpolice1.0',//本地
+    ajaxUrlDNN:'http://172.16.10.59:8280/Auxpolice1.0',//本地
     // ajaxUrlDNN:getRealPath(),//请求地址 -> DNN
     loginCookieKey:'', //登录成功后的cookie名 'AUXPOLICE10'
     userRoles:{ //用户角色字段
-        fj:'1000',      //辅警
-        pcs:'1001', //派出所
-        qj:'1002',  //区级
+        fj:'1000',      //驻村辅警 
+        sqfj:'1003', //社区辅警
+        pcs:'1001', //派出所 065496
+        qj:'1002',  //区级 062507
         sj:'8888',  //市局
         cg:'9999'   //超级管理员
+    },
+    userRolesName:{ //角色名
+        '1000':'驻村辅警',
+        '1003':'社区辅警',
+        '1001':'派出所',
+        '1002':'区级',
+        '8888':'市局',
+        '9999':'超级管理员'
     },
     cityInfos:{  //地区基本信息
         deptName:'',    //区域部门名

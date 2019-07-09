@@ -435,6 +435,10 @@ export default {
             {
               title: "工作日志",
               route: "/fjWorkManage-workLog"
+            },
+            {
+              title: "数据统计",
+              route: "/fjWorkManage-data"
             }
           ]
         },
@@ -616,10 +620,13 @@ export default {
         [fjPublic.userRoles.pcs]: function() {
           var special = this.navData[6];//添加专题考试
           special.children.splice(0, 2);//只留下教培管理->专题考试
+          var personnel = this.navData[7];//添加人事管理
+          personnel.children.splice(1, 1);//去掉人事管理>合同管理
           //派出所
           this.navData = this.navData.slice(0, 4);
           this.navData[this.navData.length - 1].children.splice(0, 2); //去掉考核管理->单位考核、地区考核
           this.navData.push(special);
+          this.navData.push(personnel);
           return this.navData;
         },
         [fjPublic.userRoles.qj]: function() {
@@ -627,7 +634,6 @@ export default {
           this.navData.splice(5, 1);
           this.navData[3].children.splice(0, 1); //去掉考核管理->单位考核
           this.navData[5].children.splice(0, 2); //只留下教培管理->专题考试
-          this.navData[6].children.splice(1, 1); //去掉考核管理->单位考核
           this.navData.splice(4, 1); //去掉数据中心
           return this.navData;
         },

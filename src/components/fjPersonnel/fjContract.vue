@@ -97,7 +97,7 @@
                   <el-button
                     type="primary"
                     @click="exportExcl"
-                  >{{multipleSelection.length>1?'批量导出':'导出'}}</el-button> -->
+                  >{{multipleSelection.length>1?'批量导出':'导出'}}</el-button>-->
                   <!-- <el-button>批量导入</el-button> -->
                 </el-form-item>
               </el-col>
@@ -105,20 +105,13 @@
           </el-row>
         </div>
         <el-table :data="tableDataList" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="55"></el-table-column>
+          <!-- <el-table-column type="selection" width="55"></el-table-column> -->
           <el-table-column prop="id" label="合同编号" width="100px" show-overflow-tooltip></el-table-column>
           <el-table-column prop="username" label="姓名" width="80px"></el-table-column>
           <el-table-column prop="useraccount" label="警号"></el-table-column>
-          <el-table-column
-            label="签订日期"
-            prop="signTime"
-          ></el-table-column>
-          <el-table-column
-            label="到期日期"
-            prop="expireTime"
-          ></el-table-column>
-          <el-table-column label="剩余天数" prop="residueDay">
-          </el-table-column>
+          <el-table-column label="签订日期" prop="signTime"></el-table-column>
+          <el-table-column label="到期日期" prop="expireTime"></el-table-column>
+          <el-table-column label="剩余天数" prop="residueDay"></el-table-column>
           <el-table-column prop="place" label="地区" width="100px" show-overflow-tooltip></el-table-column>
           <el-table-column label="在职状态" prop="state" width="120px">
             <template slot-scope="scope">
@@ -127,18 +120,14 @@
                 :class="scope.row.state == 0 ? 'green' : scope.row.state == 1 ? 'grey' : 'red'"
               >
                 {{parseInt( scope.row.state) === 0 ? '在职' : parseInt( scope.row.state) === 1 ?'离职'
-                : '试用'}}
+                : parseInt( scope.row.state) === 2?'试用':'未签订'}}
               </span>
             </template>
           </el-table-column>
           <el-table-column prop="job" label="职位"></el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
-              <span
-                class="ope-txt"
-                v-if="scope.row.signTime"
-                @click="goDetails(scope.row.id,1)"
-              >详情</span>
+              <span class="ope-txt" v-if="scope.row.signTime" @click="goDetails(scope.row.id,1)">详情</span>
               <span
                 class="ope-txt"
                 v-if="!scope.row.signTime"
@@ -206,7 +195,7 @@ export default {
         // supDeptId: "", // 公安局
         // status: "" // 状态
       },
-      searchListUrl: "/getContractList", //获取列表数据URL
+      searchListUrl: "/getContractList" //获取列表数据URL
     };
   },
   mounted: function() {
@@ -286,6 +275,8 @@ export default {
     },
     // 设置获取列表参数
     setSearchList: function() {
+      let userInfo = $.parseJSON(fjPublic.getLocalData("userInfo"));
+      this.searchForm["userId"] = userInfo.userId;
       this.searchForm["pageNumber"] = this.currentPage;
       this.searchForm["pageSize"] = this.pageSize;
       // 传入当前用户信息
@@ -316,7 +307,7 @@ export default {
         ":" +
         dateStr.substr(14, 2)
       );
-    },
+    }
   },
   components: {
     fjBreadNav

@@ -563,6 +563,8 @@ export default {
     },
     // 设置获取列表参数
     setSearchList: function() {
+      let userInfo = $.parseJSON(fjPublic.getLocalData("userInfo"));
+      this.searchForm["userId"] = userInfo.userId;
       this.searchForm["pageNumber"] = this.currentPage;
       this.searchForm["pageSize"] = this.pageSize;
     },
@@ -606,6 +608,7 @@ export default {
         url: fjPublic.ajaxUrlDNN + "/processComplain",
         type: "POST",
         data: {
+          nowUser: $.cookie(fjPublic.loginCookieKey),
           id: vm.checkDialogForm.id,
           response: vm.checkDialogForm.reason,
           checkId: $.parseJSON(fjPublic.getLocalData("userInfo")).userId,

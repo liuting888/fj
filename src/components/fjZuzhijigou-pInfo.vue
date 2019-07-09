@@ -123,7 +123,7 @@
           </el-row>
       <!-- 巡逻情况登记表 -->
       <template v-if="infoType == '1002'">
-        <el-form :rules="TZformRule"  :model="dialogForm1002" ref="dialogForm1">
+        <el-form :rules="TZformRule"  :model="dialogForm1002" ref="dialogForm1002">
           <el-row>
             <el-col :offset="1" :span="22" >
               <el-form-item label="巡逻时段："  prop="patrol_time">

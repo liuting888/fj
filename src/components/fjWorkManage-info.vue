@@ -1,5 +1,5 @@
 <template>
-  <div class="fj-content_view work-mis fj-info">
+  <div class="fj-content_view fj-info">
     <div class="fj-block title">
       <fj-breadNav :bread-data="breadData"></fj-breadNav>
     </div>
@@ -8,91 +8,122 @@
         <p class="title fj-fl">采集列表</p>
       </div>
       <div class="fj-block-body">
-        <div class="fj-search-inline-info">
+        <ul class="filterOpe-area fj-clear">
+          <li class="area-line fj-clear">
+            <div class="item fj-fl">
+              <span class="title fj-fl">信息类型：</span>
+              <el-select
+                @change="changeInfoType"
+                clearable
+                filterable
+                v-model="searchForm.infoType"
+                size="small"
+              >
+                <el-option
+                  v-for="item in infoTypes"
+                  :key="item.id"
+                  :label="item.value"
+                  :value="item.id"
+                ></el-option>
+              </el-select>
+            </div>
+            <div class="item fj-fl">
+              <span class="title fj-fl">起止日期：</span>
+              <el-date-picker
+                v-model="searchForm.searchTime"
+                type="daterange"
+                range-separator="至"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+                @change="changeSearchTime"
+                size="small"
+              ></el-date-picker>
+            </div>
+            <!-- <div class="item fj-fl">
+              <span class="title fj-fl">派出所：</span>
+              <el-select
+                @change="changeDeptId"
+                clearable
+                filterable
+                v-model="searchForm.deptId"
+                size="small"
+              >
+                <el-option
+                  v-for="item in deptIds"
+                  :key="item.deptId"
+                  :label="item.deptName"
+                  :value="item.deptId"
+                ></el-option>
+              </el-select>
+            </div> -->
+            <div class="item fj-fl">
+              <span class="title fj-fl">审核结果：</span>
+              <el-select
+                @change="changeStatus"
+                clearable
+                filterable
+                v-model="searchForm.status"
+                size="small"
+              >
+                <el-option
+                  v-for="item in statuses"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
+            </div>
+          </li>
+          <li class="area-line fj-clear">
+            <fj-dept @change-pcs="changeDeptId"></fj-dept>
+            <div class="item fj-fl">
+              <span class="title fj-fl">输入查询：</span>
+              <el-input
+                v-model="searchForm.nameOrAccount"
+                clearable
+                placeholder="请输入标题或负责人名称"
+                size="small"
+                class="search-input fj-fl"
+              >
+                <el-button slot="append" @click="searchMission">搜索</el-button>
+              </el-input>
+              
+              <el-button class="reset fj-fl"  @click="resetSearch" type="primary">重置</el-button>
+              <el-button class="fj-fl"  @click="exportInfo" type="default">导出</el-button>
+            </div><!-- 
+            <div class="item fj-fl">
+            </div> -->
+          </li>
+        </ul>
+        <!-- <div class="fj-search-inline-info">
           <el-row >
             <el-form inline label-width="85px" label-position="left">
               <el-col :lg="8" :xl="7" class="time-item">
                 <el-form-item label="信息类型：">
-                  <el-select
-                    @change="changeInfoType"
-                    clearable
-                    filterable
-                    v-model="searchForm.infoType"
-                    size="small"
-                  >
-                    <el-option
-                      v-for="item in infoTypes"
-                      :key="item.id"
-                      :label="item.value"
-                      :value="item.id"
-                    ></el-option>
-                  </el-select>
+                  
                 </el-form-item>
 
                 <el-form-item label="起止日期：" class="datepicker">
-                  <el-date-picker
-                    v-model="searchForm.searchTime"
-                    type="daterange"
-                    range-separator="至"
-                    start-placeholder="开始日期"
-                    end-placeholder="结束日期"
-                    @change="changeSearchTime"
-                    size="small"
-                  ></el-date-picker>
+                  
                 </el-form-item>
               </el-col>
               <el-col :lg="5" :xl="5">
                 <el-form-item label="派出所：" label-width="85px">
-                  <el-select
-                    @change="changeDeptId"
-                    clearable
-                    filterable
-                    v-model="searchForm.deptId"
-                    size="small"
-                  >
-                    <el-option
-                      v-for="item in deptIds"
-                      :key="item.deptId"
-                      :label="item.deptName"
-                      :value="item.deptId"
-                    ></el-option>
-                  </el-select>
+                  
                 </el-form-item>
                 <el-form-item label="审核结果：">
-                  <el-select
-                    @change="changeStatus"
-                    clearable
-                    filterable
-                    v-model="searchForm.status"
-                    size="small"
-                  >
-                    <el-option
-                      v-for="item in statuses"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    ></el-option>
-                  </el-select>
+                  
                 </el-form-item>
               </el-col>
               <el-col :lg="5" :xl="5">
                 <el-form-item label="输入查询：">
-                  <el-input
-                    v-model="searchForm.nameOrAccount"
-                    clearable
-                    placeholder="请输入标题或负责人名称"
-                    size="small"
-                    class="search-input"
-                  >
-                    <el-button slot="append" @click="searchMission">搜索</el-button>
-
-                  </el-input>
+                  
                 </el-form-item>
-                <el-form-item><el-button  @click="resetSearch" size="small" type="primary" class="reset">重置</el-button></el-form-item>
+                <el-form-item></el-form-item>
               </el-col>
             </el-form>
           </el-row>
-        </div>
+        </div> -->
         <el-table :data="infoData" class="tables">
           <el-table-column prop="infodesc" label="信息类型" show-overflow-tooltip></el-table-column>
           <el-table-column prop="userName" label="提交人" show-overflow-tooltip></el-table-column>
@@ -115,7 +146,7 @@
             <template slot-scope="scope">
               <span
                 class="ope-txt"
-                @click="openAddOrDetailDialog(scope.row.keyno, scope.row.infotype, scope.row.leadresult)"
+                @click="openAddOrDetailDialog(scope.row,scope.row.keyno, scope.row.infotype, scope.row.leadresult)"
               >{{parseInt( scope.row.leadresult) === 0 ? '审批' : '详情'}}</span>
 
               <!--<span class="ope-txt" v-if="scope.row.leadresult == 0" @click="openCheckDialog(scope.row.keyno, 1)">通过</span>-->
@@ -1508,6 +1539,7 @@
 </template>
 <script>
 import fjBreadNav from "@/components/fjBreadNav";
+import fjDept from "@/components/fjDept";
 export default {
   name: "fjWorkManageMis",
   data: function() {
@@ -1519,6 +1551,7 @@ export default {
       }
     }
     return {
+      userInfo:null, //用户信息
       breadData: [
         { name: "当前位置:", path: "" },
         { name: "工作管理", path: "" },
@@ -1549,6 +1582,8 @@ export default {
       searchForm: {
         infoType: "", // 类型
         searchTime: "", // 查询时间
+        startTime:"",
+        endTime:"",
         nameOrAccount: "", // 警号或负责人名称
         deptId: "", // 派出所
         status: "" // 状态
@@ -1856,14 +1891,16 @@ export default {
         reason: ""
       },
       reasonDisabled: true,
-      formLabelWidth: "120px"
+      formLabelWidth: "120px",
+      exportInfoUrl:fjPublic.ajaxUrlDNN+"/exportInfoCollect" //导出
     };
+  },
+  created(){
+    this.userInfo = $.parseJSON(fjPublic.getLocalData("userInfo")) || {};
   },
   mounted: function() {
     // 初始化采集类型下拉列表
     this.initInfoTypes();
-    // 初始化派出所下拉列表
-    this.initDeptIds();
     // 初始化采集列表
     this.infoCollect();
     return;
@@ -1895,6 +1932,12 @@ export default {
     }
   },
   methods: {
+    //导出
+    exportInfo(){
+      var url = this.exportInfoUrl+"?userId="+this.userInfo.userId+"&infoType="+this.searchForm.infoType+"&startTime="+this.searchForm.startTime+"&endTime="+this.searchForm.endTime+"&deptId="+this.searchForm.deptId+"&status="+this.searchForm.status+"&nameOrAccount="+this.searchForm.nameOrAccount;
+      //console.log(url);
+      window.open(url,"_blank");
+    },
     // 删除台账
     deleteInfoOrder: function() {
       var defer = $.Deferred();
@@ -1962,25 +2005,25 @@ export default {
     },
     // 初始化采集类型
     initInfoTypes: function() {
-      var defer = $.Deferred();
-      var vm = this;
-      $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/getSelectFromDict",
-        type: "POST",
-        data: {
-          dictType: "INFOCOLLECT",
-          hasEmpty: "1"
-        },
-        dataType: "json",
-        success: function(data) {
-          vm.infoTypes = data.dict;
-          defer.resolve();
-        },
-        error: function(err) {
-          defer.reject();
-        }
-      });
-      return defer;
+      return $.Deferred((defer)=>{
+        var vm = this;
+        $.ajax({
+          url: fjPublic.ajaxUrlDNN + "/getSelectFromDict",
+          type: "POST",
+          data: {
+            dictType: "INFOCOLLECT",
+            hasEmpty: "1"
+          },
+          dataType: "json",
+          success: function(data) {
+            vm.infoTypes = data.dict;
+            defer.resolve();
+          },
+          error: function(err) {
+            defer.reject();
+          }
+        });
+      }).promise();
     },
     // 初始化派出所
     initDeptIds: function() {
@@ -2006,20 +2049,24 @@ export default {
     // 修改类型下拉框查询
     changeInfoType: function(infoType) {
       this.searchForm["infoType"] = infoType;
+      this.currentPage = 1;
       this.infoCollect();
     },
     // 修改单位下拉框查询
     changeDeptId: function(deptId) {
       this.searchForm["deptId"] = deptId;
+      this.currentPage = 1;
       this.infoCollect();
     },
     // 修改状态下拉框查询
     changeStatus: function(status) {
       this.searchForm["status"] = status;
+      this.currentPage = 1;
       this.infoCollect();
     },
     // 标题或负责人名称查询
     searchMission: function(missionState) {
+      this.currentPage = 1;
       this.infoCollect();
     },
     // 修改查询时间
@@ -2031,39 +2078,50 @@ export default {
         this.searchForm["startTime"] = "";
         this.searchForm["endTime"] = "";
       }
+      this.currentPage = 1;
       this.infoCollect();
     },
     // 获取采集列表
     infoCollect: function() {
-      var defer = $.Deferred();
-      var vm = this;
-      // 参数
-      this.searchForm["page"] = this.currentPage;
-      this.searchForm["rows"] = this.pageSize;
-      // 传入当前用户信息
-      this.searchForm["nowUser"] = $.cookie(fjPublic.loginCookieKey);
-      $.ajax({
-        url: fjPublic.ajaxUrlDNN + "/infoCollect",
-        type: "POST",
-        data: vm.searchForm,
-        dataType: "json",
-        success: function(data) {
-          vm.infoData = null;
-          vm.infoData = data.list;
-          vm.total = data.total;
-          _.each(vm.infoData, function(item, i) {
-            vm.$set(item, "rank", i + 1);
-          });
-          defer.resolve();
-        },
-        error: function(err) {
-          defer.reject();
-        }
+      fjPublic.openLoad("获取数据...");
+      return $.Deferred((defer)=>{
+        var vm = this;
+        // 参数
+        this.searchForm["page"] = this.currentPage;
+        this.searchForm["rows"] = this.pageSize;
+        // 传入当前用户信息
+        this.searchForm["nowUser"] = $.cookie(fjPublic.loginCookieKey);
+        $.ajax({
+          url: fjPublic.ajaxUrlDNN + "/infoCollect",
+          type: "POST",
+          data: vm.searchForm,
+          dataType: "json",
+          success: function(data) {
+            //console.log(data);
+            if(data.errorCode==0){
+              vm.infoData = null;
+              vm.infoData = data.list;
+              vm.total = data.total;
+              _.each(vm.infoData, function(item, i) {
+                vm.$set(item, "rank", i + 1);
+              });
+            }else{
+              vm.$message({type:"warning",message:"获取列表数据失败"});
+            }
+            defer.resolve();
+          },
+          error: function(err) {
+            defer.reject();
+            vm.$message({type:"warning",message:"获取列表数据失败"});
+          }
+        });
+      }).promise().always(()=>{
+        fjPublic.closeLoad();
       });
-      return defer;
     },
     // 打开添加或详情弹出框
-    openAddOrDetailDialog: function(keyno, infoType, leadresult) {
+    openAddOrDetailDialog: function(info,keyno, infoType, leadresult) {
+      console.log(info);
       this.infoId = keyno;
       this.infoStatus = leadresult;
 
@@ -2389,7 +2447,8 @@ export default {
     }
   },
   components: {
-    fjBreadNav
+    fjBreadNav,
+    fjDept
   }
 };
 </script>
@@ -2513,6 +2572,33 @@ export default {
       .el-textarea__inner  {
         color: rgba(0,0,0,.15)
       }
+  }
+}
+/* 0514修改 */
+.fj-content_view.fj-info {
+  .fj-block-body > .filterOpe-area {
+    .el-select {width:220px;}
+    .search-input {width:260px;}
+    .el-input-group__append {
+      background-color: #1890ff;
+      border-color: #1890ff;
+      color: #fff;
+    }
+    .el-button.reset {margin-left:10px;}
+  }
+  @media screen and (max-width:1366px) {
+    .fj-block-body > .filterOpe-area {
+      .item {margin-right:10px;}
+    }
+  }
+  @media screen and (min-width:1920px) {
+    // .fj-block-body > .filterOpe-area {
+    //   padding-left:0px; 
+    //   .area-line {margin-bottom:0px;float:left;}
+    //   .item {margin-right:10px;}
+    //   .el-select {width:200px;}
+    //   .el-date-editor--daterange.el-input__inner {width:320px;}
+    // }
   }
 }
 </style>
